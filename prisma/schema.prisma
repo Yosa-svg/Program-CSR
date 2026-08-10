@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Sector {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  slug           String          @unique
+  programs       Program[]
+  activities     Activity[]
+  products       Product[]
+  documentations Documentation[]
+  metrics        Metric[]
+}
+
+model Program {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  location         String
+  beneficiaries    String
+  status           String   @default("ACTIVE") // ACTIVE, COMPLETED, PLANNED
+  imageUrl         String
+  sectorId         String
+  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  scheduleInfo     String
+  date             DateTime?
+  sectorId         String
+  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  description      String
+  price            String
+  imageUrl         String
+  sectorId         String
+  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Documentation {
+  id               String   @id @default(uuid())
+  title            String
+  imageUrl         String
+  sectorId         String
+  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
+
+model Metric {
+  id               String   @id @default(uuid())
+  indicator        String
+  value            String
+  description      String
+  icon             String?
+  color            String?
+  sectorId         String
+  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+}
