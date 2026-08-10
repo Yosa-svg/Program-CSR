@@ -19,10 +19,10 @@ async function main() {
   })
 
   // Seed Program
-  await prisma.program.create({
+  const program = await prisma.program.create({
     data: {
       title: 'Agro Edu Wisata',
-      description: 'Kawasan terpadu yang memadukan kegiatan pariwisata ekologis dengan edukasi pertanian. Di sini pengunjung tidak hanya menikmati keindahan alam, tapi juga belajar langsung cara bertani organik dari para ahlinya.',
+      description: 'Kawasan terpadu yang memadukan kegiatan pariwisata ekologis dengan edukasi pertanian.',
       location: 'Desa Suka Maju, Area Utara',
       beneficiaries: '120+ Kepala Keluarga',
       status: 'ACTIVE',
@@ -36,19 +36,28 @@ async function main() {
     {
       title: 'Penyuluhan Pertanian Organik',
       description: 'Diskusi dan praktik lapangan bersama agronom.',
-      scheduleInfo: 'Setiap Senin & Kamis',
+      location: 'Balai Desa',
+      date: new Date(),
+      status: 'UPCOMING',
+      programId: program.id,
       sectorId: pertanian.id,
     },
     {
       title: 'Distribusi Bibit Unggul',
       description: 'Pembagian bibit sayur dan buah kepada kelompok tani mitra.',
-      scheduleInfo: 'Minggu Ke-2 Tiap Bulan',
+      location: 'Gudang Pertanian',
+      date: new Date(),
+      status: 'ONGOING',
+      programId: program.id,
       sectorId: pertanian.id,
     },
     {
       title: 'Festival Panen Raya',
       description: 'Perayaan hasil bumi yang melibatkan seluruh elemen masyarakat.',
-      scheduleInfo: 'Akhir Musim Tanam',
+      location: 'Alun-alun Desa',
+      date: new Date(),
+      status: 'COMPLETED',
+      programId: program.id,
       sectorId: pertanian.id,
     },
   ]
@@ -59,22 +68,28 @@ async function main() {
     {
       name: 'Beras Organik',
       description: 'Beras sehat tanpa residu kimia.',
-      price: 'Rp 85.000',
+      category: 'Pangan',
+      status: 'AVAILABLE',
       imageUrl: '/images/products/beras.jpg',
+      programId: program.id,
       sectorId: pertanian.id,
     },
     {
       name: 'Sayur Hidroponik',
       description: 'Segar langsung dari rumah kaca.',
-      price: 'Rp 25.000',
+      category: 'Sayuran',
+      status: 'AVAILABLE',
       imageUrl: '/images/products/sayur.jpg',
+      programId: program.id,
       sectorId: pertanian.id,
     },
     {
       name: 'Pupuk Kompos',
       description: 'Diolah dari sisa pertanian kawasan.',
-      price: 'Rp 15.000',
+      category: 'Sarana Pertanian',
+      status: 'OUT_OF_STOCK',
       imageUrl: '/images/products/pupuk.jpg',
+      programId: program.id,
       sectorId: pertanian.id,
     },
   ]
