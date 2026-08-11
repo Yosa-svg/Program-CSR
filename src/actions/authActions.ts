@@ -33,7 +33,8 @@ export async function loginAction(formData: FormData) {
   if (user.role !== "ADMIN_SEKTOR") {
     const firstSector = await prisma.sector.findFirst();
     if (firstSector) {
-      cookies().set("active_sector", firstSector.id, {
+      const cookieStore = await cookies();
+      cookieStore.set("active_sector", firstSector.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24, // 1 hari
@@ -49,7 +50,8 @@ export async function loginAction(formData: FormData) {
     name: user.name
   });
 
-  cookies().set("session", session, {
+  const cookieStore = await cookies();
+  cookieStore.set("session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24, // 1 hari
@@ -60,12 +62,14 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
-  cookies().delete("session");
-  cookies().delete("active_sector");
+  const cookieStore = await cookies();
+  cookieStore.delete("session");
+  cookieStore.delete("active_sector");
 }
 
 export async function switchActiveSectorAction(sectorId: string) {
-  cookies().set("active_sector", sectorId, {
+  const cookieStore = await cookies();
+  cookieStore.set("active_sector", sectorId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24, // 1 hari

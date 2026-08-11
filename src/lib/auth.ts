@@ -31,7 +31,8 @@ export async function decrypt(input: string): Promise<SessionPayload | null> {
 }
 
 export async function getSession() {
-  const session = cookies().get("session")?.value;
+  const cookieStore = await cookies();
+  const session = cookieStore.get("session")?.value;
   if (!session) return null;
   return await decrypt(session);
 }
@@ -45,7 +46,8 @@ export async function getActiveSectorId() {
   }
 
   // Untuk ADMIN_PUSAT atau SUPER_ADMIN, ambil dari cookie active_sector
-  const activeSector = cookies().get("active_sector")?.value;
+  const cookieStore = await cookies();
+  const activeSector = cookieStore.get("active_sector")?.value;
   return activeSector || null;
 }
 

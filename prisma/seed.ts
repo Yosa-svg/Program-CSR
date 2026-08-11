@@ -14,8 +14,14 @@ async function main() {
   // Create Sectors
   const pertanian = await prisma.sector.create({
     data: {
-      name: 'Pertanian',
+      name: 'Pertanian Terpadu',
       slug: 'pertanian',
+    },
+  })
+  const peternakan = await prisma.sector.create({
+    data: {
+      name: 'Peternakan',
+      slug: 'peternakan',
     },
   })
   const umkm = await prisma.sector.create({
@@ -56,6 +62,13 @@ async function main() {
         password: passwordHash,
         role: 'ADMIN_SEKTOR',
         sectorId: umkm.id,
+      },
+      {
+        name: 'Admin Peternakan',
+        email: 'peternakan@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: peternakan.id,
       }
     ]
   })
@@ -70,6 +83,18 @@ async function main() {
       status: 'ACTIVE',
       imageUrl: '/images/sectors/agro-edu.jpg',
       sectorId: pertanian.id,
+    },
+  })
+
+  const programPeternakan = await prisma.program.create({
+    data: {
+      title: 'Pembibitan Sapi Terpadu',
+      description: 'Program pembibitan sapi unggul dengan pendekatan manajemen pakan organik dan integrasi limbah.',
+      location: 'Blok Peternakan, Area Selatan',
+      beneficiaries: '45 Peternak Lokal',
+      status: 'ACTIVE',
+      imageUrl: '/images/sectors/pembibitan-sapi.jpg',
+      sectorId: peternakan.id,
     },
   })
 
@@ -101,6 +126,24 @@ async function main() {
       status: 'COMPLETED',
       programId: program.id,
       sectorId: pertanian.id,
+    },
+    {
+      title: 'Pelatihan Formulasi Pakan Organik',
+      description: 'Workshop pemanfaatan limbah pertanian menjadi pakan ternak bergizi.',
+      location: 'Balai Warga',
+      date: new Date(),
+      status: 'COMPLETED',
+      programId: programPeternakan.id,
+      sectorId: peternakan.id,
+    },
+    {
+      title: 'Distribusi Bibit Sapi Unggul',
+      description: 'Penyerahan anakan sapi kepada kelompok peternak binaan tahap I.',
+      location: 'Kandang Komunal',
+      date: new Date(),
+      status: 'ONGOING',
+      programId: programPeternakan.id,
+      sectorId: peternakan.id,
     },
   ]
   await prisma.activity.createMany({ data: activities })
@@ -134,6 +177,24 @@ async function main() {
       programId: program.id,
       sectorId: pertanian.id,
     },
+    {
+      name: 'Pakan Silase Organik',
+      description: 'Pakan ternak hasil fermentasi hijau.',
+      category: 'Pakan Ternak',
+      status: 'AVAILABLE',
+      imageUrl: '/images/products/pakan-silase.jpg',
+      programId: programPeternakan.id,
+      sectorId: peternakan.id,
+    },
+    {
+      name: 'Susu Segar Pasteurisasi',
+      description: 'Susu murni dari sapi perah kawasan.',
+      category: 'Pangan Ternak',
+      status: 'AVAILABLE',
+      imageUrl: '/images/products/susu-segar.jpg',
+      programId: programPeternakan.id,
+      sectorId: peternakan.id,
+    },
   ]
   await prisma.product.createMany({ data: products })
 
@@ -151,6 +212,19 @@ async function main() {
       title: `Dokumentasi ${index + 1}`,
       imageUrl: url,
       sectorId: pertanian.id,
+    }))
+  })
+
+  const photosPeternakan = [
+    '/images/sectors/peternakan-doc-1.jpg',
+    '/images/sectors/peternakan-doc-2.jpg',
+    '/images/sectors/peternakan-doc-3.jpg',
+  ]
+  await prisma.documentation.createMany({
+    data: photosPeternakan.map((url, index) => ({
+      title: `Dokumentasi Peternakan ${index + 1}`,
+      imageUrl: url,
+      sectorId: peternakan.id,
     }))
   })
 
@@ -191,6 +265,24 @@ async function main() {
       description: 'Dibandingkan tahun sebelumnya',
       status: 'PUBLISHED',
       sectorId: pertanian.id,
+    },
+    {
+      name: 'Populasi Ternak',
+      value: '240',
+      unit: 'Ekor',
+      period: '2026',
+      description: 'Sapi dan Kambing',
+      status: 'PUBLISHED',
+      sectorId: peternakan.id,
+    },
+    {
+      name: 'Produksi Susu Harian',
+      value: '450',
+      unit: 'Liter',
+      period: '2026',
+      description: 'Rata-rata produksi harian',
+      status: 'PUBLISHED',
+      sectorId: peternakan.id,
     },
   ]
   await prisma.metric.createMany({ data: metrics })
