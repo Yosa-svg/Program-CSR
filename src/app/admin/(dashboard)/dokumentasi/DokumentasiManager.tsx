@@ -17,7 +17,7 @@ type Documentation = {
   description: string | null;
   imageUrl: string;
   date: Date | null;
-  status: string;
+  isPublished: boolean;
   programId: string | null;
   activityId: string | null;
   program?: { title: string } | null;
@@ -99,9 +99,9 @@ export default function DokumentasiManager({
                 {/* Status Badge overlay */}
                 <div className="absolute top-3 left-3 flex gap-2">
                   <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-md backdrop-blur-md
-                    ${doc.status === 'PUBLISHED' ? 'bg-emerald-500/80 text-foreground' : 'bg-orange-500/80 text-foreground'}
+                    ${doc.isPublished ? 'bg-primary/80 text-primary-foreground' : 'bg-foreground/20 text-foreground'}
                   `}>
-                    {doc.status === 'PUBLISHED' ? 'Publik' : 'Draft'}
+                    {doc.isPublished ? 'Published' : 'Draft'}
                   </span>
                 </div>
                 

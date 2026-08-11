@@ -12,6 +12,7 @@ type Metric = {
   description: string | null;
   period: string;
   status: string;
+  isPublished: boolean;
 };
 
 export default function FormKinerja({ 
@@ -117,15 +118,15 @@ export default function FormKinerja({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Status Publikasi <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas <span className="text-red-400">*</span></label>
               <select 
-                name="status"
+                name="isPublished"
                 required
-                defaultValue={initialData?.status || "PUBLISHED"}
+                defaultValue={initialData?.isPublished ? "true" : "false"}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
               >
-                <option value="PUBLISHED">Publikasikan</option>
-                <option value="DRAFT">Draft</option>
+                <option value="true">Publikasikan</option>
+                <option value="false">Draft</option>
               </select>
             </div>
           </div>

@@ -38,7 +38,17 @@ export async function createProgram(formData: FormData) {
     const location = formData.get("location") as string;
     const beneficiaries = formData.get("beneficiaries") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const imageUrl = formData.get("imageUrl") as string || "/images/placeholder.jpg";
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan." };
+      }
+      if (!description || description.trim().length < 10) {
+        return { success: false, error: "Deskripsi program harus lebih detail untuk dipublikasikan." };
+      }
+    }
 
     await prisma.program.create({
       data: {
@@ -47,6 +57,7 @@ export async function createProgram(formData: FormData) {
         location,
         beneficiaries,
         status,
+        isPublished,
         imageUrl,
         sectorId: activeSectorId,
       },
@@ -74,6 +85,16 @@ export async function updateProgram(id: string, formData: FormData) {
     const location = formData.get("location") as string;
     const beneficiaries = formData.get("beneficiaries") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan." };
+      }
+      if (!description || description.trim().length < 10) {
+        return { success: false, error: "Deskripsi program harus lebih detail untuk dipublikasikan." };
+      }
+    }
 
     await prisma.program.update({
       where: { id },
@@ -83,6 +104,7 @@ export async function updateProgram(id: string, formData: FormData) {
         location,
         beneficiaries,
         status,
+        isPublished,
       },
     });
 

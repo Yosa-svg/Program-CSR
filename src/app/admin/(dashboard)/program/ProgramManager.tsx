@@ -12,6 +12,7 @@ type Program = {
   location: string;
   beneficiaries: string;
   status: string;
+  isPublished: boolean;
 };
 
 export default function ProgramManager({ programs }: { programs: Program[] }) {
@@ -100,15 +101,23 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
-                        ${prog.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
-                        ${prog.status === 'PLANNED' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : ''}
-                        ${prog.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
-                      `}>
-                        {prog.status === 'ACTIVE' && 'Aktif'}
-                        {prog.status === 'PLANNED' && 'Direncanakan'}
-                        {prog.status === 'COMPLETED' && 'Selesai'}
-                      </span>
+                      <div className="flex flex-col items-start gap-2">
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
+                          ${prog.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
+                          ${prog.status === 'PLANNED' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : ''}
+                          ${prog.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
+                        `}>
+                          {prog.status === 'ACTIVE' && 'Aktif'}
+                          {prog.status === 'PLANNED' && 'Direncanakan'}
+                          {prog.status === 'COMPLETED' && 'Selesai'}
+                        </span>
+                        
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
+                          ${prog.isPublished ? 'bg-primary/10 text-primary border-primary/20' : 'bg-foreground/5 text-foreground/50 border-foreground/10'}
+                        `}>
+                          {prog.isPublished ? 'Published' : 'Draft'}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">

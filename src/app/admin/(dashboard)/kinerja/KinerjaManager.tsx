@@ -12,7 +12,7 @@ type Metric = {
   unit: string | null;
   description: string | null;
   period: string;
-  status: string;
+  isPublished: boolean;
 };
 
 export default function KinerjaManager({ metrics }: { metrics: Metric[] }) {
@@ -65,9 +65,9 @@ export default function KinerjaManager({ metrics }: { metrics: Metric[] }) {
                 <TrendingUp size={20} />
               </div>
               <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider
-                ${metric.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'}
+                ${metric.isPublished ? 'bg-primary/10 text-primary' : 'bg-foreground/10 text-foreground'}
               `}>
-                {metric.status === 'PUBLISHED' ? 'Publik' : 'Draft'}
+                {metric.isPublished ? 'Published' : 'Draft'}
               </span>
             </div>
             

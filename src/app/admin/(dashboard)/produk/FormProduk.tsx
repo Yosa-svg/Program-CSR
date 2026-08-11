@@ -15,6 +15,7 @@ type Product = {
   description: string;
   category: string;
   status: string;
+  isPublished: boolean;
   programId: string | null;
 };
 
@@ -123,18 +124,31 @@ export default function FormProduk({
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Program Terkait (Opsional)</label>
-            <select 
-              name="programId"
-              defaultValue={initialData?.programId || ""}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-            >
-              <option value="">-- Tidak Terikat Program Khusus --</option>
-              {programs.map(p => (
-                <option key={p.id} value={p.id}>{p.title}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas</label>
+              <select 
+                name="isPublished"
+                defaultValue={initialData?.isPublished ? "true" : "false"}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="false">Draft (Sembunyikan dari Publik)</option>
+                <option value="true">Publikasikan (Tampilkan di Website)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Program Terkait (Opsional)</label>
+              <select 
+                name="programId"
+                defaultValue={initialData?.programId || ""}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="">-- Tidak Terikat Program Khusus --</option>
+                {programs.map(p => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div className="pt-4 flex justify-end gap-3 border-t border-border mt-6">

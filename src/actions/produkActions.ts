@@ -34,7 +34,14 @@ export async function createProduct(formData: FormData) {
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string; // Optional
+
+    if (isPublished) {
+      if (!name || name.trim().length < 3) {
+        return { success: false, error: "Nama produk terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     const activeSectorId = await getActiveSectorId();
     if (!activeSectorId) throw new Error("No active sector");
@@ -47,6 +54,7 @@ export async function createProduct(formData: FormData) {
         description,
         category,
         status,
+        isPublished,
         programId: programId || null,
         sectorId: activeSectorId,
         imageUrl: "/images/placeholder.jpg", // Akan dikembangkan di fase dokumentasi
@@ -72,7 +80,14 @@ export async function updateProduct(id: string, formData: FormData) {
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
+
+    if (isPublished) {
+      if (!name || name.trim().length < 3) {
+        return { success: false, error: "Nama produk terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     await prisma.product.update({
       where: { id },
@@ -81,6 +96,7 @@ export async function updateProduct(id: string, formData: FormData) {
         description,
         category,
         status,
+        isPublished,
         programId: programId || null,
       },
     });

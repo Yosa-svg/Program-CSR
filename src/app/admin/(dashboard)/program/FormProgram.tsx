@@ -11,6 +11,7 @@ type Program = {
   location: string;
   beneficiaries: string;
   status: string;
+  isPublished: boolean;
 };
 
 export default function FormProgram({ 
@@ -126,6 +127,18 @@ export default function FormProgram({
               <option value="ACTIVE">Aktif (Sedang Berjalan)</option>
               <option value="PLANNED">Direncanakan</option>
               <option value="COMPLETED">Selesai</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas</label>
+            <select 
+              name="isPublished"
+              defaultValue={initialData?.isPublished ? "true" : "false"}
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+            >
+              <option value="false">Draft (Sembunyikan dari Publik)</option>
+              <option value="true">Publikasikan (Tampilkan di Website)</option>
             </select>
           </div>
           

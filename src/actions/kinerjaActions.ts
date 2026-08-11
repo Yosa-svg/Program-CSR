@@ -33,6 +33,13 @@ export async function createMetric(formData: FormData) {
     const description = formData.get("description") as string;
     const period = formData.get("period") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
+
+    if (isPublished) {
+      if (!name || name.trim().length < 3) {
+        return { success: false, error: "Nama indikator terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     const activeSectorId = await getActiveSectorId();
     if (!activeSectorId) throw new Error("No active sector");
@@ -47,6 +54,7 @@ export async function createMetric(formData: FormData) {
         description: description || null,
         period,
         status,
+        isPublished,
         sectorId: activeSectorId,
       },
     });
@@ -72,6 +80,13 @@ export async function updateMetric(id: string, formData: FormData) {
     const description = formData.get("description") as string;
     const period = formData.get("period") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
+
+    if (isPublished) {
+      if (!name || name.trim().length < 3) {
+        return { success: false, error: "Nama indikator terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     await prisma.metric.update({
       where: { id },
@@ -82,6 +97,7 @@ export async function updateMetric(id: string, formData: FormData) {
         description: description || null,
         period,
         status,
+        isPublished,
       },
     });
 

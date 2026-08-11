@@ -35,7 +35,14 @@ export async function createActivity(formData: FormData) {
     const location = formData.get("location") as string;
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     const activeSectorId = await getActiveSectorId();
     if (!activeSectorId) throw new Error("No active sector");
@@ -49,6 +56,7 @@ export async function createActivity(formData: FormData) {
         location,
         date: new Date(dateStr),
         status,
+        isPublished,
         programId,
         sectorId: activeSectorId,
       },
@@ -74,7 +82,14 @@ export async function updateActivity(id: string, formData: FormData) {
     const location = formData.get("location") as string;
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
+      }
+    }
 
     await prisma.activity.update({
       where: { id },
@@ -84,6 +99,7 @@ export async function updateActivity(id: string, formData: FormData) {
         location,
         date: new Date(dateStr),
         status,
+        isPublished,
         programId,
       },
     });

@@ -36,8 +36,15 @@ export async function createDocumentation(formData: FormData) {
     const description = formData.get("description") as string;
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
     const activityId = formData.get("activityId") as string;
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul dokumentasi terlalu pendek untuk dipublikasikan." };
+      }
+    }
     
     const file = formData.get("image") as File;
 
@@ -63,6 +70,7 @@ export async function createDocumentation(formData: FormData) {
         description: description || null,
         date: dateStr ? new Date(dateStr) : null,
         status,
+        isPublished,
         programId: programId || null,
         activityId: activityId || null,
         sectorId: activeSectorId,
@@ -85,8 +93,15 @@ export async function updateDocumentation(id: string, formData: FormData) {
     const description = formData.get("description") as string;
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
+    const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
     const activityId = formData.get("activityId") as string;
+
+    if (isPublished) {
+      if (!title || title.trim().length < 3) {
+        return { success: false, error: "Judul dokumentasi terlalu pendek untuk dipublikasikan." };
+      }
+    }
     
     const file = formData.get("image") as File;
 
@@ -121,6 +136,7 @@ export async function updateDocumentation(id: string, formData: FormData) {
         description: description || null,
         date: dateStr ? new Date(dateStr) : null,
         status,
+        isPublished,
         programId: programId || null,
         activityId: activityId || null,
         imageUrl: finalImageUrl,

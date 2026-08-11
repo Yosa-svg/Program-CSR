@@ -16,6 +16,7 @@ type Activity = {
   location: string;
   date: Date;
   status: string;
+  isPublished: boolean;
   programId: string;
 };
 
@@ -153,6 +154,18 @@ export default function FormKegiatan({
               <option value="UPCOMING">Akan Datang</option>
               <option value="ONGOING">Sedang Berjalan</option>
               <option value="COMPLETED">Selesai</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas</label>
+            <select 
+              name="isPublished"
+              defaultValue={initialData?.isPublished ? "true" : "false"}
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+            >
+              <option value="false">Draft (Sembunyikan dari Publik)</option>
+              <option value="true">Publikasikan (Tampilkan di Website)</option>
             </select>
           </div>
           

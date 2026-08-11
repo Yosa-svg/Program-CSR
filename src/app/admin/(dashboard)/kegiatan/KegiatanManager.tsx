@@ -17,6 +17,7 @@ type Activity = {
   location: string;
   date: Date;
   status: string;
+  isPublished: boolean;
   programId: string;
   program?: {
     title: string;
@@ -113,15 +114,23 @@ export default function KegiatanManager({
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
-                        ${act.status === 'UPCOMING' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : ''}
-                        ${act.status === 'ONGOING' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
-                        ${act.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
-                      `}>
-                        {act.status === 'UPCOMING' && 'Akan Datang'}
-                        {act.status === 'ONGOING' && 'Sedang Berjalan'}
-                        {act.status === 'COMPLETED' && 'Selesai'}
-                      </span>
+                      <div className="flex flex-col items-start gap-2">
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
+                          ${act.status === 'UPCOMING' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : ''}
+                          ${act.status === 'ONGOING' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
+                          ${act.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
+                        `}>
+                          {act.status === 'UPCOMING' && 'Akan Datang'}
+                          {act.status === 'ONGOING' && 'Sedang Berjalan'}
+                          {act.status === 'COMPLETED' && 'Selesai'}
+                        </span>
+                        
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
+                          ${act.isPublished ? 'bg-primary/10 text-primary border-primary/20' : 'bg-foreground/5 text-foreground/50 border-foreground/10'}
+                        `}>
+                          {act.isPublished ? 'Published' : 'Draft'}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">

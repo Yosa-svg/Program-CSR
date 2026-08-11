@@ -41,6 +41,7 @@ model Program {
   beneficiaries    String
   status           String   @default("ACTIVE") // ACTIVE, COMPLETED, PLANNED
   imageUrl         String
+  isPublished      Boolean  @default(false)
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   activities       Activity[]
@@ -55,6 +56,7 @@ model Activity {
   location         String?
   date             DateTime?
   status           String   @default("UPCOMING") // UPCOMING, ONGOING, COMPLETED
+  isPublished      Boolean  @default(false)
   
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
@@ -71,6 +73,7 @@ model Product {
   category         String   @default("Umum")
   status           String   @default("AVAILABLE") // AVAILABLE, OUT_OF_STOCK
   imageUrl         String   @default("/images/placeholder.jpg")
+  isPublished      Boolean  @default(false)
   
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
@@ -85,7 +88,8 @@ model Documentation {
   description      String?
   imageUrl         String
   date             DateTime?
-  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT
+  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT (can be removed later if obsolete, but leaving for now)
+  isPublished      Boolean  @default(false)
   
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
@@ -108,6 +112,7 @@ model Metric {
   description      String?
   period           String
   status           String   @default("PUBLISHED") // PUBLISHED, DRAFT
+  isPublished      Boolean  @default(false)
   
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)

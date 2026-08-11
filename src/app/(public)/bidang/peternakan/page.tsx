@@ -12,11 +12,18 @@ export default async function PeternakanPage() {
   const sector = await prisma.sector.findUnique({
     where: { slug: "peternakan" },
     include: {
-      programs: true,
-      activities: { take: 3, orderBy: { date: "desc" } },
-      products: true,
-      documentations: { take: 4 },
-      metrics: true,
+      programs: { where: { isPublished: true } },
+      activities: { 
+        where: { isPublished: true },
+        take: 3, 
+        orderBy: { date: "desc" } 
+      },
+      products: { where: { isPublished: true } },
+      documentations: { 
+        where: { isPublished: true },
+        take: 4 
+      },
+      metrics: { where: { isPublished: true } },
     },
   });
 

@@ -16,7 +16,7 @@ type Documentation = {
   description: string | null;
   imageUrl: string;
   date: Date | null;
-  status: string;
+  isPublished: boolean;
   programId: string | null;
   activityId: string | null;
 };
@@ -211,14 +211,14 @@ export default function FormDokumentasi({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Publikasi</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Visibilitas</label>
               <select 
-                name="status"
-                defaultValue={initialData?.status || "PUBLISHED"}
+                name="isPublished"
+                defaultValue={initialData?.isPublished ? "true" : "false"}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
-                <option value="PUBLISHED">Publikasikan</option>
-                <option value="DRAFT">Simpan Draft</option>
+                <option value="true">Publikasikan</option>
+                <option value="false">Simpan Draft</option>
               </select>
             </div>
           </div>

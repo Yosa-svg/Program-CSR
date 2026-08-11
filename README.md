@@ -97,3 +97,13 @@ Buka peramban (browser) Anda dan akses:
 <div align="center">
   <p>Didesain dengan 💚 untuk ekosistem CSR yang lebih berkelanjutan.</p>
 </div>
+
+Semua Akun Menggunakan Password: password123
+
+Email untuk Masing-masing Admin:
+
+Super Admin: super@csr.com (Bisa melihat semua sektor - fitur ini masih dalam tahap pengembangan untuk switch-sektor)
+Admin Pusat: pusat@csr.com
+Admin Pertanian: pertanian@csr.com (Hanya bisa mengakses data sektor Pertanian)
+Admin Peternakan: peternakan@csr.com (Hanya bisa mengakses data sektor Peternakan)
+Admin UMKM: umkm@csr.com
