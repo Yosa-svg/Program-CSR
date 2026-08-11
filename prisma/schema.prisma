@@ -30,6 +30,7 @@ model Program {
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   activities       Activity[]
   products         Product[]
+  documentations   Documentation[]
 }
 
 model Activity {
@@ -45,6 +46,7 @@ model Activity {
 
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  documentations   Documentation[]
 }
 
 model Product {
@@ -65,9 +67,22 @@ model Product {
 model Documentation {
   id               String   @id @default(uuid())
   title            String
+  description      String?
   imageUrl         String
+  date             DateTime?
+  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT
+  
+  programId        String?
+  program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
+  
+  activityId       String?
+  activity         Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Metric {
