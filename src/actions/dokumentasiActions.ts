@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadImage, deleteImage } from "@/lib/mediaService";
+import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 
 // ==========================================
 // DOCUMENTATION ACTIONS
@@ -10,14 +11,13 @@ import { uploadImage, deleteImage } from "@/lib/mediaService";
 
 export async function getDocumentations() {
   try {
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) return [];
     
-    if (!sector) return [];
+    await requireSectorAccess(activeSectorId);
 
     return await prisma.documentation.findMany({
-      where: { sectorId: sector.id },
+      where: { sectorId: activeSectorId },
       include: {
         program: true,
         activity: true
@@ -45,11 +45,10 @@ export async function createDocumentation(formData: FormData) {
       return { success: false, error: "Pilih gambar terlebih dahulu." };
     }
 
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
-
-    if (!sector) throw new Error("Sector Pertanian not found");
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) throw new Error("No active sector");
+    
+    await requireSectorAccess(activeSectorId);
 
     // Upload file
     const uploadResult = await uploadImage(file, "documentation");
@@ -66,13 +65,13 @@ export async function createDocumentation(formData: FormData) {
         status,
         programId: programId || null,
         activityId: activityId || null,
-        sectorId: sector.id,
+        sectorId: activeSectorId,
         imageUrl: uploadResult.url,
       },
     });
 
-    revalidatePath("/admin/pertanian/dokumentasi");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/dokumentasi");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to create documentation:", error);
@@ -94,6 +93,8 @@ export async function updateDocumentation(id: string, formData: FormData) {
     // Cek dokumentasi lama
     const oldDoc = await prisma.documentation.findUnique({ where: { id } });
     if (!oldDoc) return { success: false, error: "Dokumentasi tidak ditemukan." };
+    
+    await requireSectorAccess(oldDoc.sectorId);
 
     let finalImageUrl = oldDoc.imageUrl;
 
@@ -126,8 +127,8 @@ export async function updateDocumentation(id: string, formData: FormData) {
       },
     });
 
-    revalidatePath("/admin/pertanian/dokumentasi");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/dokumentasi");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to update documentation:", error);
@@ -140,6 +141,7 @@ export async function deleteDocumentation(id: string) {
     const doc = await prisma.documentation.findUnique({ where: { id } });
     
     if (doc) {
+      await requireSectorAccess(doc.sectorId);
       // Hapus data dari database
       await prisma.documentation.delete({
         where: { id }
@@ -149,8 +151,8 @@ export async function deleteDocumentation(id: string) {
       await deleteImage(doc.imageUrl);
     }
     
-    revalidatePath("/admin/pertanian/dokumentasi");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/dokumentasi");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete documentation:", error);

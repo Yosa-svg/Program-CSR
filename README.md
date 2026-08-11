@@ -1,38 +1,99 @@
-# Program-CSR
+<div align="center">
+  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma" />
+  
+  <h1>🌱 Sistem Informasi Program CSR Terpadu</h1>
+  <p>Dasbor Admin dan Portal Publik untuk Manajemen Corporate Social Responsibility (CSR)</p>
+</div>
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
 
-## Getting Started
+## 📖 Tentang Proyek
 
-First, run the development server:
+Sistem Informasi Program CSR adalah sebuah platform web modern berbasis **Next.js App Router** yang dirancang khusus untuk mengelola, memantau, dan mempublikasikan seluruh kegiatan tanggung jawab sosial perusahaan (CSR). 
 
+Sistem ini memiliki dua pilar utama:
+1. **Portal Publik**: Etalase visual interaktif yang menampilkan komitmen perusahaan kepada masyarakat luas (Program, Kinerja, Produk, Dokumentasi).
+2. **Dasbor Admin**: Pusat kendali terpadu yang memfasilitasi tim pengelola CSR dalam melakukan input data (CRUD) secara instan tanpa perlu bantuan teknis (*Server Actions*).
+
+## ✨ Fitur Utama (Fase 1-12)
+
+Sistem telah dilengkapi dengan modul fungsional yang tangguh dan terhubung (*relational*):
+
+- 🏢 **Manajemen Program**: Buat dan pantau inisiatif CSR (contoh: *Agro Edu Wisata*).
+- 📅 **Manajemen Kegiatan**: Jadwalkan agenda lapangan dan kaitkan langsung ke Program Induk.
+- 📦 **Katalog Produk Binaan**: Kelola hasil karya atau panen dari masyarakat binaan, dengan opsi penautan ke program tertentu.
+- 📸 **Arsitektur Media & Galeri**: Sistem *upload* gambar terpusat (*Media Upload Service*) yang mendukung validasi tipe file, otomatisasi penamaan (UUID), serta *lazy loading* menggunakan `next/image`.
+- ⚡ **Performa Tinggi**: Dibangun dengan pola **Clean Architecture** memisahkan rute `(public)` dan Admin, serta memanfaatkan *Next.js Server Actions* untuk manipulasi data secepat kilat tanpa jeda *refresh*.
+
+## 🛠️ Teknologi yang Digunakan
+
+* **Framework**: [Next.js](https://nextjs.org/) (App Router)
+* **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
+* **Database & ORM**: [SQLite](https://www.sqlite.org/index.html) + [Prisma ORM](https://www.prisma.io/)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+* **Ikon**: [Lucide React](https://lucide.dev/)
+
+---
+
+## 🚀 Panduan Instalasi & Menjalankan (Local Development)
+
+Ikuti langkah-langkah berikut untuk menjalankan sistem di komputer lokal Anda:
+
+### 1. Kloning Repositori & Instalasi Dependensi
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Yosa-svg/Program-CSR.git
+cd Program-CSR
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Konfigurasi Database (Prisma)
+Sistem menggunakan SQLite agar mudah dijalankan tanpa konfigurasi *database server* yang rumit. Terapkan skema ke database dan masukkan data awal (*seed*):
+```bash
+# Generate tipe Prisma Client
+npx prisma generate
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Dorong skema tabel ke database lokal
+npx prisma db push
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Isi database dengan data percontohan (Dummy Data)
+npx prisma db seed
+```
 
-## Learn More
+### 3. Jalankan Server
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Buka peramban (browser) Anda dan akses:
+- **Portal Publik**: [http://localhost:3000](http://localhost:3000)
+- **Dasbor Admin (Pertanian)**: [http://localhost:3000/admin/pertanian](http://localhost:3000/admin/pertanian)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Struktur Direktori Utama
 
-## Deploy on Vercel
+```text
+/
+├── prisma/
+│   ├── schema.prisma   # Struktur relasi database
+│   ├── seed.ts         # Script pengisian data awal
+│   └── dev.db          # File database lokal (SQLite)
+├── public/
+│   └── uploads/        # Direktori terpusat untuk berkas media (diabaikan oleh git)
+├── src/
+│   ├── actions/        # Kumpulan Server Actions (Logika CRUD)
+│   ├── app/
+│   │   ├── (public)/   # Halaman untuk masyarakat luas
+│   │   └── admin/      # Halaman khusus Dasbor Admin
+│   ├── components/     # Komponen UI (Navbar, Footer, Card, dll)
+│   └── lib/            # Fungsi bantuan (Prisma Client, Media Service)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<div align="center">
+  <p>Didesain dengan 💚 untuk ekosistem CSR yang lebih berkelanjutan.</p>
+</div>

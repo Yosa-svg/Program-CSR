@@ -88,12 +88,12 @@ export default function FormDokumentasi({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
       <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto">
         <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
-          <h3 className="font-semibold text-white">
+          <h3 className="font-semibold text-foreground">
             {isEditing ? "Edit Dokumentasi" : "Unggah Dokumentasi Baru"}
           </h3>
           <button 
             onClick={() => setIsOpen(false)}
-            className="text-white/50 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors"
+            className="text-foreground/50 hover:text-foreground bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
@@ -102,7 +102,7 @@ export default function FormDokumentasi({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* FOTO UPLOAD AREA */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-white/70">Foto Dokumentasi <span className="text-red-400">*</span></label>
+            <label className="block text-sm font-medium text-foreground/70">Foto Dokumentasi <span className="text-red-400">*</span></label>
             <div 
               className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl transition-colors overflow-hidden group
                 ${previewUrl ? 'border-primary/50 bg-black/40' : 'border-border bg-background hover:bg-white/[0.02] hover:border-primary/50 cursor-pointer'}
@@ -121,7 +121,7 @@ export default function FormDokumentasi({
                     <button 
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white/10 backdrop-blur text-white rounded-lg border border-white/20 text-sm font-medium"
+                      className="px-4 py-2 bg-white/10 backdrop-blur text-foreground rounded-lg border border-white/20 text-sm font-medium"
                     >
                       Ganti Foto
                     </button>
@@ -129,9 +129,9 @@ export default function FormDokumentasi({
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                  <ImagePlus className="w-10 h-10 text-white/20 mb-3" />
-                  <p className="mb-1 text-sm text-white/70"><span className="font-semibold text-primary">Klik untuk unggah</span></p>
-                  <p className="text-xs text-white/40">JPG, PNG atau WEBP (Maks. 5MB)</p>
+                  <ImagePlus className="w-10 h-10 text-foreground/20 mb-3" />
+                  <p className="mb-1 text-sm text-foreground/70"><span className="font-semibold text-primary">Klik untuk unggah</span></p>
+                  <p className="text-xs text-foreground/40">JPG, PNG atau WEBP (Maks. 5MB)</p>
                 </div>
               )}
               <input 
@@ -148,46 +148,46 @@ export default function FormDokumentasi({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Judul Dokumentasi <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Judul Dokumentasi <span className="text-red-400">*</span></label>
               <input 
                 name="title" 
                 required 
                 defaultValue={initialData?.title}
                 type="text" 
                 placeholder="Contoh: Panen Raya Q3"
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Tanggal</label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Tanggal</label>
               <input 
                 name="date" 
                 defaultValue={formattedDate}
                 type="date" 
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary [color-scheme:dark]"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary [color-scheme:dark]"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">Deskripsi</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi</label>
             <textarea 
               name="description" 
               defaultValue={initialData?.description || ""}
               rows={2}
               placeholder="Ceritakan momen dalam foto ini..."
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background border border-border rounded-xl">
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Program Induk</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Program Induk</label>
               <select 
                 name="programId"
                 defaultValue={initialData?.programId || ""}
-                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-white text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="">-- Bebas --</option>
                 {programs.map(p => (
@@ -197,11 +197,11 @@ export default function FormDokumentasi({
             </div>
             
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Kegiatan</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Kegiatan</label>
               <select 
                 name="activityId"
                 defaultValue={initialData?.activityId || ""}
-                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-white text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="">-- Bebas --</option>
                 {activities.map(a => (
@@ -211,11 +211,11 @@ export default function FormDokumentasi({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Publikasi</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Publikasi</label>
               <select 
                 name="status"
                 defaultValue={initialData?.status || "PUBLISHED"}
-                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-white text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="PUBLISHED">Publikasikan</option>
                 <option value="DRAFT">Simpan Draft</option>
@@ -227,7 +227,7 @@ export default function FormDokumentasi({
             <button 
               type="button" 
               onClick={() => setIsOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors"
+              className="px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
             >
               Batal
             </button>

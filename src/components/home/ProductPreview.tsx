@@ -30,7 +30,7 @@ export default function ProductPreview() {
   ];
 
   return (
-    <section className="py-24 bg-card">
+    <section className="py-24 bg-white text-[#112316]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
@@ -39,7 +39,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-border bg-background/50 mb-6 text-xs font-semibold tracking-wider text-accent uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 text-xs font-semibold tracking-wider text-primary uppercase"
             >
               PRODUK LOKAL
             </motion.div>
@@ -74,23 +74,23 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-              className="group bg-background border border-border rounded-2xl overflow-hidden hover:border-primary/50 transition-colors"
+              className="group bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden hover:border-primary hover:shadow-md transition-all"
             >
-              <div className="aspect-[4/3] bg-muted relative overflow-hidden flex items-center justify-center">
+              <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden flex items-center justify-center">
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                   style={{ backgroundImage: `url('${product.image}')` }}
                 ></div>
                 {/* Fallback pattern/gradient */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-background/80 to-background/20 z-0"></div>
-                <ShoppingBag size={48} className="text-white/20 z-10 relative" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent z-0"></div>
+                <ShoppingBag size={48} className="text-[#112316]/10 z-10 relative" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                <p className="text-white/70 mb-6 text-sm">{product.desc}</p>
+                <h3 className="text-xl font-bold text-[#112316] mb-2">{product.name}</h3>
+                <p className="text-[#112316]/70 mb-6 text-sm">{product.desc}</p>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="font-semibold text-accent">{product.price}</span>
-                  <Link href={`/produk/${product.id}`} className="text-white hover:text-accent transition-colors">
+                  <span className="font-semibold text-primary">{product.price}</span>
+                  <Link href={`/produk/${product.id}`} className="text-[#112316]/60 hover:text-primary transition-colors">
                     <ArrowRight size={20} />
                   </Link>
                 </div>

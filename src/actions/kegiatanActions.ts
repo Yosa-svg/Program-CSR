@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 
 // ==========================================
 // ACTIVITY (KEGIATAN) ACTIONS
@@ -9,14 +10,13 @@ import { revalidatePath } from "next/cache";
 
 export async function getActivities() {
   try {
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) return [];
     
-    if (!sector) return [];
+    await requireSectorAccess(activeSectorId);
 
     return await prisma.activity.findMany({
-      where: { sectorId: sector.id },
+      where: { sectorId: activeSectorId },
       include: {
         program: true
       },
@@ -37,11 +37,10 @@ export async function createActivity(formData: FormData) {
     const status = formData.get("status") as string;
     const programId = formData.get("programId") as string;
 
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
-
-    if (!sector) throw new Error("Sector Pertanian not found");
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) throw new Error("No active sector");
+    
+    await requireSectorAccess(activeSectorId);
 
     await prisma.activity.create({
       data: {
@@ -51,12 +50,12 @@ export async function createActivity(formData: FormData) {
         date: new Date(dateStr),
         status,
         programId,
-        sectorId: sector.id,
+        sectorId: activeSectorId,
       },
     });
 
-    revalidatePath("/admin/pertanian/kegiatan");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/kegiatan");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to create activity:", error);
@@ -66,6 +65,10 @@ export async function createActivity(formData: FormData) {
 
 export async function updateActivity(id: string, formData: FormData) {
   try {
+    const activity = await prisma.activity.findUnique({ where: { id } });
+    if (!activity) throw new Error("Activity not found");
+    
+    await requireSectorAccess(activity.sectorId);
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
@@ -85,8 +88,8 @@ export async function updateActivity(id: string, formData: FormData) {
       },
     });
 
-    revalidatePath("/admin/pertanian/kegiatan");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/kegiatan");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to update activity:", error);
@@ -96,11 +99,16 @@ export async function updateActivity(id: string, formData: FormData) {
 
 export async function deleteActivity(id: string) {
   try {
+    const activity = await prisma.activity.findUnique({ where: { id } });
+    if (!activity) throw new Error("Activity not found");
+    
+    await requireSectorAccess(activity.sectorId);
+
     await prisma.activity.delete({
       where: { id }
     });
-    revalidatePath("/admin/pertanian/kegiatan");
-    revalidatePath("/admin/pertanian");
+    revalidatePath("/admin/kegiatan");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete activity:", error);

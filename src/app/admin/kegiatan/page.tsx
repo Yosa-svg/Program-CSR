@@ -1,5 +1,5 @@
 import { getActivities } from "@/actions/kegiatanActions";
-import { getPrograms } from "@/actions/pertanianActions";
+import { getPrograms } from "@/actions/csrActions";
 import KegiatanManager from "./KegiatanManager";
 
 // Ini akan memaksa re-render setiap kali data berubah (jangan di-cache)

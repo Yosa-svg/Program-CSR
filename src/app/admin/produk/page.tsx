@@ -1,5 +1,5 @@
 import { getProducts } from "@/actions/produkActions";
-import { getPrograms } from "@/actions/pertanianActions";
+import { getPrograms } from "@/actions/csrActions";
 import ProdukManager from "./ProdukManager";
 
 // Ini akan memaksa re-render setiap kali data berubah (jangan di-cache)

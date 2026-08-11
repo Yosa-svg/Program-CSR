@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function About() {
   return (
-    <section id="about" className="py-24 bg-background">
+    <section id="about" className="py-24 bg-gradient-to-b from-white to-[#f4fbf6] text-[#112316]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 items-start">
           {/* Left Side */}
@@ -16,7 +16,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm mb-8 text-xs font-semibold tracking-wider text-accent uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm mb-8 text-xs font-semibold tracking-wider text-primary uppercase"
             >
               TENTANG KAMI
             </motion.div>
@@ -26,10 +26,10 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-serif text-4xl md:text-5xl font-bold tracking-tight leading-tight text-white"
+              className="font-serif text-4xl md:text-5xl font-bold tracking-tight leading-tight text-[#112316]"
             >
               Satu kawasan,<br />
-              <span className="text-white/70">banyak kemungkinan.</span>
+              <span className="text-[#112316]/60">banyak kemungkinan.</span>
             </motion.h2>
           </div>
           
@@ -40,7 +40,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg md:text-xl text-white/80 leading-relaxed mb-8"
+              className="text-lg md:text-xl text-[#112316]/80 leading-relaxed mb-8"
             >
               Kawasan Ekonomi Berkelanjutan hadir untuk menyatukan potensi masyarakat,
               sumber daya, dan inovasi lokal.
@@ -52,7 +52,7 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Link href="#pendekatan" className="inline-flex items-center gap-2 text-accent font-medium hover:text-white transition-colors group">
+              <Link href="#pendekatan" className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors group">
                 Kenali pendekatan kami
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>

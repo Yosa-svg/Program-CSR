@@ -8,14 +8,56 @@ async function main() {
   await prisma.product.deleteMany()
   await prisma.activity.deleteMany()
   await prisma.program.deleteMany()
+  await prisma.user.deleteMany()
   await prisma.sector.deleteMany()
 
-  // Create Pertanian Sector
+  // Create Sectors
   const pertanian = await prisma.sector.create({
     data: {
       name: 'Pertanian',
       slug: 'pertanian',
     },
+  })
+  const umkm = await prisma.sector.create({
+    data: {
+      name: 'UMKM',
+      slug: 'umkm',
+    },
+  })
+
+  // Create Users
+  const bcrypt = require('bcryptjs');
+  const passwordHash = await bcrypt.hash('password123', 10);
+
+  await prisma.user.createMany({
+    data: [
+      {
+        name: 'Super Admin',
+        email: 'super@csr.com',
+        password: passwordHash,
+        role: 'SUPER_ADMIN',
+      },
+      {
+        name: 'Admin Pusat',
+        email: 'pusat@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_PUSAT',
+      },
+      {
+        name: 'Admin Pertanian',
+        email: 'pertanian@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: pertanian.id,
+      },
+      {
+        name: 'Admin UMKM',
+        email: 'umkm@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: umkm.id,
+      }
+    ]
   })
 
   // Seed Program
@@ -115,35 +157,39 @@ async function main() {
   // Seed Metrics
   const metrics = [
     {
-      indicator: 'Petani Binaan',
-      value: '450+',
+      name: 'Petani Binaan',
+      value: '120',
+      unit: 'Orang',
+      period: '2026',
       description: 'Kepala keluarga di 5 desa',
-      icon: 'Users',
-      color: 'bg-blue-500',
+      status: 'PUBLISHED',
       sectorId: pertanian.id,
     },
     {
-      indicator: 'Luas Lahan',
-      value: '120 Ha',
+      name: 'Luas Lahan',
+      value: '25',
+      unit: 'Hektar',
+      period: '2026',
       description: 'Dikelola secara organik',
-      icon: 'Sprout',
-      color: 'bg-emerald-500',
+      status: 'PUBLISHED',
       sectorId: pertanian.id,
     },
     {
-      indicator: 'Peningkatan Hasil',
-      value: '35%',
+      name: 'Hasil Produksi',
+      value: '5.2',
+      unit: 'Ton',
+      period: 'Januari 2026',
+      description: 'Peningkatan hasil panen',
+      status: 'PUBLISHED',
+      sectorId: pertanian.id,
+    },
+    {
+      name: 'Peningkatan Hasil',
+      value: '18',
+      unit: '%',
+      period: '2026',
       description: 'Dibandingkan tahun sebelumnya',
-      icon: 'TrendingUp',
-      color: 'bg-orange-500',
-      sectorId: pertanian.id,
-    },
-    {
-      indicator: 'Omzet Bulanan',
-      value: 'Rp 250Jt',
-      description: 'Rata-rata penjualan produk',
-      icon: 'HandCoins',
-      color: 'bg-purple-500',
+      status: 'PUBLISHED',
       sectorId: pertanian.id,
     },
   ]

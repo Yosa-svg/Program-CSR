@@ -51,13 +51,13 @@ export default function KegiatanManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Daftar Kegiatan</h1>
-          <p className="text-white/60">Kelola jadwal dan aktivitas lapangan sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Daftar Kegiatan</h1>
+          <p className="text-foreground/60">Kelola jadwal dan aktivitas lapangan sektor Pertanian.</p>
         </div>
         
         <button 
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white font-medium rounded-lg hover:bg-emerald-600 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-foreground font-medium rounded-lg hover:bg-emerald-600 transition-colors"
         >
           <Plus size={18} />
           Tambah Kegiatan
@@ -74,14 +74,14 @@ export default function KegiatanManager({
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         {activities.length === 0 ? (
-          <div className="p-8 text-center text-white/50">
+          <div className="p-8 text-center text-foreground/50">
             Belum ada data kegiatan. Silakan tambahkan kegiatan baru.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-background/50 border-b border-border text-xs uppercase tracking-wider text-white/40">
+                <tr className="bg-background/50 border-b border-border text-xs uppercase tracking-wider text-foreground/40">
                   <th className="p-4 font-medium">Kegiatan</th>
                   <th className="p-4 font-medium">Detail Pelaksanaan</th>
                   <th className="p-4 font-medium">Status</th>
@@ -92,21 +92,21 @@ export default function KegiatanManager({
                 {activities.map((act) => (
                   <tr key={act.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4">
-                      <div className="font-semibold text-white mb-1">{act.title}</div>
-                      <div className="flex items-center gap-1.5 text-xs text-white/50 mt-1">
+                      <div className="font-semibold text-foreground mb-1">{act.title}</div>
+                      <div className="flex items-center gap-1.5 text-xs text-foreground/50 mt-1">
                         <Folder size={12} className="text-primary" />
                         Program: {act.program?.title || "Tidak diketahui"}
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-sm text-white/70">
+                        <div className="flex items-center gap-1.5 text-sm text-foreground/70">
                           <Calendar size={14} className="text-emerald-500" />
                           {new Date(act.date).toLocaleDateString('id-ID', {
                             day: 'numeric', month: 'long', year: 'numeric'
                           })}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-white/50">
+                        <div className="flex items-center gap-1.5 text-xs text-foreground/50">
                           <MapPin size={14} className="text-blue-500" />
                           {act.location}
                         </div>
@@ -127,7 +127,7 @@ export default function KegiatanManager({
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEdit(act)}
-                          className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                          className="p-2 text-foreground/40 hover:text-foreground hover:bg-white/10 rounded-md transition-colors"
                         >
                           <Edit2 size={16} />
                         </button>
@@ -137,7 +137,7 @@ export default function KegiatanManager({
                             await deleteActivity(act.id);
                           }
                         }}>
-                          <button type="submit" className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors">
+                          <button type="submit" className="p-2 text-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors">
                             <Trash2 size={16} />
                           </button>
                         </form>

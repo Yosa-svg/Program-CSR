@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 
 // ==========================================
 // PROGRAM ACTIONS
@@ -9,14 +10,14 @@ import { revalidatePath } from "next/cache";
 
 export async function getPrograms() {
   try {
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
-    
-    if (!sector) return [];
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) return [];
+
+    // Verifikasi bahwa user punya akses ke sektor ini (kalau dia ADMIN_SEKTOR)
+    await requireSectorAccess(activeSectorId);
 
     return await prisma.program.findMany({
-      where: { sectorId: sector.id },
+      where: { sectorId: activeSectorId },
       orderBy: { title: 'asc' }
     });
   } catch (error) {
@@ -27,18 +28,17 @@ export async function getPrograms() {
 
 export async function createProgram(formData: FormData) {
   try {
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) throw new Error("No active sector");
+
+    await requireSectorAccess(activeSectorId);
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
     const beneficiaries = formData.get("beneficiaries") as string;
     const status = formData.get("status") as string;
     const imageUrl = formData.get("imageUrl") as string || "/images/placeholder.jpg";
-
-    const sector = await prisma.sector.findUnique({
-      where: { slug: "pertanian" },
-    });
-
-    if (!sector) throw new Error("Sector Pertanian not found");
 
     await prisma.program.create({
       data: {
@@ -48,13 +48,12 @@ export async function createProgram(formData: FormData) {
         beneficiaries,
         status,
         imageUrl,
-        sectorId: sector.id,
+        sectorId: activeSectorId,
       },
     });
 
-    revalidatePath("/admin/pertanian/program");
-    revalidatePath("/admin/pertanian");
-    revalidatePath("/bidang/pertanian");
+    revalidatePath("/admin/program");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to create program:", error);
@@ -64,6 +63,12 @@ export async function createProgram(formData: FormData) {
 
 export async function updateProgram(id: string, formData: FormData) {
   try {
+    // Kita harus memverifikasi bahwa program yang akan diedit ada di sektor yang user punya akses
+    const program = await prisma.program.findUnique({ where: { id } });
+    if (!program) throw new Error("Program not found");
+    
+    await requireSectorAccess(program.sectorId);
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
@@ -81,9 +86,8 @@ export async function updateProgram(id: string, formData: FormData) {
       },
     });
 
-    revalidatePath("/admin/pertanian/program");
-    revalidatePath("/admin/pertanian");
-    revalidatePath("/bidang/pertanian");
+    revalidatePath("/admin/program");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to update program:", error);
@@ -93,12 +97,16 @@ export async function updateProgram(id: string, formData: FormData) {
 
 export async function deleteProgram(id: string) {
   try {
+    const program = await prisma.program.findUnique({ where: { id } });
+    if (!program) throw new Error("Program not found");
+    
+    await requireSectorAccess(program.sectorId);
+
     await prisma.program.delete({
       where: { id }
     });
-    revalidatePath("/admin/pertanian/program");
-    revalidatePath("/admin/pertanian");
-    revalidatePath("/bidang/pertanian");
+    revalidatePath("/admin/program");
+    revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete program:", error);

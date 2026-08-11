@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Trash2, Edit2, MapPin, Users } from "lucide-react";
 import FormProgram from "./FormProgram";
-import { deleteProgram } from "@/actions/pertanianActions";
+import { deleteProgram } from "@/actions/csrActions";
 
 type Program = {
   id: string;
@@ -37,8 +37,8 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Daftar Program</h1>
-          <p className="text-white/60">Kelola program-program andalan pada sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Daftar Program</h1>
+          <p className="text-foreground/60">Kelola program-program andalan pada sektor Pertanian.</p>
         </div>
         
         <button 
@@ -59,14 +59,14 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         {programs.length === 0 ? (
-          <div className="p-8 text-center text-white/50">
+          <div className="p-8 text-center text-foreground/50">
             Belum ada data program. Silakan tambahkan program baru.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-background/50 border-b border-border text-xs uppercase tracking-wider text-white/40">
+                <tr className="bg-background/50 border-b border-border text-xs uppercase tracking-wider text-foreground/40">
                   <th className="p-4 font-medium">Program</th>
                   <th className="p-4 font-medium">Lokasi & Sasaran</th>
                   <th className="p-4 font-medium">Status</th>
@@ -82,18 +82,18 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
                           <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary/50 text-xs">IMG</div>
                         </div>
                         <div>
-                          <div className="font-semibold text-white mb-1">{prog.title}</div>
-                          <div className="text-xs text-white/50 line-clamp-1 max-w-[250px]">{prog.description}</div>
+                          <div className="font-semibold text-foreground mb-1">{prog.title}</div>
+                          <div className="text-xs text-foreground/50 line-clamp-1 max-w-[250px]">{prog.description}</div>
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-sm text-white/70">
+                        <div className="flex items-center gap-1.5 text-sm text-foreground/70">
                           <MapPin size={14} className="text-primary" />
                           {prog.location}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-white/50">
+                        <div className="flex items-center gap-1.5 text-xs text-foreground/50">
                           <Users size={14} className="text-emerald-500" />
                           {prog.beneficiaries}
                         </div>
@@ -114,7 +114,7 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEdit(prog)}
-                          className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                          className="p-2 text-foreground/40 hover:text-foreground hover:bg-white/10 rounded-md transition-colors"
                         >
                           <Edit2 size={16} />
                         </button>
@@ -124,7 +124,7 @@ export default function ProgramManager({ programs }: { programs: Program[] }) {
                             await deleteProgram(prog.id);
                           }
                         }}>
-                          <button type="submit" className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors">
+                          <button type="submit" className="p-2 text-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors">
                             <Trash2 size={16} />
                           </button>
                         </form>

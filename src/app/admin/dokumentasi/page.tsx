@@ -1,5 +1,5 @@
 import { getDocumentations } from "@/actions/dokumentasiActions";
-import { getPrograms } from "@/actions/pertanianActions";
+import { getPrograms } from "@/actions/csrActions";
 import { getActivities } from "@/actions/kegiatanActions";
 import DokumentasiManager from "./DokumentasiManager";
 

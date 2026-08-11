@@ -23,7 +23,7 @@ export default function ProgramPreview() {
   ];
 
   return (
-    <section className="py-24 bg-background border-t border-white/5">
+    <section className="py-24 bg-gradient-to-b from-[#f4fbf6] to-white text-[#112316] border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <motion.div
@@ -31,7 +31,7 @@ export default function ProgramPreview() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/5 mb-6 text-xs font-semibold tracking-wider text-accent uppercase"
+            className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 text-xs font-semibold tracking-wider text-primary uppercase"
           >
             PROGRAM UNGGULAN
           </motion.div>
@@ -54,16 +54,16 @@ export default function ProgramPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-              className="bg-card border border-border p-8 rounded-2xl flex flex-col hover:border-primary/50 transition-colors"
+              className="bg-white border border-gray-200 shadow-sm p-8 rounded-2xl flex flex-col hover:border-primary hover:shadow-md transition-all"
             >
-              <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary">
                 {prog.icon}
               </div>
-              <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{prog.category}</p>
-              <h3 className="text-2xl font-bold text-white mb-4">{prog.title}</h3>
-              <p className="text-white/70 mb-8 flex-1">{prog.desc}</p>
+              <p className="text-xs font-semibold text-[#112316]/50 uppercase tracking-wider mb-2">{prog.category}</p>
+              <h3 className="text-2xl font-bold text-[#112316] mb-4">{prog.title}</h3>
+              <p className="text-[#112316]/70 mb-8 flex-1">{prog.desc}</p>
               
-              <Link href={`/program/${prog.id}`} className="inline-flex items-center gap-2 font-medium text-white/90 hover:text-accent transition-colors mt-auto group">
+              <Link href={`/program/${prog.id}`} className="inline-flex items-center gap-2 font-semibold text-[#112316]/90 hover:text-primary transition-colors mt-auto group">
                 Pelajari Program <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </motion.div>
@@ -77,7 +77,7 @@ export default function ProgramPreview() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="text-center"
         >
-          <Link href="/program" className="btn btn-outline px-8 py-3 text-base">
+          <Link href="/program" className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-8 py-3 text-base">
             Lihat Semua Program
           </Link>
         </motion.div>
