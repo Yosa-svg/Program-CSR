@@ -21,17 +21,22 @@ type Documentation = {
   programId: string | null;
   activityId: string | null;
   program?: { title: string } | null;
-  activity?: { title: string } | null;
+  activity?: {
+    title: string;
+  } | null;
+  sector?: { name: string };
 };
 
 export default function DokumentasiManager({ 
-  documentations,
-  programs,
-  activities
+  documentations, 
+  programs, 
+  activities,
+  activeSectorId
 }: { 
   documentations: Documentation[];
-  programs: RelationalData[];
-  activities: RelationalData[];
+  programs: { id: string, title: string }[];
+  activities: { id: string, title: string }[];
+  activeSectorId: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<Documentation | null>(null);
@@ -58,13 +63,19 @@ export default function DokumentasiManager({
           <p className="text-foreground/60">Kelola arsip foto kegiatan dan dokumentasi visual sektor Pertanian.</p>
         </div>
         
-        <button 
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-foreground font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
-        >
-          <Plus size={18} />
-          Unggah Foto
-        </button>
+        {activeSectorId ? (
+          <button 
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Tambah Dokumentasi
+          </button>
+        ) : (
+          <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
+            Pilih sektor spesifik untuk menambah data
+          </div>
+        )}
       </div>
 
       <FormDokumentasi 
@@ -127,11 +138,13 @@ export default function DokumentasiManager({
 
               {/* Info Container */}
               <div className="p-4 flex flex-col flex-grow">
-                <h3 className="font-semibold text-foreground text-base mb-1 line-clamp-1">{doc.title}</h3>
-                
-                {doc.description && (
-                  <p className="text-sm text-foreground/60 line-clamp-2 mb-3 flex-grow">{doc.description}</p>
+                <div className="font-semibold text-foreground mb-1">{doc.title}</div>
+                {!activeSectorId && doc.sector && (
+                  <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider mb-1">
+                    {doc.sector.name}
+                  </span>
                 )}
+                <div className="text-xs text-foreground/50 line-clamp-1 max-w-[250px]">{doc.description || "-"}</div>
 
                 <div className="space-y-2 mt-auto pt-3 border-t border-border">
                   {doc.date && (

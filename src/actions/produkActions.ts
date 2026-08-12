@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // PRODUCT (PRODUK) ACTIONS
@@ -11,8 +11,16 @@ import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 export async function getProducts() {
   try {
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) return [];
-    
+    if (!activeSectorId) {
+      const session = await requireAuth();
+      if (session.role === "ADMIN_SEKTOR") return []; 
+      
+      return await prisma.product.findMany({
+        include: { sector: true },
+        orderBy: { name: 'asc' }
+      });
+    }
+
     await requireSectorAccess(activeSectorId);
 
     return await prisma.product.findMany({
@@ -44,7 +52,9 @@ export async function createProduct(formData: FormData) {
     }
 
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) throw new Error("No active sector");
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
     
     await requireSectorAccess(activeSectorId);
 

@@ -28,19 +28,16 @@ export async function loginAction(formData: FormData) {
     return { error: "Kredensial tidak valid." };
   }
 
-  // Set Cookie Active Sector untuk ADMIN_PUSAT/SUPER_ADMIN by default menggunakan ID sektor pertama jika ada,
-  // Atau biarkan kosong dan mereka bisa memilih dari dropdown nanti.
-  if (user.role !== "ADMIN_SEKTOR") {
-    const firstSector = await prisma.sector.findFirst();
-    if (firstSector) {
-      const cookieStore = await cookies();
-      cookieStore.set("active_sector", firstSector.id, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24, // 1 hari
-        path: "/",
-      });
-    }
+  // Set Cookie Active Sector untuk ADMIN_PUSAT/SUPER_ADMIN akan dibiarkan kosong,
+  // sehingga mereka masuk dalam mode agregasi "Semua Sektor" secara default.
+  if (user.role === "ADMIN_SEKTOR" && user.sectorId) {
+    const cookieStore = await cookies();
+    cookieStore.set("active_sector", user.sectorId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24, // 1 hari
+      path: "/",
+    });
   }
 
   const session = await encrypt({
@@ -69,10 +66,15 @@ export async function logoutAction() {
 
 export async function switchActiveSectorAction(sectorId: string) {
   const cookieStore = await cookies();
-  cookieStore.set("active_sector", sectorId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24, // 1 hari
-    path: "/",
-  });
+  
+  if (sectorId === "ALL") {
+    cookieStore.delete("active_sector");
+  } else {
+    cookieStore.set("active_sector", sectorId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24, // 1 hari
+      path: "/",
+    });
+  }
 }

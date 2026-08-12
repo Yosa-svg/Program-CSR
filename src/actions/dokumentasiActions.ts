@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadImage, deleteImage } from "@/lib/mediaService";
-import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // DOCUMENTATION ACTIONS
@@ -12,13 +12,22 @@ import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 export async function getDocumentations() {
   try {
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) return [];
-    
+    if (!activeSectorId) {
+      const session = await requireAuth();
+      if (session.role === "ADMIN_SEKTOR") return []; 
+      
+      return await prisma.documentation.findMany({
+        include: { sector: true },
+        orderBy: { createdAt: 'desc' }
+      });
+    }
+
     await requireSectorAccess(activeSectorId);
 
     return await prisma.documentation.findMany({
       where: { sectorId: activeSectorId },
       include: {
+        sector: true,
         program: true,
         activity: true
       },
@@ -53,7 +62,9 @@ export async function createDocumentation(formData: FormData) {
     }
 
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) throw new Error("No active sector");
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
     
     await requireSectorAccess(activeSectorId);
 

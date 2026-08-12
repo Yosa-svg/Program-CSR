@@ -17,8 +17,23 @@ export default async function AdminLayout({
   const session = await getSession();
   if (!session) redirect("/admin/login");
 
+  let sectors: { id: string, name: string }[] = [];
+  
+  if (session?.role !== "ADMIN_SEKTOR") {
+    sectors = await prisma.sector.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' }
+    });
+  } else if (session?.sectorId) {
+    const s = await prisma.sector.findUnique({
+      where: { id: session.sectorId },
+      select: { id: true, name: true }
+    });
+    if (s) sectors = [s];
+  }
+
   const activeSectorId = await getActiveSectorId();
-  const sectors = await prisma.sector.findMany();
+  const allowAll = session?.role !== "ADMIN_SEKTOR";
   const activeSector = sectors.find(s => s.id === activeSectorId);
 
   return (
@@ -93,7 +108,7 @@ export default async function AdminLayout({
             
             {/* Pemilihan Sektor untuk Admin Pusat / Super Admin */}
             {session.role !== "ADMIN_SEKTOR" ? (
-              <SectorSelector sectors={sectors} activeSectorId={activeSectorId} />
+              <SectorSelector sectors={sectors} activeSectorId={activeSectorId} allowAll={allowAll} />
             ) : (
               <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium flex items-center gap-2">
                 Sektor Aktif: {activeSector?.name} 🔒

@@ -1,11 +1,13 @@
 import { getActivities } from "@/actions/kegiatanActions";
 import { getPrograms } from "@/actions/csrActions";
 import KegiatanManager from "./KegiatanManager";
+import { getActiveSectorId } from "@/lib/auth";
 
 // Ini akan memaksa re-render setiap kali data berubah (jangan di-cache)
 export const revalidate = 0;
 
 export default async function KegiatanDashboard() {
+  const activeSectorId = await getActiveSectorId();
   const activities = await getActivities();
   const programs = await getPrograms();
 
@@ -15,5 +17,11 @@ export default async function KegiatanDashboard() {
     title: p.title
   }));
 
-  return <KegiatanManager activities={activities} programs={programsForForm} />;
+  return (
+    <KegiatanManager 
+      activities={activities} 
+      programs={programsForForm} 
+      activeSectorId={activeSectorId} 
+    />
+  );
 }

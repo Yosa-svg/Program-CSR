@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // PROGRAM ACTIONS
@@ -11,13 +11,22 @@ import { getActiveSectorId, requireSectorAccess } from "@/lib/auth";
 export async function getPrograms() {
   try {
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) return [];
+    if (!activeSectorId) {
+      const session = await requireAuth();
+      if (session.role === "ADMIN_SEKTOR") return []; 
+      
+      return await prisma.program.findMany({
+        include: { sector: true },
+        orderBy: { title: 'asc' }
+      });
+    }
 
     // Verifikasi bahwa user punya akses ke sektor ini (kalau dia ADMIN_SEKTOR)
     await requireSectorAccess(activeSectorId);
 
     return await prisma.program.findMany({
       where: { sectorId: activeSectorId },
+      include: { sector: true },
       orderBy: { title: 'asc' }
     });
   } catch (error) {
@@ -29,7 +38,9 @@ export async function getPrograms() {
 export async function createProgram(formData: FormData) {
   try {
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) throw new Error("No active sector");
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
 
     await requireSectorAccess(activeSectorId);
 

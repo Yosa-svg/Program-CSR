@@ -48,7 +48,12 @@ export async function getActiveSectorId() {
   // Untuk ADMIN_PUSAT atau SUPER_ADMIN, ambil dari cookie active_sector
   const cookieStore = await cookies();
   const activeSector = cookieStore.get("active_sector")?.value;
-  return activeSector || null;
+  
+  if (!activeSector || activeSector === "ALL") {
+    return null;
+  }
+  
+  return activeSector;
 }
 
 export async function requireAuth() {

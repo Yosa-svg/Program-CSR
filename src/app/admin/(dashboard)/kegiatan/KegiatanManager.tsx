@@ -22,14 +22,17 @@ type Activity = {
   program?: {
     title: string;
   };
+  sector?: { name: string };
 };
 
 export default function KegiatanManager({ 
-  activities,
-  programs 
+  activities, 
+  programs,
+  activeSectorId
 }: { 
-  activities: Activity[];
-  programs: Program[];
+  activities: Activity[], 
+  programs: { id: string, title: string }[],
+  activeSectorId: string | null
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -56,13 +59,19 @@ export default function KegiatanManager({
           <p className="text-foreground/60">Kelola jadwal dan aktivitas lapangan sektor Pertanian.</p>
         </div>
         
-        <button 
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-foreground font-medium rounded-lg hover:bg-emerald-600 transition-colors"
-        >
-          <Plus size={18} />
-          Tambah Kegiatan
-        </button>
+        {activeSectorId ? (
+          <button 
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Tambah Kegiatan
+          </button>
+        ) : (
+          <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
+            Pilih sektor spesifik untuk menambah data
+          </div>
+        )}
       </div>
 
       <FormKegiatan 
@@ -94,6 +103,11 @@ export default function KegiatanManager({
                   <tr key={act.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4">
                       <div className="font-semibold text-foreground mb-1">{act.title}</div>
+                      {!activeSectorId && act.sector && (
+                        <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider mb-1">
+                          {act.sector.name}
+                        </span>
+                      )}
                       <div className="flex items-center gap-1.5 text-xs text-foreground/50 mt-1">
                         <Folder size={12} className="text-primary" />
                         Program: {act.program?.title || "Tidak diketahui"}

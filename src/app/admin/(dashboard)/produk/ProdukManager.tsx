@@ -22,14 +22,17 @@ type Product = {
   program?: {
     title: string;
   } | null;
+  sector?: { name: string };
 };
 
 export default function ProdukManager({ 
   products,
-  programs 
+  programs,
+  activeSectorId
 }: { 
   products: Product[];
   programs: Program[];
+  activeSectorId: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -56,13 +59,19 @@ export default function ProdukManager({
           <p className="text-foreground/60">Kelola katalog produk unggulan dari sektor Pertanian.</p>
         </div>
         
-        <button 
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-foreground font-medium rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          <Plus size={18} />
-          Tambah Produk
-        </button>
+        {activeSectorId ? (
+          <button 
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Tambah Produk
+          </button>
+        ) : (
+          <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
+            Pilih sektor spesifik untuk menambah data
+          </div>
+        )}
       </div>
 
       <FormProduk 
@@ -101,6 +110,11 @@ export default function ProdukManager({
                         </div>
                         <div>
                           <div className="font-semibold text-foreground mb-1">{prod.name}</div>
+                          {!activeSectorId && prod.sector && (
+                            <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider mb-1">
+                              {prod.sector.name}
+                            </span>
+                          )}
                           <div className="text-xs text-foreground/50 line-clamp-1 max-w-[250px]">{prod.description}</div>
                         </div>
                       </div>

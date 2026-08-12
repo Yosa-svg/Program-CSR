@@ -13,9 +13,16 @@ type Metric = {
   description: string | null;
   period: string;
   isPublished: boolean;
+  sector?: { name: string };
 };
 
-export default function KinerjaManager({ metrics }: { metrics: Metric[] }) {
+export default function KinerjaManager({ 
+  metrics,
+  activeSectorId
+}: { 
+  metrics: Metric[],
+  activeSectorId: string | null
+}) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMetric, setEditingMetric] = useState<Metric | null>(null);
 
@@ -41,13 +48,19 @@ export default function KinerjaManager({ metrics }: { metrics: Metric[] }) {
           <p className="text-foreground/60">Kelola indikator statistik dan metrik capaian sektor Pertanian.</p>
         </div>
         
-        <button 
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-foreground font-medium rounded-lg hover:bg-purple-600 transition-colors shadow-lg shadow-purple-500/20"
-        >
-          <Plus size={18} />
-          Tambah Indikator
-        </button>
+        {activeSectorId ? (
+          <button 
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Tambah Metrik
+          </button>
+        ) : (
+          <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
+            Pilih sektor spesifik untuk menambah data
+          </div>
+        )}
       </div>
 
       <FormKinerja 
@@ -76,11 +89,13 @@ export default function KinerjaManager({ metrics }: { metrics: Metric[] }) {
               {metric.unit && <span className="text-lg text-foreground/50 ml-1">{metric.unit}</span>}
             </div>
             
-            <h3 className="font-medium text-foreground mb-2">{metric.name}</h3>
-            
-            {metric.description && (
-              <p className="text-sm text-foreground/50 line-clamp-2 mb-4 flex-grow">{metric.description}</p>
+            <div className="font-semibold text-foreground mb-1">{metric.name}</div>
+            {!activeSectorId && metric.sector && (
+              <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider mb-1">
+                {metric.sector.name}
+              </span>
             )}
+            <div className="text-xs text-foreground/50 line-clamp-1 max-w-[250px]">{metric.description}</div>
 
             <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs text-foreground/40">

@@ -12,28 +12,29 @@ export const revalidate = 0;
 export default async function AdminDashboard() {
   const activeSectorId = await getActiveSectorId();
 
-  if (!activeSectorId) {
-    return (
-      <div className="flex items-center justify-center h-64 text-foreground/50">
-        Pilih sektor dari menu atas untuk melihat dashboard.
-      </div>
-    );
+  let sectorName = "Semua Sektor";
+  let sectorSlug = "";
+  let whereClause = {};
+
+  if (activeSectorId) {
+    const sector = await prisma.sector.findUnique({
+      where: { id: activeSectorId }
+    });
+    if (sector) {
+      sectorName = sector.name;
+      sectorSlug = sector.slug;
+      whereClause = { sectorId: activeSectorId };
+    }
   }
 
-  const sector = await prisma.sector.findUnique({
-    where: { id: activeSectorId }
-  });
-
-  if (!sector) return <div>Sektor tidak ditemukan.</div>;
-
   // 1. STATISTIK UTAMA
-  const programCount = await prisma.program.count({ where: { sectorId: sector.id } });
-  const activityCount = await prisma.activity.count({ where: { sectorId: sector.id } });
-  const productCount = await prisma.product.count({ where: { sectorId: sector.id } });
-  const docCount = await prisma.documentation.count({ where: { sectorId: sector.id } });
+  const programCount = await prisma.program.count({ where: whereClause });
+  const activityCount = await prisma.activity.count({ where: whereClause });
+  const productCount = await prisma.product.count({ where: whereClause });
+  const docCount = await prisma.documentation.count({ where: whereClause });
 
   // 2. DATA CHART STATUS PROGRAM
-  const programs = await prisma.program.findMany({ where: { sectorId: sector.id } });
+  const programs = await prisma.program.findMany({ where: whereClause });
   let activeCount = 0;
   let completedCount = 0;
   let plannedCount = 0;
@@ -60,7 +61,7 @@ export default async function AdminDashboard() {
 
   // 4. DATA CHART KINERJA & DAMPAK
   const metrics = await prisma.metric.findMany({ 
-    where: { sectorId: sector.id, name: { contains: "Penerima" } },
+    where: { ...whereClause, name: { contains: "Penerima" } },
     orderBy: { createdAt: 'asc' }
   });
   
@@ -81,12 +82,12 @@ export default async function AdminDashboard() {
 
   // 5. AKTIVITAS TERBARU
   const recentActivities = await prisma.activity.findMany({
-    where: { sectorId: sector.id },
+    where: whereClause,
     orderBy: { date: 'desc' },
     take: 3
   });
   const recentDocs = await prisma.documentation.findMany({
-    where: { sectorId: sector.id },
+    where: whereClause,
     orderBy: { createdAt: 'desc' },
     take: 3
   });
@@ -114,16 +115,20 @@ export default async function AdminDashboard() {
       {/* HEADER OVERVIEW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-[#112316] mb-1">Dashboard Sektor {sector.name}</h1>
-          <p className="text-[#112316]/60">Selamat datang kembali. Berikut adalah ringkasan performa sektor.</p>
+          <h1 className="text-2xl font-bold text-[#112316] mb-1">
+            {activeSectorId ? `Dashboard Sektor ${sectorName}` : "Dashboard Semua Sektor"}
+          </h1>
+          <p className="text-[#112316]/60">Selamat datang kembali. Berikut adalah ringkasan performa {activeSectorId ? "sektor" : "keseluruhan"}.</p>
         </div>
-        <Link 
-          href={`/bidang/${sector.slug}`} 
-          target="_blank"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors"
-        >
-          Lihat Halaman Publik <ArrowRight size={16} />
-        </Link>
+        {activeSectorId && (
+          <Link 
+            href={`/bidang/${sectorSlug}`} 
+            target="_blank"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors"
+          >
+            Lihat Halaman Publik <ArrowRight size={16} />
+          </Link>
+        )}
       </div>
 
       {/* 4 KARTU STATISTIK */}
@@ -172,7 +177,9 @@ export default async function AdminDashboard() {
             <h3 className="font-bold text-[#112316]">
               Tren Kinerja & Dampak (Penerima Manfaat)
             </h3>
-            <Link href="/admin/pertanian/kinerja" className="text-sm text-primary font-medium hover:underline">Kelola Data</Link>
+            {activeSectorId && (
+              <Link href="/admin/kinerja" className="text-sm text-primary font-medium hover:underline">Kelola Data</Link>
+            )}
           </div>
           <ImpactChart data={impactData} />
         </div>
