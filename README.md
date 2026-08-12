@@ -22,10 +22,13 @@ Sistem ini memiliki dua pilar utama:
 
 Sistem telah dilengkapi dengan modul fungsional yang tangguh dan terhubung (*relational*):
 
-- 🏢 **Manajemen Program**: Buat dan pantau inisiatif CSR (contoh: *Agro Edu Wisata*).
+- 🏢 **Manajemen Program & Kinerja**: Buat dan pantau inisiatif CSR serta metrik dampaknya secara terpadu.
 - 📅 **Manajemen Kegiatan**: Jadwalkan agenda lapangan dan kaitkan langsung ke Program Induk.
 - 📦 **Katalog Produk Binaan**: Kelola hasil karya atau panen dari masyarakat binaan, dengan opsi penautan ke program tertentu.
 - 📸 **Arsitektur Media & Galeri**: Sistem *upload* gambar terpusat (*Media Upload Service*) yang mendukung validasi tipe file, otomatisasi penamaan (UUID), serta *lazy loading* menggunakan `next/image`.
+- 🔐 **Autentikasi & RBAC (Role-Based Access Control)**: Menggunakan JWT (`jose`) dan Middleware untuk memastikan setiap Admin Sektor (seperti Pertanian atau Peternakan) hanya bisa melihat dan mengubah data milik sektornya saja.
+- 🎛️ **Dashboard Terpusat (*Centralized Dashboard*)**: Tidak perlu membuat halaman coding baru untuk sektor baru. Cukup tambahkan data Sektor ke *database*, dan sistem akan otomatis mengelola akses serta antarmukanya.
+- 👁️ **Kontrol Visibilitas Publikasi**: Pisahkan antara status operasional (Berjalan/Selesai) dengan status publikasi (*Draft*/*Published*). Admin bisa menyusun draf konten tanpa menampilkannya ke publik secara prematur.
 - ⚡ **Performa Tinggi**: Dibangun dengan pola **Clean Architecture** memisahkan rute `(public)` dan Admin, serta memanfaatkan *Next.js Server Actions* untuk manipulasi data secepat kilat tanpa jeda *refresh*.
 
 ## 🛠️ Teknologi yang Digunakan
@@ -69,7 +72,8 @@ npm run dev
 
 Buka peramban (browser) Anda dan akses:
 - **Portal Publik**: [http://localhost:3000](http://localhost:3000)
-- **Dasbor Admin (Pertanian)**: [http://localhost:3000/admin/pertanian](http://localhost:3000/admin/pertanian)
+- **Halaman Hub Sektor**: [http://localhost:3000/bidang](http://localhost:3000/bidang)
+- **Dasbor Admin Utama**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ---
 
@@ -98,12 +102,14 @@ Buka peramban (browser) Anda dan akses:
   <p>Didesain dengan 💚 untuk ekosistem CSR yang lebih berkelanjutan.</p>
 </div>
 
-Semua Akun Menggunakan Password: password123
+### 🔑 Kredensial Login (Local)
 
-Email untuk Masing-masing Admin:
+Semua akun secara default menggunakan password: `password123`
 
-Super Admin: super@csr.com (Bisa melihat semua sektor - fitur ini masih dalam tahap pengembangan untuk switch-sektor)
-Admin Pusat: pusat@csr.com
-Admin Pertanian: pertanian@csr.com (Hanya bisa mengakses data sektor Pertanian)
-Admin Peternakan: peternakan@csr.com (Hanya bisa mengakses data sektor Peternakan)
-Admin UMKM: umkm@csr.com
+| Peran (Role) | Email Login | Hak Akses |
+| --- | --- | --- |
+| **Super Admin** | `super@csr.com` | Akses ke seluruh sektor (Fitur switch-sector dalam pengembangan) |
+| **Admin Pusat** | `pusat@csr.com` | - |
+| **Admin Pertanian** | `pertanian@csr.com` | Terisolasi hanya ke data **Pertanian Terpadu** |
+| **Admin Peternakan** | `peternakan@csr.com` | Terisolasi hanya ke data **Peternakan** |
+| **Admin UMKM** | `umkm@csr.com` | Terisolasi hanya ke data **UMKM** |

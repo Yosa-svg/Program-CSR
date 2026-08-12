@@ -64,6 +64,7 @@ export async function createActivity(formData: FormData) {
 
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to create activity:", error);
@@ -106,6 +107,7 @@ export async function updateActivity(id: string, formData: FormData) {
 
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to update activity:", error);
@@ -125,6 +127,7 @@ export async function deleteActivity(id: string) {
     });
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete activity:", error);

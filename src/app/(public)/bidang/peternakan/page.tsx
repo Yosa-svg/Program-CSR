@@ -79,40 +79,27 @@ export default async function PeternakanPage() {
       {/* 3. FOKUS UTAMA (Pembibitan, Pakan Organik, Integrasi) */}
       <section className="py-24 px-6 bg-[#2B1B12]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Pembibitan */}
-            <div className="bg-[#362318] p-10 rounded-2xl border border-[#4A3223]">
-              <div className="w-16 h-16 bg-orange-900/30 text-orange-400 rounded-xl flex items-center justify-center mb-8">
-                <Users className="w-8 h-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Program Pembibitan</h3>
-              <p className="text-gray-400">
-                Penyediaan bibit sapi dan kambing unggul bagi peternak lokal untuk memastikan keberlanjutan garis keturunan ternak berkualitas.
-              </p>
+          {sector.programs.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-8">
+              {sector.programs.map((program, idx) => {
+                const icons = [<Users key="1" className="w-8 h-8" />, <Wheat key="2" className="w-8 h-8" />, <Recycle key="3" className="w-8 h-8" />];
+                const iconColors = ["bg-orange-900/30 text-orange-400", "bg-green-900/30 text-green-400", "bg-yellow-900/30 text-yellow-400"];
+                const currentIcon = icons[idx % icons.length];
+                const currentColor = iconColors[idx % iconColors.length];
+                return (
+                  <div key={program.id} className="bg-[#362318] p-10 rounded-2xl border border-[#4A3223]">
+                    <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-8 ${currentColor}`}>
+                      {currentIcon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">{program.title}</h3>
+                    <p className="text-gray-400">{program.description}</p>
+                  </div>
+                );
+              })}
             </div>
-            
-            {/* Pakan Organik */}
-            <div className="bg-[#362318] p-10 rounded-2xl border border-[#4A3223]">
-              <div className="w-16 h-16 bg-green-900/30 text-green-400 rounded-xl flex items-center justify-center mb-8">
-                <Wheat className="w-8 h-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Pakan Organik</h3>
-              <p className="text-gray-400">
-                Pengembangan silase dari rumput gajah dan tebon jagung tanpa tambahan bahan kimia sintetis.
-              </p>
-            </div>
-
-            {/* Integrasi */}
-            <div className="bg-[#362318] p-10 rounded-2xl border border-[#4A3223]">
-              <div className="w-16 h-16 bg-yellow-900/30 text-yellow-400 rounded-xl flex items-center justify-center mb-8">
-                <Recycle className="w-8 h-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Integrasi Lintas Sektor</h3>
-              <p className="text-gray-400">
-                Kotoran ternak diproses di instalasi biogas dan reaktor kompos untuk dikembalikan menyuburkan tanah.
-              </p>
-            </div>
-          </div>
+          ) : (
+            <div className="text-center text-gray-400 py-10">Belum ada program yang dipublikasikan.</div>
+          )}
         </div>
       </section>
 

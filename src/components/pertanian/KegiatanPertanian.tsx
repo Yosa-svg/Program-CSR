@@ -3,24 +3,13 @@
 import { motion } from "framer-motion";
 import { CalendarDays, CheckCircle2 } from "lucide-react";
 
-export default function KegiatanPertanian() {
-  const activities = [
-    {
-      date: "Setiap Senin & Kamis",
-      title: "Penyuluhan Pertanian Organik",
-      desc: "Diskusi dan praktik lapangan bersama agronom.",
-    },
-    {
-      date: "Minggu Ke-2 Tiap Bulan",
-      title: "Distribusi Bibit Unggul",
-      desc: "Pembagian bibit sayur dan buah kepada kelompok tani mitra.",
-    },
-    {
-      date: "Akhir Musim Tanam",
-      title: "Festival Panen Raya",
-      desc: "Perayaan hasil bumi yang melibatkan seluruh elemen masyarakat.",
-    }
-  ];
+import { Activity } from "@prisma/client";
+
+interface Props {
+  activities: Activity[];
+}
+
+export default function KegiatanPertanian({ activities }: Props) {
 
   return (
     <section className="py-24 bg-card border-t border-border/50">
@@ -52,7 +41,7 @@ export default function KegiatanPertanian() {
             <div className="space-y-6">
               {activities.map((item, i) => (
                 <motion.div
-                  key={i}
+                  key={item.id}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -61,12 +50,12 @@ export default function KegiatanPertanian() {
                 >
                   <div className="flex items-center gap-2 text-accent bg-accent/10 px-4 py-2 rounded-lg shrink-0">
                     <CalendarDays size={16} />
-                    <span className="text-sm font-semibold">{item.date}</span>
+                    <span className="text-sm font-semibold">{item.date ? new Date(item.date).toLocaleDateString('id-ID') : 'Segera'}</span>
                   </div>
                   
                   <div>
                     <h4 className="text-lg font-bold text-white mb-2">{item.title}</h4>
-                    <p className="text-white/70 text-sm">{item.desc}</p>
+                    <p className="text-white/70 text-sm">{item.description}</p>
                   </div>
                 </motion.div>
               ))}

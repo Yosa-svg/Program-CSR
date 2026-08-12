@@ -80,6 +80,7 @@ export async function createDocumentation(formData: FormData) {
 
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to create documentation:", error);
@@ -145,6 +146,7 @@ export async function updateDocumentation(id: string, formData: FormData) {
 
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to update documentation:", error);
@@ -169,6 +171,7 @@ export async function deleteDocumentation(id: string) {
     
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete documentation:", error);

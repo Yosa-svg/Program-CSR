@@ -3,15 +3,13 @@
 import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
 
-export default function DokumentasiPertanian() {
-  const photos = [
-    "/images/sectors/pertanian-doc-1.jpg",
-    "/images/sectors/pertanian-doc-2.jpg",
-    "/images/sectors/pertanian-doc-3.jpg",
-    "/images/sectors/pertanian-doc-4.jpg",
-    "/images/sectors/pertanian-doc-5.jpg",
-    "/images/sectors/pertanian-doc-6.jpg",
-  ];
+import { Documentation } from "@prisma/client";
+
+interface Props {
+  documentations: Documentation[];
+}
+
+export default function DokumentasiPertanian({ documentations }: Props) {
 
   return (
     <section className="py-24 bg-card border-t border-border/50">
@@ -38,9 +36,9 @@ export default function DokumentasiPertanian() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {photos.map((src, i) => (
+          {documentations.map((doc, i) => (
             <motion.div
-              key={i}
+              key={doc.id}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -49,7 +47,7 @@ export default function DokumentasiPertanian() {
             >
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url('${src}')` }}
+                style={{ backgroundImage: `url('${doc.imageUrl || "/images/placeholder.jpg"}')` }}
               ></div>
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Camera size={32} className="text-white/80" />

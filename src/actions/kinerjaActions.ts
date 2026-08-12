@@ -61,6 +61,7 @@ export async function createMetric(formData: FormData) {
 
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to create metric:", error);
@@ -103,6 +104,7 @@ export async function updateMetric(id: string, formData: FormData) {
 
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to update metric:", error);
@@ -122,6 +124,7 @@ export async function deleteMetric(id: string) {
     });
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete metric:", error);

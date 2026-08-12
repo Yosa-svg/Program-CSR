@@ -65,6 +65,7 @@ export async function createProgram(formData: FormData) {
 
     revalidatePath("/admin/program");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to create program:", error);
@@ -110,6 +111,7 @@ export async function updateProgram(id: string, formData: FormData) {
 
     revalidatePath("/admin/program");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to update program:", error);
@@ -129,6 +131,7 @@ export async function deleteProgram(id: string) {
     });
     revalidatePath("/admin/program");
     revalidatePath("/admin");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete program:", error);

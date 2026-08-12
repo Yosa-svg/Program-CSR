@@ -4,30 +4,13 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
-export default function ProdukPertanian() {
-  const products = [
-    {
-      id: "beras-organik",
-      name: "Beras Organik",
-      desc: "Beras sehat tanpa residu kimia.",
-      price: "Rp 85.000",
-      image: "/images/products/beras.jpg",
-    },
-    {
-      id: "sayur-hidroponik",
-      name: "Sayur Hidroponik",
-      desc: "Segar langsung dari rumah kaca.",
-      price: "Rp 25.000",
-      image: "/images/products/sayur.jpg",
-    },
-    {
-      id: "pupuk-kompos",
-      name: "Pupuk Kompos",
-      desc: "Diolah dari sisa pertanian kawasan.",
-      price: "Rp 15.000",
-      image: "/images/products/pupuk.jpg",
-    }
-  ];
+import { Product } from "@prisma/client";
+
+interface Props {
+  products: Product[];
+}
+
+export default function ProdukPertanian({ products }: Props) {
 
   return (
     <section className="py-24 bg-background">
@@ -79,16 +62,16 @@ export default function ProdukPertanian() {
               <div className="aspect-[4/3] bg-muted relative overflow-hidden flex items-center justify-center">
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url('${product.image}')` }}
+                  style={{ backgroundImage: `url('${product.imageUrl || "/images/placeholder.jpg"}')` }}
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-tr from-background/80 to-background/20 z-0"></div>
                 <ShoppingBag size={40} className="text-white/20 z-10 relative" />
               </div>
               <div className="p-6 flex flex-col">
                 <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                <p className="text-white/70 text-sm mb-6 flex-1">{product.desc}</p>
+                <p className="text-white/70 text-sm mb-6 flex-1">{product.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-accent">{product.price}</span>
+                  <span className="font-semibold text-accent">-</span>
                   <Link href={`/produk/${product.id}`} className="text-white hover:text-accent transition-colors">
                     <ArrowRight size={20} />
                   </Link>

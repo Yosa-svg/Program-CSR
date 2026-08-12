@@ -3,36 +3,19 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Users, Sprout, HandCoins } from "lucide-react";
 
-export default function KinerjaPertanian() {
-  const stats = [
-    {
-      title: "Petani Binaan",
-      value: "450+",
-      desc: "Kepala keluarga di 5 desa",
-      icon: <Users size={24} className="text-white" />,
-      color: "bg-blue-500"
-    },
-    {
-      title: "Luas Lahan",
-      value: "120 Ha",
-      desc: "Dikelola secara organik",
-      icon: <Sprout size={24} className="text-white" />,
-      color: "bg-emerald-500"
-    },
-    {
-      title: "Peningkatan Hasil",
-      value: "35%",
-      desc: "Dibandingkan tahun sebelumnya",
-      icon: <TrendingUp size={24} className="text-white" />,
-      color: "bg-orange-500"
-    },
-    {
-      title: "Omzet Bulanan",
-      value: "Rp 250Jt",
-      desc: "Rata-rata penjualan produk",
-      icon: <HandCoins size={24} className="text-white" />,
-      color: "bg-purple-500"
-    }
+import { Metric } from "@prisma/client";
+
+interface Props {
+  metrics: Metric[];
+}
+
+export default function KinerjaPertanian({ metrics }: Props) {
+  // Array of colors/icons to cycle through for metrics
+  const displayConfig = [
+    { icon: <Users size={24} className="text-white" />, color: "bg-blue-500" },
+    { icon: <Sprout size={24} className="text-white" />, color: "bg-emerald-500" },
+    { icon: <TrendingUp size={24} className="text-white" />, color: "bg-orange-500" },
+    { icon: <HandCoins size={24} className="text-white" />, color: "bg-purple-500" }
   ];
 
   return (
@@ -69,25 +52,28 @@ export default function KinerjaPertanian() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-              className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden"
-            >
-              <div className={`absolute top-0 right-0 w-24 h-24 ${stat.color} rounded-bl-full opacity-10`}></div>
-              
-              <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center mb-6`}>
-                {stat.icon}
-              </div>
-              <h4 className="text-4xl font-bold text-white mb-2">{stat.value}</h4>
-              <p className="font-semibold text-white/90 mb-1">{stat.title}</p>
-              <p className="text-sm text-white/50">{stat.desc}</p>
-            </motion.div>
-          ))}
+          {metrics.map((metric, i) => {
+            const config = displayConfig[i % displayConfig.length];
+            return (
+              <motion.div
+                key={metric.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
+                className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden"
+              >
+                <div className={`absolute top-0 right-0 w-24 h-24 ${config.color} rounded-bl-full opacity-10`}></div>
+                
+                <div className={`w-12 h-12 ${config.color} rounded-xl flex items-center justify-center mb-6`}>
+                  {config.icon}
+                </div>
+                <h4 className="text-4xl font-bold text-white mb-2">{metric.value} {metric.unit}</h4>
+                <p className="font-semibold text-white/90 mb-1">{metric.name}</p>
+                <p className="text-sm text-white/50">{metric.description}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
