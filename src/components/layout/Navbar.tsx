@@ -21,6 +21,7 @@ export default function Navbar() {
     { name: "Bidang CSR", href: "/bidang" },
     { name: "Program", href: "/program" },
     { name: "Produk", href: "/produk" },
+    { name: "Dokumentasi", href: "/dokumentasi" },
     { name: "Kinerja", href: "/kinerja" },
   ];
 

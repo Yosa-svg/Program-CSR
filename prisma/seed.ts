@@ -77,6 +77,7 @@ async function main() {
   const program = await prisma.program.create({
     data: {
       title: 'Agro Edu Wisata',
+      slug: 'agro-edu-wisata',
       description: 'Kawasan terpadu yang memadukan kegiatan pariwisata ekologis dengan edukasi pertanian.',
       location: 'Desa Suka Maju, Area Utara',
       beneficiaries: '120+ Kepala Keluarga',
@@ -89,6 +90,7 @@ async function main() {
   const programPeternakan = await prisma.program.create({
     data: {
       title: 'Pembibitan Sapi Terpadu',
+      slug: 'pembibitan-sapi-terpadu',
       description: 'Program pembibitan sapi unggul dengan pendekatan manajemen pakan organik dan integrasi limbah.',
       location: 'Blok Peternakan, Area Selatan',
       beneficiaries: '45 Peternak Lokal',
@@ -152,6 +154,7 @@ async function main() {
   const products = [
     {
       name: 'Beras Organik',
+      slug: 'beras-organik',
       description: 'Beras sehat tanpa residu kimia.',
       category: 'Pangan',
       status: 'AVAILABLE',
@@ -161,6 +164,7 @@ async function main() {
     },
     {
       name: 'Sayur Hidroponik',
+      slug: 'sayur-hidroponik',
       description: 'Segar langsung dari rumah kaca.',
       category: 'Sayuran',
       status: 'AVAILABLE',
@@ -170,6 +174,7 @@ async function main() {
     },
     {
       name: 'Pupuk Kompos',
+      slug: 'pupuk-kompos',
       description: 'Diolah dari sisa pertanian kawasan.',
       category: 'Sarana Pertanian',
       status: 'OUT_OF_STOCK',
@@ -179,6 +184,7 @@ async function main() {
     },
     {
       name: 'Pakan Silase Organik',
+      slug: 'pakan-silase-organik',
       description: 'Pakan ternak hasil fermentasi hijau.',
       category: 'Pakan Ternak',
       status: 'AVAILABLE',
@@ -188,6 +194,7 @@ async function main() {
     },
     {
       name: 'Susu Segar Pasteurisasi',
+      slug: 'susu-segar-pasteurisasi',
       description: 'Susu murni dari sapi perah kawasan.',
       category: 'Pangan Ternak',
       status: 'AVAILABLE',

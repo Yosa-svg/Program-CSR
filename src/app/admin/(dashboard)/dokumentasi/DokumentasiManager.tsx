@@ -20,10 +20,14 @@ type Documentation = {
   isPublished: boolean;
   programId: string | null;
   activityId: string | null;
+  productId: string | null;
+  source: string | null;
+  verificationStatus: string | null;
   program?: { title: string } | null;
   activity?: {
     title: string;
   } | null;
+  product?: { title: string } | null;
   sector?: { name: string };
 };
 
@@ -31,11 +35,13 @@ export default function DokumentasiManager({
   documentations, 
   programs, 
   activities,
+  products,
   activeSectorId
 }: { 
   documentations: Documentation[];
   programs: { id: string, title: string }[];
   activities: { id: string, title: string }[];
+  products: { id: string, title: string }[];
   activeSectorId: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -84,6 +90,7 @@ export default function DokumentasiManager({
         initialData={editingDoc}
         programs={programs}
         activities={activities}
+        products={products}
         onSuccess={handleSuccess} 
       />
 
@@ -156,11 +163,11 @@ export default function DokumentasiManager({
                     </div>
                   )}
                   
-                  {(doc.program || doc.activity) && (
+                  {(doc.program || doc.activity || doc.product) && (
                     <div className="flex items-center gap-2 text-xs text-foreground/50">
                       <LayoutGrid size={12} className="text-blue-500" />
                       <span className="line-clamp-1">
-                        {doc.program?.title || doc.activity?.title}
+                        {doc.program?.title || doc.activity?.title || doc.product?.title}
                       </span>
                     </div>
                   )}

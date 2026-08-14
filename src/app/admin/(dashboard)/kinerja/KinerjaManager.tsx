@@ -12,6 +12,7 @@ type Metric = {
   unit: string | null;
   description: string | null;
   period: string;
+  status: string;
   isPublished: boolean;
   sector?: { name: string };
 };

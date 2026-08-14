@@ -19,6 +19,9 @@ type Documentation = {
   isPublished: boolean;
   programId: string | null;
   activityId: string | null;
+  productId: string | null;
+  source: string | null;
+  verificationStatus: string | null;
 };
 
 export default function FormDokumentasi({ 
@@ -26,6 +29,7 @@ export default function FormDokumentasi({
   initialData,
   programs,
   activities,
+  products,
   isOpen,
   setIsOpen 
 }: { 
@@ -33,6 +37,7 @@ export default function FormDokumentasi({
   initialData?: Documentation | null;
   programs: RelationalData[];
   activities: RelationalData[];
+  products: RelationalData[];
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }) {
@@ -181,7 +186,31 @@ export default function FormDokumentasi({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background border border-border rounded-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Sumber Dokumentasi</label>
+              <input 
+                name="source" 
+                defaultValue={initialData?.source || ""}
+                type="text" 
+                placeholder="Contoh: Internal ANTAM"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+              <select 
+                name="verificationStatus"
+                defaultValue={initialData?.verificationStatus || "Menunggu Verifikasi"}
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="Terverifikasi">Terverifikasi</option>
+                <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-background border border-border rounded-xl">
             <div>
               <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Program Induk</label>
               <select 
@@ -206,6 +235,20 @@ export default function FormDokumentasi({
                 <option value="">-- Bebas --</option>
                 {activities.map(a => (
                   <option key={a.id} value={a.id}>{a.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Produk</label>
+              <select 
+                name="productId"
+                defaultValue={initialData?.productId || ""}
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">-- Bebas --</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
                 ))}
               </select>
             </div>

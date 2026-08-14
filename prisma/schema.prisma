@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -36,6 +36,7 @@ model Sector {
 model Program {
   id               String   @id @default(uuid())
   title            String
+  slug             String   @unique
   description      String
   location         String
   beneficiaries    String
@@ -47,6 +48,7 @@ model Program {
   activities       Activity[]
   products         Product[]
   documentations   Documentation[]
+  metrics          Metric[]
 }
 
 model Activity {
@@ -75,11 +77,21 @@ model Product {
   imageUrl         String   @default("/images/placeholder.jpg")
   isPublished      Boolean  @default(false)
   
+  // Phase 15.2 Details
+  slug             String   @unique
+  capacity         String?
+  unit             String?
+  marketing        String?
+  certification    String?
+  source           String?
+
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
 
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  
+  documentations   Documentation[]
 }
 
 model Documentation {
@@ -91,11 +103,17 @@ model Documentation {
   status           String   @default("PUBLISHED") // PUBLISHED, DRAFT (can be removed later if obsolete, but leaving for now)
   isPublished      Boolean  @default(false)
   
+  source           String?  // cth: "Internal ANTAM", "Laporan Vendor"
+  verificationStatus String? // cth: "Terverifikasi", "Menunggu Verifikasi"
+  
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
   
   activityId       String?
   activity         Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  
+  productId        String?
+  product          Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
@@ -105,18 +123,28 @@ model Documentation {
 }
 
 model Metric {
-  id               String   @id @default(uuid())
-  name             String
-  value            String
-  unit             String?
-  description      String?
-  period           String
-  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT
-  isPublished      Boolean  @default(false)
+  id                 String    @id @default(uuid())
+  name               String
+  description        String?
+  category           String    @default("OUTCOME") // OUTPUT, OUTCOME, IMPACT, INDIKATOR
+  unit               String?
+  target             Float?
+  realization        Float?
+  value              String?
+  year               Int?
+  period             String?
+  status             String    @default("PUBLISHED")
+  isPublished        Boolean   @default(false)
   
-  sectorId         String
-  sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  source             String?
+  verificationStatus String?   @default("MENUNGGU_VERIFIKASI")
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  programId          String?
+  program            Program?  @relation(fields: [programId], references: [id], onDelete: SetNull)
+
+  sectorId           String
+  sector             Sector    @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }

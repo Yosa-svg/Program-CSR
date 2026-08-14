@@ -5,3 +5,10 @@ export async function getSectorBySlug(slug: string) {
     where: { slug }
   });
 }
+
+export async function getAllSectors() {
+  return prisma.sector.findMany({
+    select: { id: true, name: true, slug: true },
+    orderBy: { name: "asc" }
+  });
+}

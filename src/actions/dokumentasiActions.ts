@@ -48,6 +48,9 @@ export async function createDocumentation(formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
     const activityId = formData.get("activityId") as string;
+    const productId = formData.get("productId") as string;
+    const source = formData.get("source") as string;
+    const verificationStatus = formData.get("verificationStatus") as string;
 
     if (isPublished) {
       if (!title || title.trim().length < 3) {
@@ -80,10 +83,13 @@ export async function createDocumentation(formData: FormData) {
         title,
         description: description || null,
         date: dateStr ? new Date(dateStr) : null,
-        status,
+        status: status || "Active",
         isPublished,
         programId: programId || null,
         activityId: activityId || null,
+        productId: productId || null,
+        source: source || null,
+        verificationStatus: verificationStatus || null,
         sectorId: activeSectorId,
         imageUrl: uploadResult.url,
       },
@@ -108,6 +114,9 @@ export async function updateDocumentation(id: string, formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
     const activityId = formData.get("activityId") as string;
+    const productId = formData.get("productId") as string;
+    const source = formData.get("source") as string;
+    const verificationStatus = formData.get("verificationStatus") as string;
 
     if (isPublished) {
       if (!title || title.trim().length < 3) {
@@ -147,10 +156,13 @@ export async function updateDocumentation(id: string, formData: FormData) {
         title,
         description: description || null,
         date: dateStr ? new Date(dateStr) : null,
-        status,
+        status: status || "Active",
         isPublished,
         programId: programId || null,
         activityId: activityId || null,
+        productId: productId || null,
+        source: source || null,
+        verificationStatus: verificationStatus || null,
         imageUrl: finalImageUrl,
       },
     });

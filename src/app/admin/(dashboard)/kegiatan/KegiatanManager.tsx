@@ -14,11 +14,11 @@ type Activity = {
   id: string;
   title: string;
   description: string;
-  location: string;
-  date: Date;
+  location: string | null;
+  date: Date | null;
   status: string;
   isPublished: boolean;
-  programId: string;
+  programId: string | null;
   program?: {
     title: string;
   };
@@ -117,13 +117,13 @@ export default function KegiatanManager({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 text-sm text-foreground/70">
                           <Calendar size={14} className="text-emerald-500" />
-                          {new Date(act.date).toLocaleDateString('id-ID', {
+                          {act.date ? new Date(act.date).toLocaleDateString('id-ID', {
                             day: 'numeric', month: 'long', year: 'numeric'
-                          })}
+                          }) : '-'}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-foreground/50">
                           <MapPin size={14} className="text-blue-500" />
-                          {act.location}
+                          {act.location || '-'}
                         </div>
                       </div>
                     </td>

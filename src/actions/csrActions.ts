@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
 
+// Helper: generate URL-safe slug from title
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 // ==========================================
 // PROGRAM ACTIONS
 // ==========================================
@@ -61,9 +71,12 @@ export async function createProgram(formData: FormData) {
       }
     }
 
+    const slug = generateSlug(title);
+
     await prisma.program.create({
       data: {
         title,
+        slug,
         description,
         location,
         beneficiaries,

@@ -13,11 +13,11 @@ type Activity = {
   id: string;
   title: string;
   description: string;
-  location: string;
-  date: Date;
+  location: string | null;
+  date: Date | null;
   status: string;
   isPublished: boolean;
-  programId: string;
+  programId: string | null;
 };
 
 export default function FormKegiatan({ 
@@ -124,7 +124,7 @@ export default function FormKegiatan({
               <input 
                 name="location" 
                 required 
-                defaultValue={initialData?.location}
+                defaultValue={initialData?.location || ""}
                 type="text" 
                 placeholder="Balai Desa"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"

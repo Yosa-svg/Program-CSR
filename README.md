@@ -18,7 +18,7 @@ Sistem ini memiliki dua pilar utama:
 1. **Portal Publik**: Etalase visual interaktif yang menampilkan komitmen perusahaan kepada masyarakat luas (Program, Kinerja, Produk, Dokumentasi).
 2. **Dasbor Admin**: Pusat kendali terpadu yang memfasilitasi tim pengelola CSR dalam melakukan input data (CRUD) secara instan tanpa perlu bantuan teknis (*Server Actions*).
 
-## ✨ Fitur Utama (Fase 1-12)
+## ✨ Fitur Utama (Fase 1-14)
 
 Sistem telah dilengkapi dengan modul fungsional yang tangguh dan terhubung (*relational*):
 
@@ -29,6 +29,8 @@ Sistem telah dilengkapi dengan modul fungsional yang tangguh dan terhubung (*rel
 - 🔐 **Autentikasi & RBAC (Role-Based Access Control)**: Menggunakan JWT (`jose`) dan Middleware untuk memastikan setiap Admin Sektor (seperti Pertanian atau Peternakan) hanya bisa melihat dan mengubah data milik sektornya saja.
 - 🎛️ **Dashboard Terpusat (*Centralized Dashboard*)**: Tidak perlu membuat halaman coding baru untuk sektor baru. Cukup tambahkan data Sektor ke *database*, dan sistem akan otomatis mengelola akses serta antarmukanya.
 - 👁️ **Kontrol Visibilitas Publikasi**: Pisahkan antara status operasional (Berjalan/Selesai) dengan status publikasi (*Draft*/*Published*). Admin bisa menyusun draf konten tanpa menampilkannya ke publik secara prematur.
+- 🔄 **Sector Switcher (Multi-Sektor)**: Super Admin dan Admin Pusat memiliki kapabilitas untuk melakukan agregasi data lintas-sektor ("Semua Sektor") dan berpindah konteks (konteks Pertanian, Peternakan, dll.) secara presisi tanpa takut mencampur-adukkan data antar sektor.
+- 🌐 **Halaman Publik Dinamis Terintegrasi**: Halaman sektor untuk masyarakat umum (seperti /bidang/pertanian dan /bidang/peternakan) dikonstruksi secara dinamis dengan mengkonsumsi *database* Prisma, memfilter hanya data yang telah berstatus *Published*.
 - ⚡ **Performa Tinggi**: Dibangun dengan pola **Clean Architecture** memisahkan rute `(public)` dan Admin, serta memanfaatkan *Next.js Server Actions* untuk manipulasi data secepat kilat tanpa jeda *refresh*.
 
 ## 🛠️ Teknologi yang Digunakan
@@ -88,12 +90,16 @@ Buka peramban (browser) Anda dan akses:
 ├── public/
 │   └── uploads/        # Direktori terpusat untuk berkas media (diabaikan oleh git)
 ├── src/
-│   ├── actions/        # Kumpulan Server Actions (Logika CRUD)
+│   ├── actions/        # Kumpulan Server Actions (Logika Mutasi/CRUD)
 │   ├── app/
-│   │   ├── (public)/   # Halaman untuk masyarakat luas
-│   │   └── admin/      # Halaman khusus Dasbor Admin
-│   ├── components/     # Komponen UI (Navbar, Footer, Card, dll)
-│   └── lib/            # Fungsi bantuan (Prisma Client, Media Service)
+│   │   ├── (public)/   # Halaman untuk masyarakat luas (Dinamis dari Prisma)
+│   │   └── admin/      # Halaman khusus Dasbor Admin dengan sistem RBAC
+│   ├── components/     # Komponen UI Reusable (Form, Navbar, Dashboard Managers)
+│   └── lib/            # Fungsi bantuan utama
+│       ├── auth.ts     # Middleware autentikasi dan validasi sektor (RBAC)
+│       ├── prisma.ts   # Prisma client instance
+│       ├── queries/    # Abstraksi fungsi read-only (Pengambilan data publik/spesifik)
+│       └── mediaService.ts # Layanan pengelolaan unggahan media
 ```
 
 ---

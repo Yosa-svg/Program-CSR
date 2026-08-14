@@ -18,6 +18,12 @@ type Product = {
   status: string;
   isPublished: boolean;
   programId: string | null;
+  capacity: string | null;
+  unit: string | null;
+  marketing: string | null;
+  certification: string | null;
+  source: string | null;
+  slug: string;
   imageUrl: string;
   program?: {
     title: string;

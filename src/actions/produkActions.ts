@@ -4,6 +4,40 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
 
+// Helper: generate unique URL-safe slug for Product
+async function generateUniqueProductSlug(name: string, sectorId: string): Promise<string> {
+  const baseSlug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+  
+  let slug = baseSlug;
+  let existing = await prisma.product.findUnique({ where: { slug } });
+  
+  if (existing) {
+    const sector = await prisma.sector.findUnique({ where: { id: sectorId } });
+    if (sector) {
+      const sectorSlug = sector.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
+      slug = `${baseSlug}-${sectorSlug}`;
+      existing = await prisma.product.findUnique({ where: { slug } });
+    }
+  }
+  
+  let counter = 1;
+  while (existing) {
+    slug = `${baseSlug}-${counter}`;
+    existing = await prisma.product.findUnique({ where: { slug } });
+    counter++;
+  }
+  return slug;
+}
+
 // ==========================================
 // PRODUCT (PRODUK) ACTIONS
 // ==========================================
@@ -44,6 +78,13 @@ export async function createProduct(formData: FormData) {
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string; // Optional
+    
+    // New fields
+    const capacity = formData.get("capacity") as string;
+    const unit = formData.get("unit") as string;
+    const marketing = formData.get("marketing") as string;
+    const certification = formData.get("certification") as string;
+    const source = formData.get("source") as string;
 
     if (isPublished) {
       if (!name || name.trim().length < 3) {
@@ -58,13 +99,21 @@ export async function createProduct(formData: FormData) {
     
     await requireSectorAccess(activeSectorId);
 
+    const slug = await generateUniqueProductSlug(name, activeSectorId);
+
     await prisma.product.create({
       data: {
         name,
+        slug,
         description,
         category,
         status,
         isPublished,
+        capacity: capacity || null,
+        unit: unit || null,
+        marketing: marketing || null,
+        certification: certification || null,
+        source: source || null,
         programId: programId || null,
         sectorId: activeSectorId,
         imageUrl: "/images/placeholder.jpg", // Akan dikembangkan di fase dokumentasi
@@ -93,6 +142,13 @@ export async function updateProduct(id: string, formData: FormData) {
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
+    
+    // New fields
+    const capacity = formData.get("capacity") as string;
+    const unit = formData.get("unit") as string;
+    const marketing = formData.get("marketing") as string;
+    const certification = formData.get("certification") as string;
+    const source = formData.get("source") as string;
 
     if (isPublished) {
       if (!name || name.trim().length < 3) {
@@ -108,6 +164,11 @@ export async function updateProduct(id: string, formData: FormData) {
         category,
         status,
         isPublished,
+        capacity: capacity || null,
+        unit: unit || null,
+        marketing: marketing || null,
+        certification: certification || null,
+        source: source || null,
         programId: programId || null,
       },
     });

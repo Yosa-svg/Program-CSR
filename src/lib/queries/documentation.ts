@@ -15,8 +15,41 @@ export async function getAllPublishedDocumentation() {
     where: { 
       isPublished: true 
     },
-    include: {
-      sector: true
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      date: true,
+      source: true,
+      verificationStatus: true,
+      sectorId: true,
+      sector: {
+        select: {
+          id: true,
+          name: true,
+        }
+      },
+      program: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+        }
+      },
+      activity: {
+        select: {
+          id: true,
+          title: true,
+        }
+      },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        }
+      }
     },
     orderBy: { createdAt: "desc" }
   });

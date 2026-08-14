@@ -17,6 +17,11 @@ type Product = {
   status: string;
   isPublished: boolean;
   programId: string | null;
+  capacity?: string | null;
+  unit?: string | null;
+  marketing?: string | null;
+  certification?: string | null;
+  source?: string | null;
 };
 
 export default function FormProduk({ 
@@ -121,6 +126,63 @@ export default function FormProduk({
               rows={3}
               placeholder="Jelaskan detail mengenai produk ini..."
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Kapasitas Produksi</label>
+              <input 
+                name="capacity" 
+                defaultValue={initialData?.capacity || ""}
+                type="text" 
+                placeholder="Contoh: 1000"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Satuan</label>
+              <input 
+                name="unit" 
+                defaultValue={initialData?.unit || ""}
+                type="text" 
+                placeholder="Contoh: Kg/Bulan, Liter/Hari"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Jangkauan Pemasaran</label>
+              <input 
+                name="marketing" 
+                defaultValue={initialData?.marketing || ""}
+                type="text" 
+                placeholder="Lokal, Nasional, Ekspor"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Sertifikasi</label>
+              <input 
+                name="certification" 
+                defaultValue={initialData?.certification || ""}
+                type="text" 
+                placeholder="Halal, BPOM, PIRT (Opsional)"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Sumber Data (Referensi ANTAM)</label>
+            <input 
+              name="source" 
+              defaultValue={initialData?.source || ""}
+              type="text" 
+              placeholder="Contoh: Laporan Tahunan ANTAM 2025 Hal. 42"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
             />
           </div>
 
