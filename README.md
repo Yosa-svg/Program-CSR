@@ -13,105 +13,78 @@
 
 ## 📖 Tentang Proyek
 
-Sistem Informasi Program CSR adalah platform web modern berbasis **Next.js App Router** yang dirancang khusus untuk mengelola, memantau, dan mempublikasikan seluruh kegiatan tanggung jawab sosial perusahaan (CSR). 
+Sistem Informasi Program CSR adalah platform web modern berbasis **Next.js App Router** yang dirancang khusus untuk mengelola, memantau, dan mempublikasikan seluruh kegiatan tanggung jawab sosial perusahaan (CSR) dalam Kawasan Ekonomi Berkelanjutan.
 
 Sistem memiliki dua pilar utama:
-1. **Portal Publik**: Etalase visual interaktif yang menampilkan komitmen dan bukti dampak nyata kepada masyarakat luas (Program, Produk Binaan, Galeri Dokumentasi, dan Kinerja & Impact Dashboard).
+1. **Portal Publik**: Etalase visual interaktif yang menampilkan komitmen dan bukti dampak nyata kepada masyarakat luas (Sektor, Program, Produk Binaan, Galeri Dokumentasi, dan Kinerja & Impact Dashboard).
 2. **Dasbor Admin**: Pusat kendali terpadu dengan sistem **Role-Based Access Control (RBAC)** untuk tim pengelola CSR dalam melakukan mutasi data (*Server Actions*) secara aman, cepat, dan terisolasi antar sektor.
 
 ---
 
-## ✨ Fitur Utama & Fase Pengembangan (Fase 1 - 15.4)
+## ✨ Fitur Utama & Fase Pengembangan
 
 - 🏢 **Fase 15.1: Manajemen Program & Detail Slug (`/program` & `/program/[slug]`)**:
   - Halaman katalog program publik dengan filter sektor interaktif.
   - Halaman detail program berbasis `slug` unik.
   - Isolasi ketat relasi: Kegiatan, Produk, dan Dokumentasi yang masih *Draft* tidak akan pernah bocor ke halaman publik.
 - 📦 **Fase 15.2: Katalog Produk Binaan (`/produk` & `/produk/[slug]`)**:
-  - Katalog karya dan panen kelompok tani/ternak binaan.
-  - Atribut lengkap: Kapasitas produksi, unit/satuan, saluran pemasaran, sertifikasi, dan sumber produk.
-  - PenautanOpsional ke Program Induk.
+  - Katalog karya dan produk olahan kelompok binaan CSR.
+  - Atribut lengkap: Kapasitas produksi, unit/satuan, saluran pemasaran, sertifikasi, dan sumber data resmi.
 - 📸 **Fase 15.3: CSR Impact Gallery (`/dokumentasi`)**:
   - Galeri dokumentasi aksi nyata CSR di lapangan.
-  - Informasi sumber dokumentasi (Internal/Vendor) dan status verifikasi.
-  - Penautan otomatis ke Program atau Produk terkait.
+  - Informasi jenis sumber data dan status verifikasi.
+  - Penautan otomatis ke Program, Kegiatan, atau Produk terkait.
 - 📊 **Fase 15.4: Kinerja, Metrics & Impact Dashboard (`/kinerja`)**:
   - Pelacakan kuantitatif **Target**, **Realisasi**, dan kalkulasi **Capaian (%)** secara *dynamic on-the-fly*.
   - Penanganan aman `target = 0` (tanpa error *division by zero*) dan visual progress bar klem rapi untuk capaian `>100%`.
   - Pengelompokan 3 Pilar Dampak: **OUTPUT** (Hasil langsung), **OUTCOME** (Perubahan kapasitas), dan **IMPACT** (Dampak jangka panjang).
-  - Badge verifikasi data (*TERVERIFIKASI*, *BELUM VERIFIKASI*) dan transparansi tanpa melibatkan nilai anggaran/harga.
-- 🔐 **Autentikasi & RBAC Multi-Sektor**:
-  - Admin Sektor (seperti Pertanian atau Peternakan) hanya dapat mengakses dan mengedit data sektornya.
-  - Super Admin dan Admin Pusat memiliki kapabilitas melakukan agregasi dan *switch sector* secara fleksibel.
-- 📸 **Media Upload Service**:
-  - Layanan unggah gambar terpusat dengan penamaan otomatis UUID, validasi tipe file, dan optimasi `next/image`.
+- 🛡️ **Fase 15.5: Data Integrity & Source Management**:
+  - Standarisasi jenis sumber data: `RESMI_ANTAM`, `PEMERINTAH`, `JURNAL_AKADEMIK`, `MEDIA_MASSA`, `DOKUMEN_LAPORAN`.
+  - Pipa keamanan backend 6-lapis (*Multi-Layer Server Pipeline*): Otentikasi, RBAC, Sector Access Guard, Relational Consistency Guard (mencegah anak beda sektor dari induk), dan Publication Readiness Guard.
+- ⚙️ **Pengaturan Sistem & Manajemen Pengguna (`/admin/pengaturan`)**:
+  - Manajemen akun admin (Tambah, Edit Peran, Pindah Sektor, Reset Password, Hapus Akun).
+  - Profil mandiri dan pergantian kata sandi dengan enkripsi bcrypt.
+  - Statistik agregasi database dan pemantauan sektor aktif.
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## 🔒 Panduan Keamanan & Deployment Production
 
-* **Framework**: [Next.js](https://nextjs.org/) (App Router, Turbopack)
-* **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
-* **Database & ORM**: [MySQL](https://www.mysql.com/) + [Prisma ORM](https://www.prisma.io/)
-* **Styling & Animas**: [Tailwind CSS](https://tailwindcss.com/) + [Framer Motion](https://www.framer.com/motion/)
-* **Ikon**: [Lucide React](https://lucide.dev/)
+> [!CAUTION]
+> **PENTING: Jangan Gunakan Secret / Password Default di Server Publik!**
 
----
+Sebelum mempublikasikan aplikasi ke server produksi (Vercel/Cloud):
 
-## 🚀 Panduan Instalasi & Menjalankan (Local Development)
-
-### 1. Kloning Repositori & Instalasi Dependensi
-```bash
-git clone https://github.com/Yosa-svg/Program-CSR.git
-cd Program-CSR
-npm install
-```
-
-### 2. Konfigurasi Environment (`.env`)
-Buat atau sesuaikan file `.env` di direktori utama:
-```env
-DATABASE_URL="mysql://root:@127.0.0.1:3306/csr_db"
-```
-
-### 3. Migrasi & Seed Database
-Jalankan migrasi aman Prisma untuk membuat tabel di MySQL dan mengisi data percontohan (Dummy Data):
-```bash
-# Generate tipe Prisma Client
-npx prisma generate
-
-# Jalankan migrasi schema ke MySQL
-npx prisma migrate dev --name init_mysql
-
-# Isi data percontohan awal (Users, Sectors, Programs, Products, Metrics, Docs)
-npx prisma db seed
-```
-
-### 4. Jalankan Server
-```bash
-npm run dev
-```
-
-Buka peramban (browser) Anda dan akses:
-* **Portal Publik**: [http://localhost:3000](http://localhost:3000)
-* **Katalog Program**: [http://localhost:3000/program](http://localhost:3000/program)
-* **Katalog Produk**: [http://localhost:3000/produk](http://localhost:3000/produk)
-* **Galeri Dokumentasi**: [http://localhost:3000/dokumentasi](http://localhost:3000/dokumentasi)
-* **Dashboard Kinerja & Dampak**: [http://localhost:3000/kinerja](http://localhost:3000/kinerja)
-* **Dasbor Admin Utama**: [http://localhost:3000/admin](http://localhost:3000/admin)
+1. **Rotasi JWT Secret**:
+   Pastikan environment variable `JWT_SECRET` diisi dengan string acak yang panjang dan aman. Contoh generate di terminal:
+   ```bash
+   openssl rand -base64 32
+   ```
+2. **Ganti Kredensial Default**:
+   Password default testing (`password123`) wajib diganti untuk semua akun admin sebelum deploy melalui halaman **Pengaturan > Profil & Keamanan**.
+3. **Database Cloud & Migrasi**:
+   Gunakan MySQL Server Production (cth: Aiven, PlanetScale, Railway) dan jalankan:
+   ```bash
+   npx prisma migrate deploy
+   ```
+4. **Proteksi File Sensitif**:
+   Pastikan file `.env` dan database SQLite tidak ter-track oleh Git.
 
 ---
 
-## 🔑 Kredensial Login (Local Testing)
+## 🔑 Kredensial Pengujian Lokal (Development Only)
 
-Semua akun secara default menggunakan password: **`password123`**
+Password default untuk seluruh akun pengujian lokal: **`password123`**
 
-| Peran (Role) | Email Login | Hak Akses & Sektor |
+| Peran (Role) | Email Login | Hak Akses & Sektor Binaan |
 | --- | --- | --- |
 | **Super Admin** | `super@csr.com` | Akses penuh ke seluruh sektor & manajemen admin |
 | **Admin Pusat** | `pusat@csr.com` | Akses monitoring seluruh sektor |
-| **Admin Pertanian** | `pertanian@csr.com` | Terisolasi hanya ke sektor **Pertanian Terpadu** |
-| **Admin Peternakan** | `peternakan@csr.com` | Terisolasi hanya ke sektor **Peternakan** |
-| **Admin UMKM** | `umkm@csr.com` | Terisolasi hanya ke sektor **UMKM** |
+| **Admin Pertanian** | `pertanian@csr.com` | Terisolasi ke sektor **Pertanian** (Agro Edu Wisata) |
+| **Admin Peternakan** | `peternakan@csr.com` | Terisolasi ke sektor **Peternakan** (Inkubator Bisnis) |
+| **Admin Lingkungan** | `lingkungan@csr.com` | Terisolasi ke sektor **Lingkungan** (Pengolahan Sampah & Pupuk) |
+| **Admin Industri Kelapa** | `kelapa@csr.com` | Terisolasi ke sektor **Industri Kelapa** (Industri Kelapa Terpadu) |
+| **Admin UMKM** | `umkm@csr.com` | Terisolasi ke sektor **UMKM** |
 
 ---
 
@@ -122,20 +95,21 @@ Semua akun secara default menggunakan password: **`password123`**
 ├── prisma/
 │   ├── schema.prisma       # Skema relasi database Prisma (MySQL)
 │   ├── migrations/         # Riwayat migrasi database
-│   └── seed.ts             # Script seeding data percontohan
+│   └── seed.ts             # Script seeding taksonomi & akun percontohan
 ├── public/
 │   ├── images/             # Gambar & berkas aset terpusat
-│   └── uploads/            # Direktori hasil unggahan media
+│   └── uploads/            # Direktori hasil unggahan media lokal
 ├── src/
-│   ├── actions/            # Server Actions (Mutasi/CRUD Admin: Program, Produk, Kinerja, Docs)
+│   ├── actions/            # Server Actions (Program, Produk, Kegiatan, Docs, Kinerja, Settings, Auth)
 │   ├── app/
-│   │   ├── (public)/       # Halaman publik (program, produk, dokumentasi, kinerja)
-│   │   └── admin/          # Dasbor Admin terproteksi RBAC
+│   │   ├── (public)/       # Halaman portal publik (program, produk, dokumentasi, kinerja, sektor)
+│   │   └── admin/          # Dasbor Admin terproteksi RBAC (termasuk pengaturan)
 │   ├── components/         # Komponen UI Reusable (Navbar, Managers, Forms, Cards)
+│   ├── middleware.ts       # Route guard middleware berbasis JWT token
 │   └── lib/
-│       ├── auth.ts         # Middleware JWT & Validasi Akses Sektor
-│       ├── prisma.ts       # Prisma Client Instance
-│       └── queries/        # Abstraksi query read-only publik (programs, products, metrics, docs)
+│       ├── auth.ts         # Enkripsi/Dekripsi JWT & Validasi Akses Sektor
+│       ├── mediaService.ts # Service upload media dengan validasi Magic Bytes
+│       └── prisma.ts       # Prisma Client Instance
 ```
 
 ---

@@ -84,7 +84,7 @@ export default async function AdminLayout({
           <div className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4 mt-6 px-3">
             Sistem
           </div>
-          <Link href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:bg-white/5 hover:text-white transition-colors">
+          <Link href="/admin/pengaturan" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:bg-white/5 hover:text-white transition-colors">
             <Settings size={18} />
             Pengaturan
           </Link>

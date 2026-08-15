@@ -38,6 +38,14 @@ yarn-error.log*
 .env.production.local
 !.env.example
 
+# databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+prisma/dev.db
+
 # vercel
 .vercel
 
