@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, getSession } from "@/lib/auth";
 
 // ==========================================
 // ACTIVITY (KEGIATAN) ACTIONS
@@ -26,7 +26,8 @@ export async function getActivities() {
     return await prisma.activity.findMany({
       where: { sectorId: activeSectorId },
       include: {
-        program: true
+        program: true,
+        sector: true
       },
       orderBy: { date: 'desc' }
     });
@@ -38,6 +39,13 @@ export async function getActivities() {
 
 export async function createActivity(formData: FormData) {
   try {
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
+    
+    await requireSectorAccess(activeSectorId);
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
@@ -46,28 +54,48 @@ export async function createActivity(formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
 
+    const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      if (!parentProgram || parentProgram.sectorId !== activeSectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor yang sedang Anda kelola." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!title || title.trim().length < 3) {
         return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
       }
+      if (!programId || programId.trim().length === 0) {
+        return { success: false, error: "Kegiatan wajib dikaitkan dengan Program Induk sebelum dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum kegiatan dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data kegiatan harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
+      }
     }
-
-    const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
-    }
-    
-    await requireSectorAccess(activeSectorId);
 
     await prisma.activity.create({
       data: {
         title,
         description,
         location,
-        date: new Date(dateStr),
+        date: dateStr ? new Date(dateStr) : null,
         status,
         isPublished,
-        programId,
+        programId: programId || null,
+        source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
         sectorId: activeSectorId,
       },
     });
@@ -88,6 +116,7 @@ export async function updateActivity(id: string, formData: FormData) {
     if (!activity) throw new Error("Activity not found");
     
     await requireSectorAccess(activity.sectorId);
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
@@ -96,9 +125,32 @@ export async function updateActivity(id: string, formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
 
+    const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      if (!parentProgram || parentProgram.sectorId !== activity.sectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari kegiatan ini." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!title || title.trim().length < 3) {
         return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
+      }
+      if (!programId || programId.trim().length === 0) {
+        return { success: false, error: "Kegiatan wajib dikaitkan dengan Program Induk sebelum dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum kegiatan dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data kegiatan harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
 
@@ -108,10 +160,14 @@ export async function updateActivity(id: string, formData: FormData) {
         title,
         description,
         location,
-        date: new Date(dateStr),
+        date: dateStr ? new Date(dateStr) : null,
         status,
         isPublished,
-        programId,
+        programId: programId || null,
+        source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
       },
     });
 

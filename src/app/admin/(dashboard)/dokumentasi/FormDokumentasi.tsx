@@ -21,6 +21,8 @@ type Documentation = {
   activityId: string | null;
   productId: string | null;
   source: string | null;
+  sourceType?: string | null;
+  sourceUrl?: string | null;
   verificationStatus: string | null;
 };
 
@@ -165,7 +167,7 @@ export default function FormDokumentasi({
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Tanggal</label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Tanggal Kegiatan</label>
               <input 
                 name="date" 
                 defaultValue={formattedDate}
@@ -176,7 +178,7 @@ export default function FormDokumentasi({
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi Ringkas</label>
             <textarea 
               name="description" 
               defaultValue={initialData?.description || ""}
@@ -186,27 +188,67 @@ export default function FormDokumentasi({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Sumber Dokumentasi</label>
-              <input 
-                name="source" 
-                defaultValue={initialData?.source || ""}
-                type="text" 
-                placeholder="Contoh: Internal ANTAM"
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-              />
+          {/* Section Source Management & Verification */}
+          <div className="p-4 bg-background border border-border rounded-xl space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-foreground/60 border-b border-border/60 pb-2">
+              Integritas & Sumber Data Resmi (Fase 15.5)
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Status Verifikasi</label>
-              <select 
-                name="verificationStatus"
-                defaultValue={initialData?.verificationStatus || "Menunggu Verifikasi"}
-                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-              >
-                <option value="Terverifikasi">Terverifikasi</option>
-                <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-              </select>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Nama Sumber Data <span className="text-xs text-amber-400">(Wajib untuk publish)</span>
+                </label>
+                <input 
+                  name="source" 
+                  defaultValue={initialData?.source || ""}
+                  type="text" 
+                  placeholder="Contoh: Arsip Lapangan & Dokumentasi Tim"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">Jenis Sumber Data</label>
+                <select 
+                  name="sourceType"
+                  defaultValue={initialData?.sourceType || ""}
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="">-- Belum Ditentukan --</option>
+                  <option value="RESMI_ANTAM">Sumber Resmi ANTAM (Internal)</option>
+                  <option value="PEMERINTAH">Instansi Pemerintah / Dinas</option>
+                  <option value="JURNAL_AKADEMIK">Jurnal Ilmiah / Akademik</option>
+                  <option value="MEDIA_MASSA">Media Massa / Pemberitaan</option>
+                  <option value="DOKUMEN_LAPORAN">Dokumen Laporan / Audit</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">URL Rujukan (Opsional)</label>
+                <input 
+                  name="sourceUrl" 
+                  defaultValue={initialData?.sourceUrl || ""}
+                  type="url" 
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+                <select 
+                  name="verificationStatus"
+                  defaultValue={initialData?.verificationStatus || "BELUM_TERVERIFIKASI"}
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
+                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
+                  <option value="TERVERIFIKASI">TERVERIFIKASI (Sah / Valid)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -260,8 +302,8 @@ export default function FormDokumentasi({
                 defaultValue={initialData?.isPublished ? "true" : "false"}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
-                <option value="true">Publikasikan</option>
                 <option value="false">Simpan Draft</option>
+                <option value="true">Publikasikan</option>
               </select>
             </div>
           </div>

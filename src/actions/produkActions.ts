@@ -12,25 +12,15 @@ async function generateUniqueProductSlug(name: string, sectorId: string): Promis
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
-  
+
   let slug = baseSlug;
-  let existing = await prisma.product.findUnique({ where: { slug } });
-  
-  if (existing) {
-    const sector = await prisma.sector.findUnique({ where: { id: sectorId } });
-    if (sector) {
-      const sectorSlug = sector.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-");
-      slug = `${baseSlug}-${sectorSlug}`;
-      existing = await prisma.product.findUnique({ where: { slug } });
-    }
-  }
-  
   let counter = 1;
+
+  let existing = await prisma.product.findUnique({ where: { slug } });
   while (existing) {
+    if (existing.sectorId === sectorId && existing.name.toLowerCase() === name.toLowerCase()) {
+      return existing.slug;
+    }
     slug = `${baseSlug}-${counter}`;
     existing = await prisma.product.findUnique({ where: { slug } });
     counter++;
@@ -50,7 +40,7 @@ export async function getProducts() {
       if (!session || session.role === "ADMIN_SEKTOR") return []; 
       
       return await prisma.product.findMany({
-        include: { sector: true },
+        include: { sector: true, program: true },
         orderBy: { name: 'asc' }
       });
     }
@@ -60,7 +50,8 @@ export async function getProducts() {
     return await prisma.product.findMany({
       where: { sectorId: activeSectorId },
       include: {
-        program: true
+        program: true,
+        sector: true
       },
       orderBy: { name: 'asc' }
     });
@@ -72,6 +63,13 @@ export async function getProducts() {
 
 export async function createProduct(formData: FormData) {
   try {
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
+    
+    await requireSectorAccess(activeSectorId);
+
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
@@ -79,25 +77,36 @@ export async function createProduct(formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string; // Optional
     
-    // New fields
     const capacity = formData.get("capacity") as string;
     const unit = formData.get("unit") as string;
     const marketing = formData.get("marketing") as string;
     const certification = formData.get("certification") as string;
+    
     const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      if (!parentProgram || parentProgram.sectorId !== activeSectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor yang sedang Anda kelola." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!name || name.trim().length < 3) {
         return { success: false, error: "Nama produk terlalu pendek untuk dipublikasikan." };
       }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum produk dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data produk harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
+      }
     }
-
-    const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
-    }
-    
-    await requireSectorAccess(activeSectorId);
 
     const slug = await generateUniqueProductSlug(name, activeSectorId);
 
@@ -114,9 +123,12 @@ export async function createProduct(formData: FormData) {
         marketing: marketing || null,
         certification: certification || null,
         source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
         programId: programId || null,
         sectorId: activeSectorId,
-        imageUrl: "/images/placeholder.jpg", // Akan dikembangkan di fase dokumentasi
+        imageUrl: "/images/placeholder.jpg",
       },
     });
 
@@ -143,16 +155,34 @@ export async function updateProduct(id: string, formData: FormData) {
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
     
-    // New fields
     const capacity = formData.get("capacity") as string;
     const unit = formData.get("unit") as string;
     const marketing = formData.get("marketing") as string;
     const certification = formData.get("certification") as string;
+    
     const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      if (!parentProgram || parentProgram.sectorId !== product.sectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari produk ini." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!name || name.trim().length < 3) {
         return { success: false, error: "Nama produk terlalu pendek untuk dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum produk dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data produk harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
 
@@ -169,6 +199,9 @@ export async function updateProduct(id: string, formData: FormData) {
         marketing: marketing || null,
         certification: certification || null,
         source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
         programId: programId || null,
       },
     });

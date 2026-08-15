@@ -1,0 +1,26 @@
+-- AlterTable
+ALTER TABLE `activity` ADD COLUMN `source` VARCHAR(191) NULL,
+    ADD COLUMN `sourceType` VARCHAR(191) NULL,
+    ADD COLUMN `sourceUrl` VARCHAR(191) NULL,
+    ADD COLUMN `verificationStatus` VARCHAR(191) NULL DEFAULT 'BELUM_TERVERIFIKASI';
+
+-- AlterTable
+ALTER TABLE `documentation` ADD COLUMN `sourceType` VARCHAR(191) NULL,
+    ADD COLUMN `sourceUrl` VARCHAR(191) NULL,
+    MODIFY `verificationStatus` VARCHAR(191) NULL DEFAULT 'BELUM_TERVERIFIKASI';
+
+-- AlterTable
+ALTER TABLE `metric` ADD COLUMN `sourceType` VARCHAR(191) NULL,
+    ADD COLUMN `sourceUrl` VARCHAR(191) NULL,
+    MODIFY `verificationStatus` VARCHAR(191) NULL DEFAULT 'BELUM_TERVERIFIKASI';
+
+-- AlterTable
+ALTER TABLE `product` ADD COLUMN `sourceType` VARCHAR(191) NULL,
+    ADD COLUMN `sourceUrl` VARCHAR(191) NULL,
+    ADD COLUMN `verificationStatus` VARCHAR(191) NULL DEFAULT 'BELUM_TERVERIFIKASI';
+
+-- AlterTable
+ALTER TABLE `program` ADD COLUMN `source` VARCHAR(191) NULL,
+    ADD COLUMN `sourceType` VARCHAR(191) NULL,
+    ADD COLUMN `sourceUrl` VARCHAR(191) NULL,
+    ADD COLUMN `verificationStatus` VARCHAR(191) NULL DEFAULT 'BELUM_TERVERIFIKASI';

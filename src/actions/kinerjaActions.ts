@@ -42,6 +42,13 @@ export async function getMetrics() {
 
 export async function createMetric(formData: FormData) {
   try {
+    const activeSectorId = await getActiveSectorId();
+    if (!activeSectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    }
+    
+    await requireSectorAccess(activeSectorId);
+
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = (formData.get("category") as string) || "OUTCOME";
@@ -58,24 +65,34 @@ export async function createMetric(formData: FormData) {
     const period = formData.get("period") as string;
 
     const source = formData.get("source") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "MENUNGGU_VERIFIKASI";
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
     const programId = formData.get("programId") as string;
 
     const status = (formData.get("status") as string) || "PUBLISHED";
     const isPublished = formData.get("isPublished") === "true";
 
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const p = await prisma.program.findUnique({ where: { id: programId } });
+      if (!p || p.sectorId !== activeSectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari indikator ini." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!name || name.trim().length < 3) {
         return { success: false, error: "Nama indikator terlalu pendek untuk dipublikasikan." };
       }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum indikator dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data indikator harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
+      }
     }
-
-    const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
-    }
-    
-    await requireSectorAccess(activeSectorId);
 
     await prisma.metric.create({
       data: {
@@ -89,6 +106,8 @@ export async function createMetric(formData: FormData) {
         year,
         period: period || null,
         source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
         verificationStatus,
         programId: programId || null,
         status,
@@ -131,15 +150,32 @@ export async function updateMetric(id: string, formData: FormData) {
     const period = formData.get("period") as string;
 
     const source = formData.get("source") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "MENUNGGU_VERIFIKASI";
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
     const programId = formData.get("programId") as string;
 
     const status = (formData.get("status") as string) || "PUBLISHED";
     const isPublished = formData.get("isPublished") === "true";
 
+    // Server-Side Relational Consistency Check
+    if (programId) {
+      const p = await prisma.program.findUnique({ where: { id: programId } });
+      if (!p || p.sectorId !== metric.sectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari indikator ini." };
+      }
+    }
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!name || name.trim().length < 3) {
         return { success: false, error: "Nama indikator terlalu pendek untuk dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum indikator dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data indikator harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
 
@@ -156,6 +192,8 @@ export async function updateMetric(id: string, formData: FormData) {
         year,
         period: period || null,
         source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
         verificationStatus,
         programId: programId || null,
         status,

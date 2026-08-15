@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, getSession } from "@/lib/auth";
 
 // Helper: generate URL-safe slug from title
 function generateSlug(title: string): string {
@@ -31,7 +31,6 @@ export async function getPrograms() {
       });
     }
 
-    // Verifikasi bahwa user punya akses ke sektor ini (kalau dia ADMIN_SEKTOR)
     await requireSectorAccess(activeSectorId);
 
     return await prisma.program.findMany({
@@ -60,14 +59,26 @@ export async function createProgram(formData: FormData) {
     const beneficiaries = formData.get("beneficiaries") as string;
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
-    const imageUrl = formData.get("imageUrl") as string || "/images/placeholder.jpg";
+    const imageUrl = (formData.get("imageUrl") as string) || "/images/placeholder.jpg";
 
+    const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string; // Nullable
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!title || title.trim().length < 3) {
-        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan." };
+        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan (min 3 karakter)." };
       }
       if (!description || description.trim().length < 10) {
-        return { success: false, error: "Deskripsi program harus lebih detail untuk dipublikasikan." };
+        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum program dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data program harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
 
@@ -83,6 +94,10 @@ export async function createProgram(formData: FormData) {
         status,
         isPublished,
         imageUrl,
+        source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
         sectorId: activeSectorId,
       },
     });
@@ -93,13 +108,12 @@ export async function createProgram(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Failed to create program:", error);
-    return { success: false, error: "Gagal menyimpan data" };
+    return { success: false, error: "Gagal menyimpan data program" };
   }
 }
 
 export async function updateProgram(id: string, formData: FormData) {
   try {
-    // Kita harus memverifikasi bahwa program yang akan diedit ada di sektor yang user punya akses
     const program = await prisma.program.findUnique({ where: { id } });
     if (!program) throw new Error("Program not found");
     
@@ -112,12 +126,24 @@ export async function updateProgram(id: string, formData: FormData) {
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
 
+    const source = formData.get("source") as string;
+    const sourceType = formData.get("sourceType") as string;
+    const sourceUrl = formData.get("sourceUrl") as string;
+    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+
+    // Entity-Specific Publication Readiness Guard
     if (isPublished) {
       if (!title || title.trim().length < 3) {
-        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan." };
+        return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan (min 3 karakter)." };
       }
       if (!description || description.trim().length < 10) {
-        return { success: false, error: "Deskripsi program harus lebih detail untuk dipublikasikan." };
+        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan." };
+      }
+      if (!source || source.trim().length === 0) {
+        return { success: false, error: "Sumber data wajib diisi sebelum program dipublikasikan." };
+      }
+      if (verificationStatus === "BELUM_TERVERIFIKASI") {
+        return { success: false, error: "Data program harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
 
@@ -130,6 +156,10 @@ export async function updateProgram(id: string, formData: FormData) {
         beneficiaries,
         status,
         isPublished,
+        source: source || null,
+        sourceType: sourceType || null,
+        sourceUrl: sourceUrl || null,
+        verificationStatus,
       },
     });
 
@@ -139,7 +169,7 @@ export async function updateProgram(id: string, formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Failed to update program:", error);
-    return { success: false, error: "Gagal memperbarui data" };
+    return { success: false, error: "Gagal memperbarui data program" };
   }
 }
 
@@ -159,6 +189,6 @@ export async function deleteProgram(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Failed to delete program:", error);
-    return { success: false, error: "Gagal menghapus data" };
+    return { success: false, error: "Gagal menghapus data program" };
   }
 }

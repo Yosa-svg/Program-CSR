@@ -43,6 +43,13 @@ model Program {
   status           String   @default("ACTIVE") // ACTIVE, COMPLETED, PLANNED
   imageUrl         String
   isPublished      Boolean  @default(false)
+  
+  // Phase 15.5 Integrity & Source
+  source             String?
+  sourceType         String?  // RESMI_ANTAM, PEMERINTAH, JURNAL_AKADEMIK, MEDIA_MASSA, DOKUMEN_LAPORAN
+  sourceUrl          String?
+  verificationStatus String?  @default("BELUM_TERVERIFIKASI") // BELUM_TERVERIFIKASI, MENUNGGU_VERIFIKASI, TERVERIFIKASI
+
   sectorId         String
   sector           Sector   @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   activities       Activity[]
@@ -60,6 +67,12 @@ model Activity {
   status           String   @default("UPCOMING") // UPCOMING, ONGOING, COMPLETED
   isPublished      Boolean  @default(false)
   
+  // Phase 15.5 Integrity & Source
+  source             String?
+  sourceType         String?
+  sourceUrl          String?
+  verificationStatus String?  @default("BELUM_TERVERIFIKASI")
+
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
 
@@ -83,7 +96,12 @@ model Product {
   unit             String?
   marketing        String?
   certification    String?
-  source           String?
+  
+  // Phase 15.5 Integrity & Source
+  source             String?
+  sourceType         String?
+  sourceUrl          String?
+  verificationStatus String?  @default("BELUM_TERVERIFIKASI")
 
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
@@ -100,11 +118,14 @@ model Documentation {
   description      String?
   imageUrl         String
   date             DateTime?
-  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT (can be removed later if obsolete, but leaving for now)
+  status           String   @default("PUBLISHED") // PUBLISHED, DRAFT
   isPublished      Boolean  @default(false)
   
-  source           String?  // cth: "Internal ANTAM", "Laporan Vendor"
-  verificationStatus String? // cth: "Terverifikasi", "Menunggu Verifikasi"
+  // Phase 15.5 Integrity & Source
+  source             String?
+  sourceType         String?
+  sourceUrl          String?
+  verificationStatus String?  @default("BELUM_TERVERIFIKASI")
   
   programId        String?
   program          Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
@@ -136,8 +157,11 @@ model Metric {
   status             String    @default("PUBLISHED")
   isPublished        Boolean   @default(false)
   
+  // Phase 15.5 Integrity & Source
   source             String?
-  verificationStatus String?   @default("MENUNGGU_VERIFIKASI")
+  sourceType         String?
+  sourceUrl          String?
+  verificationStatus String?   @default("BELUM_TERVERIFIKASI")
 
   programId          String?
   program            Program?  @relation(fields: [programId], references: [id], onDelete: SetNull)

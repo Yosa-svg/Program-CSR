@@ -18,6 +18,10 @@ type Activity = {
   status: string;
   isPublished: boolean;
   programId: string | null;
+  source?: string | null;
+  sourceType?: string | null;
+  sourceUrl?: string | null;
+  verificationStatus?: string | null;
 };
 
 export default function FormKegiatan({ 
@@ -60,21 +64,20 @@ export default function FormKegiatan({
 
   if (!isOpen) return null;
 
-  // Format date for input type="date"
   const formattedDate = initialData?.date 
     ? new Date(initialData.date).toISOString().split('T')[0]
     : new Date().toISOString().split('T')[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-card w-full max-w-lg rounded-xl shadow-2xl border border-border overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-border bg-background/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
           <h3 className="font-semibold text-foreground">
             {isEditing ? "Edit Kegiatan" : "Tambah Kegiatan Baru"}
           </h3>
           <button 
             onClick={() => setIsOpen(false)}
-            className="text-foreground/50 hover:text-foreground transition-colors"
+            className="text-foreground/50 hover:text-foreground bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
@@ -82,7 +85,9 @@ export default function FormKegiatan({
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Program Induk</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">
+              Program Induk <span className="text-red-400">*</span>
+            </label>
             <select 
               name="programId"
               required
@@ -97,7 +102,9 @@ export default function FormKegiatan({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Nama Kegiatan</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">
+              Nama Kegiatan <span className="text-red-400">*</span>
+            </label>
             <input 
               name="title" 
               required 
@@ -108,7 +115,7 @@ export default function FormKegiatan({
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground/70 mb-1">Tanggal</label>
               <input 
@@ -133,40 +140,105 @@ export default function FormKegiatan({
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi Ringkas</label>
             <textarea 
               name="description" 
-              required 
-              defaultValue={initialData?.description}
-              rows={3}
-              placeholder="Detail kegiatan yang dilakukan..."
+              defaultValue={initialData?.description || ""}
+              rows={2}
+              placeholder="Penjelasan singkat mengenai pelaksanaan kegiatan..."
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Status Kegiatan</label>
-            <select 
-              name="status"
-              defaultValue={initialData?.status || "UPCOMING"}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-            >
-              <option value="UPCOMING">Akan Datang</option>
-              <option value="ONGOING">Sedang Berjalan</option>
-              <option value="COMPLETED">Selesai</option>
-            </select>
+
+          {/* Section Source Management & Verification */}
+          <div className="p-4 bg-background border border-border rounded-xl space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-foreground/60 border-b border-border/60 pb-2">
+              Integritas & Sumber Data Resmi (Fase 15.5)
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Nama Sumber Data <span className="text-xs text-amber-400">(Wajib untuk publish)</span>
+                </label>
+                <input 
+                  name="source" 
+                  defaultValue={initialData?.source || ""}
+                  type="text" 
+                  placeholder="Contoh: Absensi & Berita Acara"
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">Jenis Sumber Data</label>
+                <select 
+                  name="sourceType"
+                  defaultValue={initialData?.sourceType || ""}
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="">-- Belum Ditentukan --</option>
+                  <option value="RESMI_ANTAM">Sumber Resmi ANTAM (Internal)</option>
+                  <option value="PEMERINTAH">Instansi Pemerintah / Dinas</option>
+                  <option value="JURNAL_AKADEMIK">Jurnal Ilmiah / Akademik</option>
+                  <option value="MEDIA_MASSA">Media Massa / Pemberitaan</option>
+                  <option value="DOKUMEN_LAPORAN">Dokumen Laporan / Audit</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">URL Rujukan (Opsional)</label>
+                <input 
+                  name="sourceUrl" 
+                  defaultValue={initialData?.sourceUrl || ""}
+                  type="url" 
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+                <select 
+                  name="verificationStatus"
+                  defaultValue={initialData?.verificationStatus || "BELUM_TERVERIFIKASI"}
+                  className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
+                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
+                  <option value="TERVERIFIKASI">TERVERIFIKASI (Sah / Valid)</option>
+                </select>
+              </div>
+            </div>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas</label>
-            <select 
-              name="isPublished"
-              defaultValue={initialData?.isPublished ? "true" : "false"}
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-            >
-              <option value="false">Draft (Sembunyikan dari Publik)</option>
-              <option value="true">Publikasikan (Tampilkan di Website)</option>
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Status Pelaksanaan</label>
+              <select 
+                name="status"
+                defaultValue={initialData?.status || "UPCOMING"}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="UPCOMING">Akan Datang</option>
+                <option value="ONGOING">Sedang Berlangsung</option>
+                <option value="COMPLETED">Selesai</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas Publik</label>
+              <select 
+                name="isPublished"
+                defaultValue={initialData?.isPublished ? "true" : "false"}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="false">Draft (Sembunyikan dari Publik)</option>
+                <option value="true">Publikasikan (Tampilkan di Portal)</option>
+              </select>
+            </div>
           </div>
           
           <div className="pt-4 flex justify-end gap-3 border-t border-border mt-6">
