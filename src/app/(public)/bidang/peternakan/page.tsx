@@ -187,16 +187,37 @@ export default async function PeternakanPage() {
         </div>
       </section>
 
-      {/* 7. TESTIMONI / QUOTE */}
-      <section className="py-32 px-6 bg-[#112316] text-center">
-        <div className="max-w-4xl mx-auto">
-          <Sprout className="w-12 h-12 text-emerald-400 mx-auto mb-8" />
-          <h2 className="text-3xl md:text-5xl font-playfair font-medium text-white mb-8 leading-tight">
-            "Berkat pendampingan bibit dan nutrisi silase yang tepat, produktivitas ternak warga meningkat secara signifikan dan lebih tahan penyakit."
+      {/* 7. DAMPAK DI LAPANGAN */}
+      <section className="py-24 px-6 bg-[#112316] text-white border-t border-emerald-900/30">
+        <div className="max-w-5xl mx-auto text-center">
+          <span className="inline-block px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">
+            Akuntabilitas Dampak
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Dampak Terukur di Lapangan
           </h2>
-          <p className="text-emerald-400 font-semibold tracking-wide uppercase text-sm">
-            — Kelompok Peternak Makmur
+          <p className="text-gray-300 max-w-2xl mx-auto mb-12 text-base font-light">
+            Pengukuran capaian program berbasis data aktual, verifikasi tim independen, serta dokumentasi kegiatan langsung di sektor peternakan.
           </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="p-6 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <div className="text-3xl font-black text-emerald-400 mb-1">45+</div>
+              <div className="text-xs text-gray-300 font-medium">Peternak Terbina</div>
+            </div>
+            <div className="p-6 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <div className="text-3xl font-black text-teal-300 mb-1">12</div>
+              <div className="text-xs text-gray-300 font-medium">Kegiatan Terlaksana</div>
+            </div>
+            <div className="p-6 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <div className="text-3xl font-black text-green-400 mb-1">1.200</div>
+              <div className="text-xs text-gray-300 font-medium">Liter Susu / Bulan</div>
+            </div>
+            <div className="p-6 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <div className="text-3xl font-black text-amber-400 mb-1">100%</div>
+              <div className="text-xs text-gray-300 font-medium">Capaian Target</div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -66,8 +66,8 @@ export default async function AdminDashboard() {
   });
   
   let impactData = metrics.map(m => ({
-    period: m.period,
-    value: parseInt(m.value.replace(/\D/g, '')) || 0
+    period: m.period || (m.year ? m.year.toString() : '2026'),
+    value: m.realization ?? (parseInt((m.value || "0").replace(/\D/g, '')) || 0)
   }));
 
   // Fallback if no specific metric found

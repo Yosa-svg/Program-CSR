@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadImage, deleteImage } from "@/lib/mediaService";
-import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
 
 // ==========================================
 // DOCUMENTATION ACTIONS
@@ -13,8 +13,8 @@ export async function getDocumentations() {
   try {
     const activeSectorId = await getActiveSectorId();
     if (!activeSectorId) {
-      const session = await requireAuth();
-      if (session.role === "ADMIN_SEKTOR") return []; 
+      const session = await getSession();
+      if (!session || session.role === "ADMIN_SEKTOR") return []; 
       
       return await prisma.documentation.findMany({
         include: { sector: true },

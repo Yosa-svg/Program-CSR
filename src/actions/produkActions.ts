@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, requireAuth } from "@/lib/auth";
+import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
 
 // Helper: generate unique URL-safe slug for Product
 async function generateUniqueProductSlug(name: string, sectorId: string): Promise<string> {
@@ -46,8 +46,8 @@ export async function getProducts() {
   try {
     const activeSectorId = await getActiveSectorId();
     if (!activeSectorId) {
-      const session = await requireAuth();
-      if (session.role === "ADMIN_SEKTOR") return []; 
+      const session = await getSession();
+      if (!session || session.role === "ADMIN_SEKTOR") return []; 
       
       return await prisma.product.findMany({
         include: { sector: true },

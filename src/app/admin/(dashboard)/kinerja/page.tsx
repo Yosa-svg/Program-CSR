@@ -1,7 +1,6 @@
 import { getMetrics } from "@/actions/kinerjaActions";
+import { getPrograms } from "@/actions/csrActions";
 import KinerjaManager from "./KinerjaManager";
-
-// Ini akan memaksa re-render setiap kali data berubah (jangan di-cache)
 import { getActiveSectorId } from "@/lib/auth";
 
 export const revalidate = 0;
@@ -9,6 +8,18 @@ export const revalidate = 0;
 export default async function KinerjaDashboard() {
   const activeSectorId = await getActiveSectorId();
   const metrics = await getMetrics();
+  const programs = await getPrograms();
 
-  return <KinerjaManager metrics={metrics} activeSectorId={activeSectorId} />;
+  const programsForForm = programs.map(p => ({
+    id: p.id,
+    title: p.title
+  }));
+
+  return (
+    <KinerjaManager 
+      metrics={metrics} 
+      programs={programsForForm}
+      activeSectorId={activeSectorId} 
+    />
+  );
 }

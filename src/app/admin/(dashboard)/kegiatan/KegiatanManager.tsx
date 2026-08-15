@@ -21,7 +21,7 @@ type Activity = {
   programId: string | null;
   program?: {
     title: string;
-  };
+  } | null;
   sector?: { name: string };
 };
 

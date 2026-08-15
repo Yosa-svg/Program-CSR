@@ -7,22 +7,36 @@ import { createMetric, updateMetric } from "@/actions/kinerjaActions";
 type Metric = {
   id: string;
   name: string;
-  value: string;
-  unit: string | null;
   description: string | null;
-  period: string;
+  category: string;
+  unit: string | null;
+  target: number | null;
+  realization: number | null;
+  value: string | null;
+  year: number | null;
+  period: string | null;
+  source: string | null;
+  verificationStatus: string | null;
+  programId: string | null;
   status: string;
   isPublished: boolean;
+};
+
+type ProgramOption = {
+  id: string;
+  title: string;
 };
 
 export default function FormKinerja({ 
   onSuccess,
   initialData,
+  programs = [],
   isOpen,
   setIsOpen 
 }: { 
   onSuccess: () => void;
   initialData?: Metric | null;
+  programs?: ProgramOption[];
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }) {
@@ -54,95 +68,184 @@ export default function FormKinerja({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-card w-full max-w-lg rounded-xl shadow-2xl border border-border overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-border bg-background/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
           <h3 className="font-semibold text-foreground">
             {isEditing ? "Edit Indikator Kinerja" : "Tambah Indikator Baru"}
           </h3>
           <button 
             onClick={() => setIsOpen(false)}
-            className="text-foreground/50 hover:text-foreground transition-colors"
+            className="text-foreground/50 hover:text-foreground bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Nama Indikator <span className="text-red-400">*</span></label>
-            <input 
-              name="name" 
-              required 
-              defaultValue={initialData?.name}
-              type="text" 
-              placeholder="Contoh: Petani Binaan, Luas Lahan"
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Nilai <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">
+                Nama Indikator <span className="text-red-400">*</span>
+              </label>
               <input 
-                name="value" 
+                name="name" 
                 required 
-                defaultValue={initialData?.value}
+                defaultValue={initialData?.name}
                 type="text" 
-                placeholder="Contoh: 120, 25, 5.2"
+                placeholder="Contoh: Penerima Manfaat, Kelompok Binaan"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Satuan</label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">
+                Kategori Impact <span className="text-red-400">*</span>
+              </label>
+              <select 
+                name="category"
+                defaultValue={initialData?.category || "OUTCOME"}
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="OUTPUT">OUTPUT (Hasil Langsung Kegiatan)</option>
+                <option value="OUTCOME">OUTCOME (Perubahan Setelah Program)</option>
+                <option value="IMPACT">IMPACT (Dampak Jangka Panjang)</option>
+                <option value="INDIKATOR">INDIKATOR (Kategori Umum)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Target Angka</label>
+              <input 
+                name="target" 
+                defaultValue={initialData?.target ?? ""}
+                type="number" 
+                step="any"
+                placeholder="Contoh: 50"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Realisasi Angka</label>
+              <input 
+                name="realization" 
+                defaultValue={initialData?.realization ?? ""}
+                type="number" 
+                step="any"
+                placeholder="Contoh: 40"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Satuan (Unit)</label>
               <input 
                 name="unit" 
                 defaultValue={initialData?.unit || ""}
                 type="text" 
-                placeholder="Contoh: Orang, Hektar, %"
+                placeholder="Contoh: orang, kelompok, kg, ha"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Periode <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Tahun (Year)</label>
               <input 
-                name="period" 
-                required 
-                defaultValue={initialData?.period}
-                type="text" 
-                placeholder="Contoh: 2026, Q1 2026"
+                name="year" 
+                defaultValue={initialData?.year || new Date().getFullYear()}
+                type="number" 
+                placeholder="2026"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Visibilitas <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Periode Tambahan (Opsional)</label>
+              <input 
+                name="period" 
+                defaultValue={initialData?.period || ""}
+                type="text" 
+                placeholder="Contoh: Q1 2026, Semester 1"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Sumber Data</label>
+              <input 
+                name="source" 
+                defaultValue={initialData?.source || ""}
+                type="text" 
+                placeholder="Contoh: Laporan Monev Q4, Survei Lapangan"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+              <select 
+                name="verificationStatus"
+                defaultValue={initialData?.verificationStatus || "MENUNGGU_VERIFIKASI"}
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              >
+                <option value="TERVERIFIKASI">TERVERIFIKASI</option>
+                <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI</option>
+                <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 bg-background border border-border rounded-xl">
+            <div>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
+                Program Terkait (Opsional)
+              </label>
+              <select 
+                name="programId"
+                defaultValue={initialData?.programId || ""}
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">-- Indikator Agregat Sektor (Bebas) --</option>
+                {programs.map(p => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
+                Status Visibilitas
+              </label>
               <select 
                 name="isPublished"
-                required
                 defaultValue={initialData?.isPublished ? "true" : "false"}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="true">Publikasikan</option>
-                <option value="false">Draft</option>
+                <option value="false">Simpan Draft</option>
               </select>
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi Tambahan</label>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi Hasil & Konteks</label>
             <textarea 
               name="description" 
               defaultValue={initialData?.description || ""}
               rows={2}
-              placeholder="Penjelasan singkat indikator..."
+              placeholder="Penjelasan konteks indikator/dampak..."
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
             />
           </div>
           
-          <div className="pt-4 flex justify-end gap-3 border-t border-border mt-6">
+          <div className="pt-2 flex justify-end gap-3 border-t border-border mt-4">
             <button 
               type="button" 
               onClick={() => setIsOpen(false)}

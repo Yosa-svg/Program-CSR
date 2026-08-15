@@ -12,24 +12,21 @@ function generateSlug(title: string): string {
 }
 
 async function main() {
-  console.log("Fetching products without slugs...");
+  console.log("Fetching products...");
   const products = await prisma.product.findMany({
-    where: {
-      slug: null,
-    },
     include: {
       sector: true
     }
   });
 
   if (products.length === 0) {
-    console.log("No products need backfilling.");
+    console.log("No products found.");
     return;
   }
 
-  console.log(`Found ${products.length} products to update.`);
-
   for (const product of products) {
+    if (product.slug) continue;
+
     let baseSlug = generateSlug(product.name);
     let slug = baseSlug;
     
@@ -37,8 +34,8 @@ async function main() {
     let counter = 1;
     let existing = await prisma.product.findFirst({ where: { slug } });
     
-    while (existing) {
-      if (counter === 1) {
+    while (existing && existing.id !== product.id) {
+      if (counter === 1 && product.sector) {
         // First try appending sector name
         slug = `${baseSlug}-${generateSlug(product.sector.name)}`;
       } else {

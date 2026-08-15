@@ -80,10 +80,6 @@ export default async function AdminLayout({
             <BarChart3 size={18} />
             Kinerja & Dampak
           </Link>
-          <Link href="/admin/testimoni" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/60 hover:bg-white/5 hover:text-white transition-colors">
-            <Star size={18} />
-            Testimoni
-          </Link>
 
           <div className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4 mt-6 px-3">
             Sistem

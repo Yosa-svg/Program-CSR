@@ -3,10 +3,19 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Users, Sprout, HandCoins } from "lucide-react";
 
-import { Metric } from "@prisma/client";
+type MetricItem = {
+  id: string;
+  name: string;
+  value: string | null;
+  unit: string | null;
+  period: string | null;
+  description: string | null;
+  target?: number | null;
+  realization?: number | null;
+};
 
 interface Props {
-  metrics: Metric[];
+  metrics: MetricItem[];
 }
 
 export default function KinerjaPertanian({ metrics }: Props) {

@@ -1,28 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Edit2, TrendingUp, Clock, Info } from "lucide-react";
+import { Plus, Trash2, Edit2, TrendingUp, Clock, Info, CheckCircle, AlertCircle, ShieldAlert, Tag } from "lucide-react";
 import FormKinerja from "./FormKinerja";
 import { deleteMetric } from "@/actions/kinerjaActions";
 
 type Metric = {
   id: string;
   name: string;
-  value: string;
-  unit: string | null;
   description: string | null;
-  period: string;
+  category: string;
+  unit: string | null;
+  target: number | null;
+  realization: number | null;
+  value: string | null;
+  year: number | null;
+  period: string | null;
+  source: string | null;
+  verificationStatus: string | null;
+  programId: string | null;
   status: string;
   isPublished: boolean;
+  program?: { id: string; title: string } | null;
   sector?: { name: string };
+};
+
+type ProgramOption = {
+  id: string;
+  title: string;
 };
 
 export default function KinerjaManager({ 
   metrics,
+  programs = [],
   activeSectorId
 }: { 
-  metrics: Metric[],
-  activeSectorId: string | null
+  metrics: Metric[];
+  programs?: ProgramOption[];
+  activeSectorId: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMetric, setEditingMetric] = useState<Metric | null>(null);
@@ -45,21 +60,21 @@ export default function KinerjaManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Kinerja & Dampak</h1>
-          <p className="text-foreground/60">Kelola indikator statistik dan metrik capaian sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Kinerja & Dampak CSR</h1>
+          <p className="text-foreground/60">Kelola metrik capaian target, indikator hasil, serta dampak jangka panjang program.</p>
         </div>
         
         {activeSectorId ? (
           <button 
             onClick={handleAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
           >
             <Plus size={18} />
-            Tambah Metrik
+            Tambah Indikator
           </button>
         ) : (
           <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
-            Pilih sektor spesifik untuk menambah data
+            Pilih sektor spesifik di atas untuk menambah data
           </div>
         )}
       </div>
@@ -68,70 +83,156 @@ export default function KinerjaManager({
         isOpen={isFormOpen}
         setIsOpen={setIsFormOpen}
         initialData={editingMetric}
+        programs={programs}
         onSuccess={handleSuccess} 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {metrics.map((metric) => (
-          <div key={metric.id} className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors flex flex-col relative group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
-                <TrendingUp size={20} />
-              </div>
-              <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider
-                ${metric.isPublished ? 'bg-primary/10 text-primary' : 'bg-foreground/10 text-foreground'}
-              `}>
-                {metric.isPublished ? 'Published' : 'Draft'}
-              </span>
-            </div>
-            
-            <div className="mb-1">
-              <span className="text-3xl font-bold text-foreground tracking-tight">{metric.value}</span>
-              {metric.unit && <span className="text-lg text-foreground/50 ml-1">{metric.unit}</span>}
-            </div>
-            
-            <div className="font-semibold text-foreground mb-1">{metric.name}</div>
-            {!activeSectorId && metric.sector && (
-              <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider mb-1">
-                {metric.sector.name}
-              </span>
-            )}
-            <div className="text-xs text-foreground/50 line-clamp-1 max-w-[250px]">{metric.description}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {metrics.map((metric) => {
+          // Dynamic calculation of Capaian %
+          const achievement = (metric.target && metric.target > 0)
+            ? Math.round(((metric.realization ?? 0) / metric.target) * 100)
+            : null;
 
-            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs text-foreground/40">
-                <Clock size={14} />
-                {metric.period}
+          const progressWidth = achievement !== null ? Math.min(achievement, 100) : 0;
+
+          return (
+            <div key={metric.id} className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors flex flex-col justify-between group relative">
+              <div>
+                {/* Header Badge */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase
+                      ${metric.category === 'OUTPUT' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' :
+                        metric.category === 'OUTCOME' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
+                        metric.category === 'IMPACT' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' :
+                        'bg-slate-500/15 text-slate-400 border border-slate-500/30'}
+                    `}>
+                      {metric.category}
+                    </span>
+                    
+                    {!activeSectorId && metric.sector && (
+                      <span className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[10px] uppercase font-bold tracking-wider">
+                        {metric.sector.name}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
+                    ${metric.isPublished ? 'bg-emerald-500/10 text-emerald-500' : 'bg-foreground/10 text-foreground/50'}
+                  `}>
+                    {metric.isPublished ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+
+                {/* Indikator Name */}
+                <h3 className="font-bold text-foreground text-lg mb-2">{metric.name}</h3>
+
+                {/* Target vs Realisasi */}
+                <div className="bg-background/60 border border-border/60 rounded-lg p-3 mb-3 space-y-2">
+                  <div className="flex justify-between items-baseline text-sm">
+                    <span className="text-foreground/60 text-xs">Realisasi / Target:</span>
+                    <span className="font-semibold text-foreground">
+                      {metric.realization !== null ? metric.realization.toLocaleString('id-ID') : '-'}
+                      {' / '}
+                      {metric.target !== null ? metric.target.toLocaleString('id-ID') : '-'}
+                      {metric.unit ? ` ${metric.unit}` : ''}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar & Capaian */}
+                  {achievement !== null ? (
+                    <div>
+                      <div className="flex justify-between items-center text-xs font-semibold mb-1">
+                        <span className="text-foreground/50">Capaian</span>
+                        <span className={achievement >= 100 ? "text-emerald-400 font-bold" : "text-primary"}>
+                          {achievement}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            achievement >= 100 ? 'bg-emerald-500' : 'bg-primary'
+                          }`}
+                          style={{ width: `${progressWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-foreground/40 italic">
+                      {metric.value ? `Ringkasan: ${metric.value}` : 'Data capaian % belum tersedia'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Program Terkait */}
+                {metric.program && (
+                  <div className="flex items-center gap-1.5 text-xs text-foreground/70 mb-2">
+                    <Tag size={12} className="text-primary shrink-0" />
+                    <span className="truncate">{metric.program.title}</span>
+                  </div>
+                )}
+
+                {/* Description */}
+                {metric.description && (
+                  <p className="text-xs text-foreground/60 line-clamp-2 mb-3">
+                    {metric.description}
+                  </p>
+                )}
               </div>
-              
-              {/* Action buttons appear on hover */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => handleEdit(metric)}
-                  className="p-1.5 text-foreground/40 hover:text-foreground hover:bg-white/10 rounded-md transition-colors"
-                >
-                  <Edit2 size={14} />
-                </button>
-                <form action={async () => {
-                  if(confirm("Apakah Anda yakin ingin menghapus indikator ini?")) {
-                    await deleteMetric(metric.id);
-                  }
-                }}>
-                  <button type="submit" className="p-1.5 text-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors">
-                    <Trash2 size={14} />
+
+              {/* Footer Details */}
+              <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-foreground/50 mt-2">
+                <div className="flex items-center gap-2">
+                  {(metric.year || metric.period) && (
+                    <div className="flex items-center gap-1">
+                      <Clock size={12} />
+                      <span>{metric.year || metric.period}</span>
+                    </div>
+                  )}
+
+                  {metric.verificationStatus && (
+                    <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                      metric.verificationStatus === 'TERVERIFIKASI' 
+                        ? 'text-emerald-400 bg-emerald-500/10' 
+                        : 'text-amber-400 bg-amber-500/10'
+                    }`}>
+                      {metric.verificationStatus === 'TERVERIFIKASI' ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
+                      {metric.verificationStatus === 'TERVERIFIKASI' ? 'TERVERIFIKASI' : 'BELUM VERIFIKASI'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Edit / Delete Buttons */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    onClick={() => handleEdit(metric)}
+                    className="p-1.5 text-foreground/50 hover:text-foreground hover:bg-white/10 rounded-md transition-colors"
+                    title="Edit"
+                  >
+                    <Edit2 size={14} />
                   </button>
-                </form>
+                  <form action={async () => {
+                    if(confirm("Apakah Anda yakin ingin menghapus indikator ini?")) {
+                      await deleteMetric(metric.id);
+                    }
+                  }}>
+                    <button type="submit" className="p-1.5 text-foreground/50 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors" title="Hapus">
+                      <Trash2 size={14} />
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {metrics.length === 0 && (
         <div className="bg-card border border-border rounded-xl p-12 text-center flex flex-col items-center">
           <Info className="w-12 h-12 text-foreground/20 mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-1">Belum Ada Indikator</h3>
-          <p className="text-foreground/50 max-w-sm mx-auto">Tambahkan metrik dan indikator kinerja untuk menunjukkan dampak dari sektor Pertanian.</p>
+          <h3 className="text-lg font-medium text-foreground mb-1">Belum Ada Indikator Kinerja</h3>
+          <p className="text-foreground/50 max-w-sm mx-auto">Tambahkan metrik target dan realisasi untuk mengukur dampak program CSR.</p>
         </div>
       )}
     </div>
