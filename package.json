@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/client": "5.22.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.4.0",
@@ -22,8 +23,6 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@prisma/client": "5.22.0",
-    "@prisma/config": "^7.9.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -34,6 +33,7 @@
     "prisma": "5.22.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   },
   "prisma": {
