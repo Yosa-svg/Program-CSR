@@ -18,7 +18,7 @@ export default function Navbar() {
   const navLinks = [
     { name: "Beranda", href: "/" },
     { name: "Tentang", href: "/tentang" },
-    { name: "Bidang CSR", href: "/bidang" },
+    { name: "Sektor CSR", href: "/bidang" },
     { name: "Program", href: "/program" },
     { name: "Produk", href: "/produk" },
     { name: "Dokumentasi", href: "/dokumentasi" },

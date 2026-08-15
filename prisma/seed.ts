@@ -1,8 +1,12 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
 const prisma = new PrismaClient()
 
 async function main() {
-  // Reset existing data
+  console.log('Starting seed taxonomy realignment...')
+
+  // Reset existing data in order
   await prisma.metric.deleteMany()
   await prisma.documentation.deleteMany()
   await prisma.product.deleteMany()
@@ -11,19 +15,35 @@ async function main() {
   await prisma.user.deleteMany()
   await prisma.sector.deleteMany()
 
-  // Create Sectors
+  // 1. Create Sectors
   const pertanian = await prisma.sector.create({
     data: {
-      name: 'Pertanian Terpadu',
+      name: 'Pertanian',
       slug: 'pertanian',
     },
   })
+
   const peternakan = await prisma.sector.create({
     data: {
       name: 'Peternakan',
       slug: 'peternakan',
     },
   })
+
+  const lingkungan = await prisma.sector.create({
+    data: {
+      name: 'Lingkungan',
+      slug: 'lingkungan',
+    },
+  })
+
+  const industriKelapa = await prisma.sector.create({
+    data: {
+      name: 'Industri Kelapa',
+      slug: 'industri-kelapa',
+    },
+  })
+
   const umkm = await prisma.sector.create({
     data: {
       name: 'UMKM',
@@ -31,9 +51,8 @@ async function main() {
     },
   })
 
-  // Create Users
-  const bcrypt = require('bcryptjs');
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // 2. Create Users / Admin Accounts
+  const passwordHash = await bcrypt.hash('password123', 10)
 
   await prisma.user.createMany({
     data: [
@@ -57,266 +76,382 @@ async function main() {
         sectorId: pertanian.id,
       },
       {
+        name: 'Admin Peternakan',
+        email: 'peternakan@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: peternakan.id,
+      },
+      {
+        name: 'Admin Lingkungan',
+        email: 'lingkungan@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: lingkungan.id,
+      },
+      {
+        name: 'Admin Industri Kelapa',
+        email: 'kelapa@csr.com',
+        password: passwordHash,
+        role: 'ADMIN_SEKTOR',
+        sectorId: industriKelapa.id,
+      },
+      {
         name: 'Admin UMKM',
         email: 'umkm@csr.com',
         password: passwordHash,
         role: 'ADMIN_SEKTOR',
         sectorId: umkm.id,
       },
-      {
-        name: 'Admin Peternakan',
-        email: 'peternakan@csr.com',
-        password: passwordHash,
-        role: 'ADMIN_SEKTOR',
-        sectorId: peternakan.id,
-      }
-    ]
+    ],
   })
 
-  // Seed Program
-  const program = await prisma.program.create({
+  // 3. Seed Programs
+  const progPertanian = await prisma.program.create({
     data: {
       title: 'Agro Edu Wisata',
       slug: 'agro-edu-wisata',
-      description: 'Kawasan terpadu yang memadukan kegiatan pariwisata ekologis dengan edukasi pertanian.',
-      location: 'Desa Suka Maju, Area Utara',
+      description: 'Kawasan terpadu yang memadukan pariwisata ekologis dengan edukasi budidaya pertanian organik.',
+      location: 'Desa Suka Maju',
       beneficiaries: '120+ Kepala Keluarga',
       status: 'ACTIVE',
+      isPublished: true,
       imageUrl: '/images/sectors/agro-edu.jpg',
+      source: 'Laporan Keberlanjutan CSR 2025',
+      sourceType: 'RESMI_ANTAM',
+      verificationStatus: 'TERVERIFIKASI',
       sectorId: pertanian.id,
     },
   })
 
-  const programPeternakan = await prisma.program.create({
+  const progPeternakan = await prisma.program.create({
     data: {
-      title: 'Pembibitan Sapi Terpadu',
-      slug: 'pembibitan-sapi-terpadu',
-      description: 'Program pembibitan sapi unggul dengan pendekatan manajemen pakan organik dan integrasi limbah.',
-      location: 'Blok Peternakan, Area Selatan',
-      beneficiaries: '45 Peternak Lokal',
+      title: 'Inkubator Bisnis',
+      slug: 'inkubator-bisnis-peternakan',
+      description: 'Program inkubasi usaha peternakan terpadu meliputi pembibitan, formulasi pakan, dan pengolahan hasil ternak.',
+      location: 'Kawasan Peternakan Komunal',
+      beneficiaries: '45 Peternak Terbina',
       status: 'ACTIVE',
+      isPublished: true,
       imageUrl: '/images/sectors/pembibitan-sapi.jpg',
+      source: 'Dokumen Program CSR 2025',
+      sourceType: 'RESMI_ANTAM',
+      verificationStatus: 'TERVERIFIKASI',
       sectorId: peternakan.id,
     },
   })
 
-  // Seed Activities
-  const activities = [
-    {
-      title: 'Penyuluhan Pertanian Organik',
-      description: 'Diskusi dan praktik lapangan bersama agronom.',
-      location: 'Balai Desa',
-      date: new Date(),
-      status: 'UPCOMING',
-      programId: program.id,
-      sectorId: pertanian.id,
+  const progLingkungan = await prisma.program.create({
+    data: {
+      title: 'Pengolahan Sampah Plastik & Pupuk Diversoil',
+      slug: 'pengolahan-sampah-plastik-dan-pupuk-diversoil',
+      description: 'Inisiatif daur ulang anorganik serta komposting limbah organik menjadi produk Pupuk Diversoil ramah lingkungan.',
+      location: 'Pusat Daur Ulang Mandiri',
+      beneficiaries: '85 Warga Binaan',
+      status: 'ACTIVE',
+      isPublished: true,
+      imageUrl: '/images/sectors/lingkungan.jpg',
+      source: 'Laporan Monitoring Lingkungan 2025',
+      sourceType: 'RESMI_ANTAM',
+      verificationStatus: 'TERVERIFIKASI',
+      sectorId: lingkungan.id,
     },
-    {
-      title: 'Distribusi Bibit Unggul',
-      description: 'Pembagian bibit sayur dan buah kepada kelompok tani mitra.',
-      location: 'Gudang Pertanian',
-      date: new Date(),
-      status: 'ONGOING',
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      title: 'Festival Panen Raya',
-      description: 'Perayaan hasil bumi yang melibatkan seluruh elemen masyarakat.',
-      location: 'Alun-alun Desa',
-      date: new Date(),
-      status: 'COMPLETED',
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      title: 'Pelatihan Formulasi Pakan Organik',
-      description: 'Workshop pemanfaatan limbah pertanian menjadi pakan ternak bergizi.',
-      location: 'Balai Warga',
-      date: new Date(),
-      status: 'COMPLETED',
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-    {
-      title: 'Distribusi Bibit Sapi Unggul',
-      description: 'Penyerahan anakan sapi kepada kelompok peternak binaan tahap I.',
-      location: 'Kandang Komunal',
-      date: new Date(),
-      status: 'ONGOING',
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-  ]
-  await prisma.activity.createMany({ data: activities })
-
-  // Seed Products
-  const products = [
-    {
-      name: 'Beras Organik',
-      slug: 'beras-organik',
-      description: 'Beras sehat tanpa residu kimia.',
-      category: 'Pangan',
-      status: 'AVAILABLE',
-      imageUrl: '/images/products/beras.jpg',
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Sayur Hidroponik',
-      slug: 'sayur-hidroponik',
-      description: 'Segar langsung dari rumah kaca.',
-      category: 'Sayuran',
-      status: 'AVAILABLE',
-      imageUrl: '/images/products/sayur.jpg',
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Pupuk Kompos',
-      slug: 'pupuk-kompos',
-      description: 'Diolah dari sisa pertanian kawasan.',
-      category: 'Sarana Pertanian',
-      status: 'OUT_OF_STOCK',
-      imageUrl: '/images/products/pupuk.jpg',
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Pakan Silase Organik',
-      slug: 'pakan-silase-organik',
-      description: 'Pakan ternak hasil fermentasi hijau.',
-      category: 'Pakan Ternak',
-      status: 'AVAILABLE',
-      imageUrl: '/images/products/pakan-silase.jpg',
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-    {
-      name: 'Susu Segar Pasteurisasi',
-      slug: 'susu-segar-pasteurisasi',
-      description: 'Susu murni dari sapi perah kawasan.',
-      category: 'Pangan Ternak',
-      status: 'AVAILABLE',
-      imageUrl: '/images/products/susu-segar.jpg',
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-  ]
-  await prisma.product.createMany({ data: products })
-
-  // Seed Documentation
-  const photos = [
-    '/images/sectors/pertanian-doc-1.jpg',
-    '/images/sectors/pertanian-doc-2.jpg',
-    '/images/sectors/pertanian-doc-3.jpg',
-    '/images/sectors/pertanian-doc-4.jpg',
-    '/images/sectors/pertanian-doc-5.jpg',
-    '/images/sectors/pertanian-doc-6.jpg',
-  ]
-  await prisma.documentation.createMany({
-    data: photos.map((url, index) => ({
-      title: `Dokumentasi ${index + 1}`,
-      imageUrl: url,
-      sectorId: pertanian.id,
-    }))
   })
 
-  const photosPeternakan = [
-    '/images/sectors/peternakan-doc-1.jpg',
-    '/images/sectors/peternakan-doc-2.jpg',
-    '/images/sectors/peternakan-doc-3.jpg',
-  ]
-  await prisma.documentation.createMany({
-    data: photosPeternakan.map((url, index) => ({
-      title: `Dokumentasi Peternakan ${index + 1}`,
-      imageUrl: url,
-      sectorId: peternakan.id,
-    }))
+  const progKelapa = await prisma.program.create({
+    data: {
+      title: 'Industri Kelapa Terpadu',
+      slug: 'industri-kelapa-terpadu',
+      description: 'Pengembangan hilirisasi kelapa terpadu untuk mengolah sabut, tempurung, dan daging kelapa menjadi produk bernilai tambah.',
+      location: 'Sentra Olahan Kelapa',
+      beneficiaries: '60 Pengrajin & Petani Kelapa',
+      status: 'ACTIVE',
+      isPublished: true,
+      imageUrl: '/images/sectors/kelapa-terpadu.jpg',
+      source: 'Studi Kelayakan CSR 2025',
+      sourceType: 'RESMI_ANTAM',
+      verificationStatus: 'TERVERIFIKASI',
+      sectorId: industriKelapa.id,
+    },
   })
 
-  // Seed Metrics (Phase 15.4)
-  const metrics = [
-    {
-      name: 'Penerima Manfaat Tani',
-      category: 'OUTCOME',
-      target: 50,
-      realization: 40,
-      unit: 'orang',
-      year: 2026,
-      period: '2026',
-      description: 'Petani binaan yang aktif menerapkan teknik pertanian ramah lingkungan.',
-      source: 'Laporan Monev Q4',
-      verificationStatus: 'TERVERIFIKASI',
-      isPublished: true,
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Kegiatan Pelatihan Budidaya',
-      category: 'OUTPUT',
-      target: 10,
-      realization: 12,
-      unit: 'kegiatan',
-      year: 2026,
-      period: '2026',
-      description: 'Sesi bimbingan teknis pembuatan pupuk organik dan pengelolaan lahan.',
-      source: 'Absensi & Berita Acara',
-      verificationStatus: 'TERVERIFIKASI',
-      isPublished: true,
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Peningkatan Kemandirian Usaha Tani',
-      category: 'IMPACT',
-      target: 0,
-      realization: 0,
-      value: 'Dampak Jangka Panjang',
-      unit: 'kelompok',
-      year: 2026,
-      period: '2026',
-      description: 'Kelompok mampu mengelola rantai pasok dan pemasaran produk secara mandiri.',
-      source: 'Survei Lapangan Dampak',
-      verificationStatus: 'TERVERIFIKASI',
-      isPublished: true,
-      programId: program.id,
-      sectorId: pertanian.id,
-    },
-    {
-      name: 'Peternak Sapi Terbina',
-      category: 'OUTCOME',
-      target: 20,
-      realization: 20,
-      unit: 'orang',
-      year: 2026,
-      period: '2026',
-      description: 'Peternak yang lulus sertifikasi manajemen pakan dan kesehatan ternak.',
-      source: 'Laporan Pendampingan',
-      verificationStatus: 'TERVERIFIKASI',
-      isPublished: true,
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-    {
-      name: 'Produksi Susu Segar',
-      category: 'OUTPUT',
-      target: 1000,
-      realization: 1200,
-      unit: 'liter/bulan',
-      year: 2026,
-      period: '2026',
-      description: 'Total pengumpulan susu sapi dari kelompok peternak binaan.',
-      source: 'Catatan Penimbangan Koperasi',
-      verificationStatus: 'TERVERIFIKASI',
-      isPublished: true,
-      programId: programPeternakan.id,
-      sectorId: peternakan.id,
-    },
-  ]
-  await prisma.metric.createMany({ data: metrics })
+  // 4. Seed Products / Outputs
+  await prisma.product.createMany({
+    data: [
+      // Products Pertanian
+      {
+        name: 'Beras Organik',
+        slug: 'beras-organik',
+        description: 'Beras sehat berkualitas tanpa residu pestisida kimia.',
+        category: 'Pangan Organik',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '5000',
+        unit: 'Kg/Panen',
+        source: 'Kelompok Tani Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPertanian.id,
+        sectorId: pertanian.id,
+      },
+      {
+        name: 'Sayur Hidroponik',
+        slug: 'sayur-hidroponik',
+        description: 'Sayuran segar hidroponik bebas pestisida.',
+        category: 'Sayuran',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '200',
+        unit: 'Kg/Minggu',
+        source: 'Greenhouse Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPertanian.id,
+        sectorId: pertanian.id,
+      },
 
-  console.log('Seed completed successfully.')
+      // Products Peternakan
+      {
+        name: 'Susu Segar Pasteurisasi',
+        slug: 'susu-segar-pasteurisasi',
+        description: 'Susu murni olahan higienis dari peternakan binaan.',
+        category: 'Olahan Ternak',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '1200',
+        unit: 'Liter/Bulan',
+        source: 'Koperasi Peternak',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPeternakan.id,
+        sectorId: peternakan.id,
+      },
+      {
+        name: 'Pakan Silase Organik',
+        slug: 'pakan-silase-organik',
+        description: 'Pakan ternak bergizi tinggi dari fermentasi hijauan.',
+        category: 'Pakan Ternak',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '1500',
+        unit: 'Kg/Bulan',
+        source: 'Unit Pakan Mandiri',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPeternakan.id,
+        sectorId: peternakan.id,
+      },
+
+      // Products Lingkungan
+      {
+        name: 'Pupuk Diversoil',
+        slug: 'pupuk-diversoil',
+        description: 'Pupuk bio-organik pembenah tanah hasil komposting limbah organik.',
+        category: 'Pupuk Organik',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '3000',
+        unit: 'Kg/Bulan',
+        source: 'Unit Pengolahan Organik',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progLingkungan.id,
+        sectorId: lingkungan.id,
+      },
+
+      // Products Industri Kelapa Terpadu (4 produk resmi)
+      {
+        name: 'Coconet',
+        slug: 'coconet',
+        description: 'Jaring sabut kelapa pencegah erosi dan penguat struktur tanah pada reklamasi lahan.',
+        category: 'Produk Sabut',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '800',
+        unit: 'M/Bulan',
+        source: 'Sentra Kelapa Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+      {
+        name: 'Cocopeat',
+        slug: 'cocopeat',
+        description: 'Serbuk sabut kelapa sebagai media tanam organik penyimpan air tinggi.',
+        category: 'Media Tanam',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '2000',
+        unit: 'Kg/Bulan',
+        source: 'Sentra Kelapa Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+      {
+        name: 'Cocopot',
+        slug: 'cocopot',
+        description: 'Pot tanaman organik biodegredable dari serat sabut kelapa.',
+        category: 'Kerajinan Sabut',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '500',
+        unit: 'Pcs/Bulan',
+        source: 'Sentra Kelapa Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+      {
+        name: 'Sapu Sabut Kelapa',
+        slug: 'sapu-sabut-kelapa',
+        description: 'Sapu ramah lingkungan berbahan dasar serat sabut kelapa olahan.',
+        category: 'Alat Rumah Tangga',
+        status: 'AVAILABLE',
+        isPublished: true,
+        capacity: '300',
+        unit: 'Pcs/Bulan',
+        source: 'Sentra Kelapa Binaan',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+    ],
+  })
+
+  // 5. Seed Activities
+  await prisma.activity.createMany({
+    data: [
+      {
+        title: 'Pelatihan Budidaya Pertanian Organik',
+        description: 'Bimbingan teknik tanam ramah lingkungan tanpa pestisida kimia.',
+        location: 'Kawasan Agro Edu Wisata',
+        date: new Date(),
+        status: 'COMPLETED',
+        isPublished: true,
+        source: 'Absensi Pelatihan 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPertanian.id,
+        sectorId: pertanian.id,
+      },
+      {
+        title: 'Workshop Formulasi Pakan Ternak Organik',
+        description: 'Pelatihan pembuatan pakan silase dan suplemen herbal ternak.',
+        location: 'Kandang Komunal',
+        date: new Date(),
+        status: 'COMPLETED',
+        isPublished: true,
+        source: 'Absensi Workshop 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progPeternakan.id,
+        sectorId: peternakan.id,
+      },
+      {
+        title: 'Pelatihan Pengolahan Limbah Sampah & Pupuk Diversoil',
+        description: 'Workshop pemilahan limbah dan teknik komposting cepat menjadi Pupuk Diversoil.',
+        location: 'Pusat Daur Ulang',
+        date: new Date(),
+        status: 'COMPLETED',
+        isPublished: true,
+        source: 'Berita Acara Kegiatan 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progLingkungan.id,
+        sectorId: lingkungan.id,
+      },
+      {
+        title: 'Pelatihan Pembuatan Coconet & Cocopeat',
+        description: 'Bimbingan teknis menganyam jaring Coconet dan mengepres Cocopeat untuk komoditas ekspor.',
+        location: 'Sentra Olahan Kelapa',
+        date: new Date(),
+        status: 'COMPLETED',
+        isPublished: true,
+        source: 'Berita Acara Pelatihan 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+    ],
+  })
+
+  // 6. Seed Metrics
+  await prisma.metric.createMany({
+    data: [
+      {
+        name: 'Penerima Manfaat Tani Organik',
+        category: 'OUTCOME',
+        target: 50,
+        realization: 40,
+        unit: 'orang',
+        year: 2026,
+        period: '2026',
+        description: 'Petani binaan yang aktif menerapkan teknik pertanian ramah lingkungan.',
+        source: 'Laporan Monev Q4 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        isPublished: true,
+        programId: progPertanian.id,
+        sectorId: pertanian.id,
+      },
+      {
+        name: 'Peternak Sapi Terbina',
+        category: 'OUTCOME',
+        target: 20,
+        realization: 20,
+        unit: 'orang',
+        year: 2026,
+        period: '2026',
+        description: 'Peternak binaan yang terampil mengelola pakan dan kesehatan ternak.',
+        source: 'Laporan Pendampingan 2025',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        isPublished: true,
+        programId: progPeternakan.id,
+        sectorId: peternakan.id,
+      },
+      {
+        name: 'Produksi Pupuk Diversoil',
+        category: 'OUTPUT',
+        target: 3000,
+        realization: 3200,
+        unit: 'kg/bulan',
+        year: 2026,
+        period: '2026',
+        description: 'Total akumulasi produksi pupuk bio-organik pembenah tanah.',
+        source: 'Laporan Penimbangan Pabrikasi',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        isPublished: true,
+        programId: progLingkungan.id,
+        sectorId: lingkungan.id,
+      },
+      {
+        name: 'Produksi Coconet & Sabut Kelapa',
+        category: 'OUTPUT',
+        target: 800,
+        realization: 850,
+        unit: 'm/bulan',
+        year: 2026,
+        period: '2026',
+        description: 'Total jaring sabut kelapa yang diproduksi untuk reklamasi lahan.',
+        source: 'Laporan Produksi Sentra Kelapa',
+        sourceType: 'RESMI_ANTAM',
+        verificationStatus: 'TERVERIFIKASI',
+        isPublished: true,
+        programId: progKelapa.id,
+        sectorId: industriKelapa.id,
+      },
+    ],
+  })
+
+  console.log('Taxonomy realignment seed completed successfully.')
 }
 
 main()

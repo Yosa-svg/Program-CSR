@@ -4,45 +4,31 @@ import { ArrowRight } from "lucide-react";
 const sectors = [
   { 
     id: '01', 
-    title: 'Pertanian Terpadu', 
-    desc: 'Agro Edu Wisata dan ketahanan pangan', 
+    title: 'Pertanian', 
+    desc: 'Program: Agro Edu Wisata — Pertanian ramah lingkungan dan edukasi wisata', 
     slug: 'pertanian', 
-    icon: '🌾' 
+    icon: '🌱' 
   },
   { 
     id: '02', 
     title: 'Peternakan', 
-    desc: 'Pembibitan dan integrasi pertanian', 
+    desc: 'Program: Inkubator Bisnis — Pembibitan, pakan silase, & produk olahan ternak', 
     slug: 'peternakan', 
     icon: '🐄' 
   },
   { 
     id: '03', 
-    title: 'Pemberdayaan UMKM', 
-    desc: 'Penguatan ekonomi dan kewirausahaan lokal', 
-    slug: 'umkm', 
-    icon: '🏪' 
-  },
-  { 
-    id: '04', 
-    title: 'Pengelolaan Limbah', 
-    desc: 'Pengelolaan limbah berbasis ekonomi sirkular', 
-    slug: 'pengelolaan-limbah', 
+    title: 'Lingkungan', 
+    desc: 'Program: Pengolahan Sampah Plastik & Pupuk Diversoil — Daur ulang & komposting', 
+    slug: 'lingkungan', 
     icon: '♻️' 
   },
   { 
-    id: '05', 
+    id: '04', 
     title: 'Industri Kelapa', 
-    desc: 'Pengolahan produk turunan kelapa', 
+    desc: 'Program: Industri Kelapa Terpadu — Output: Coconet, Cocopeat, Cocopot, & Sapu Sabut Kelapa', 
     slug: 'industri-kelapa', 
     icon: '🥥' 
-  },
-  { 
-    id: '06', 
-    title: 'Ekowisata & Lingkungan', 
-    desc: 'Konservasi dan pariwisata berkelanjutan', 
-    slug: 'ekowisata-lingkungan', 
-    icon: '🏕️' 
   },
 ];
 
@@ -52,11 +38,14 @@ export default function BidangCSRPage() {
       {/* HEADER SECTION */}
       <section className="pt-32 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+          <span className="inline-block px-3.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+            Taksonomi Sektor CSR
+          </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-gray-900 mb-6 uppercase tracking-tight">
-            Bidang CSR
+            Sektor / Bidang CSR
           </h1>
           <p className="text-xl text-gray-600 font-light max-w-2xl">
-            Enam bidang fokus pengembangan untuk membangun Kawasan Ekonomi Berkelanjutan.
+            Empat sektor utama pemberdayaan masyarakat dan pelestarian lingkungan dalam Kawasan Ekonomi Berkelanjutan.
           </p>
         </div>
       </section>
