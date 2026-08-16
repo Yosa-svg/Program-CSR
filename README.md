@@ -72,19 +72,19 @@ Sebelum mempublikasikan aplikasi ke server produksi (Vercel/Cloud):
 
 ---
 
-## 🔑 Kredensial Pengujian Lokal (Development Only)
+## 🔑 Kredensial Pengujian Lokal (Development Seed)
 
-Password default untuk seluruh akun pengujian lokal: **`password123`**
+Setiap akun pengujian lokal memiliki kata sandi unik yang terenkripsi Bcrypt:
 
-| Peran (Role) | Email Login | Hak Akses & Sektor Binaan |
-| --- | --- | --- |
-| **Super Admin** | `super@csr.com` | Akses penuh ke seluruh sektor & manajemen admin |
-| **Admin Pusat** | `pusat@csr.com` | Akses monitoring seluruh sektor |
-| **Admin Pertanian** | `pertanian@csr.com` | Terisolasi ke sektor **Pertanian** (Agro Edu Wisata) |
-| **Admin Peternakan** | `peternakan@csr.com` | Terisolasi ke sektor **Peternakan** (Inkubator Bisnis) |
-| **Admin Lingkungan** | `lingkungan@csr.com` | Terisolasi ke sektor **Lingkungan** (Pengolahan Sampah & Pupuk) |
-| **Admin Industri Kelapa** | `kelapa@csr.com` | Terisolasi ke sektor **Industri Kelapa** (Industri Kelapa Terpadu) |
-| **Admin UMKM** | `umkm@csr.com` | Terisolasi ke sektor **UMKM** |
+| Peran (Role) | Email Login | Kata Sandi (*Password*) | Hak Akses & Sektor Binaan |
+| --- | --- | --- | --- |
+| **Super Admin** | `super@csr.com` | `super2026` | Akses penuh ke seluruh sektor & manajemen admin |
+| **Admin Pusat** | `pusat@csr.com` | `pusat2026` | Akses monitoring seluruh sektor |
+| **Admin Pertanian** | `pertanian@csr.com` | `tani2026` | Terisolasi ke sektor **Pertanian** (Agro Edu Wisata) |
+| **Admin Peternakan** | `peternakan@csr.com` | `ternak2026` | Terisolasi ke sektor **Peternakan** (Inkubator Bisnis) |
+| **Admin Lingkungan** | `lingkungan@csr.com` | `lingkungan2026` | Terisolasi ke sektor **Lingkungan** (Pengolahan Sampah & Pupuk) |
+| **Admin Industri Kelapa** | `kelapa@csr.com` | `kelapa2026` | Terisolasi ke sektor **Industri Kelapa** (Industri Kelapa Terpadu) |
+| **Admin UMKM** | `umkm@csr.com` | `umkm2026` | Terisolasi ke sektor **UMKM** |
 
 ---
 

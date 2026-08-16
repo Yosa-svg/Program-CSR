@@ -51,55 +51,61 @@ async function main() {
     },
   })
 
-  // 2. Create Users / Admin Accounts
-  const passwordHash = await bcrypt.hash('password123', 10)
+  // 2. Create Users / Admin Accounts with Simple & Memorable Passwords
+  const superAdminHash = await bcrypt.hash('super2026', 10)
+  const pusatAdminHash = await bcrypt.hash('pusat2026', 10)
+  const taniAdminHash = await bcrypt.hash('tani2026', 10)
+  const ternakAdminHash = await bcrypt.hash('ternak2026', 10)
+  const lingkunganAdminHash = await bcrypt.hash('lingkungan2026', 10)
+  const kelapaAdminHash = await bcrypt.hash('kelapa2026', 10)
+  const umkmAdminHash = await bcrypt.hash('umkm2026', 10)
 
   await prisma.user.createMany({
     data: [
       {
         name: 'Super Admin',
         email: 'super@csr.com',
-        password: passwordHash,
+        password: superAdminHash,
         role: 'SUPER_ADMIN',
       },
       {
         name: 'Admin Pusat',
         email: 'pusat@csr.com',
-        password: passwordHash,
+        password: pusatAdminHash,
         role: 'ADMIN_PUSAT',
       },
       {
         name: 'Admin Pertanian',
         email: 'pertanian@csr.com',
-        password: passwordHash,
+        password: taniAdminHash,
         role: 'ADMIN_SEKTOR',
         sectorId: pertanian.id,
       },
       {
         name: 'Admin Peternakan',
         email: 'peternakan@csr.com',
-        password: passwordHash,
+        password: ternakAdminHash,
         role: 'ADMIN_SEKTOR',
         sectorId: peternakan.id,
       },
       {
         name: 'Admin Lingkungan',
         email: 'lingkungan@csr.com',
-        password: passwordHash,
+        password: lingkunganAdminHash,
         role: 'ADMIN_SEKTOR',
         sectorId: lingkungan.id,
       },
       {
         name: 'Admin Industri Kelapa',
         email: 'kelapa@csr.com',
-        password: passwordHash,
+        password: kelapaAdminHash,
         role: 'ADMIN_SEKTOR',
         sectorId: industriKelapa.id,
       },
       {
         name: 'Admin UMKM',
         email: 'umkm@csr.com',
-        password: passwordHash,
+        password: umkmAdminHash,
         role: 'ADMIN_SEKTOR',
         sectorId: umkm.id,
       },
