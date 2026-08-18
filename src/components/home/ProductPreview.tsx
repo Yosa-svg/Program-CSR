@@ -11,21 +11,21 @@ export default function ProductPreview() {
       name: "Beras Organik Premium",
       desc: "Beras sehat bebas pestisida hasil panen petani binaan.",
       price: "Rp 85.000 / 5kg",
-      image: "/images/products/beras.jpg", // placeholder
+      image: "/images/products/beras.jpg",
     },
     {
       id: "kopi-robusta",
       name: "Kopi Robusta Lokal",
       desc: "Biji kopi pilihan yang dipanggang sempurna oleh UMKM lokal.",
       price: "Rp 45.000 / 250g",
-      image: "/images/products/kopi.jpg", // placeholder
+      image: "/images/products/kopi.jpg",
     },
     {
       id: "kerajinan-bambu",
       name: "Kerajinan Anyaman Bambu",
       desc: "Produk ramah lingkungan karya pengrajin desa.",
       price: "Mulai Rp 20.000",
-      image: "/images/products/anyaman.jpg", // placeholder
+      image: "/images/products/anyaman.jpg",
     }
   ];
 
@@ -39,7 +39,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 text-xs font-semibold tracking-wider text-primary uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 mb-6 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
             >
               PRODUK LOKAL
             </motion.div>
@@ -60,7 +60,7 @@ export default function ProductPreview() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Link href="/produk" className="btn btn-primary px-6 py-2">
+            <Link href="/produk" className="btn btn-primary px-7 py-3 rounded-xl font-semibold shadow-lg shadow-teal-900/20">
               Katalog Produk
             </Link>
           </motion.div>
@@ -74,7 +74,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-              className="group bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden hover:border-primary hover:shadow-md transition-all"
+              className="group bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden hover:border-[#0F6E56]/50 hover:shadow-xl transition-all"
             >
               <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden flex items-center justify-center">
                 <div 
@@ -89,8 +89,8 @@ export default function ProductPreview() {
                 <h3 className="text-xl font-bold text-[#112316] mb-2">{product.name}</h3>
                 <p className="text-[#112316]/70 mb-6 text-sm">{product.desc}</p>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="font-semibold text-primary">{product.price}</span>
-                  <Link href={`/produk/${product.id}`} className="text-[#112316]/60 hover:text-primary transition-colors">
+                  <span className="font-bold text-base text-[#0F6E56]">{product.price}</span>
+                  <Link href={`/produk`} className="text-[#0F6E56] hover:text-[#185FA5] transition-colors">
                     <ArrowRight size={20} />
                   </Link>
                 </div>

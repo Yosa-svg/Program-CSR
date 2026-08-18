@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-10">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/20 border border-primary/40 rounded-full flex items-center justify-center text-accent font-bold text-sm tracking-widest">
+            <div className="w-10 h-10 bg-gradient-to-r from-[#0F6E56] to-[#185FA5] border border-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm tracking-widest shadow-md">
               KEB
             </div>
             <div className="flex flex-col">
@@ -61,19 +61,19 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/login" className="text-base font-medium text-white/90 hover:text-white transition-colors">
+            <Link href="/admin/login" className="text-base font-medium text-white/90 hover:text-white transition-colors">
               Masuk
             </Link>
-            <button className="btn btn-primary rounded-full px-6 flex items-center gap-2">
+            <Link href="/bidang" className="btn btn-primary rounded-full px-6 flex items-center gap-2 font-semibold">
               Jelajahi <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-white hover:text-accent transition-colors focus:outline-none"
+              className="text-white hover:text-emerald-300 transition-colors focus:outline-none"
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -103,12 +103,12 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="px-3 pt-4 flex flex-col gap-3">
-                <Link href="/login" className="text-center font-medium py-2">
+                <Link href="/admin/login" className="text-center font-medium py-2 text-white">
                   Masuk
                 </Link>
-                <button className="btn btn-primary rounded-full w-full flex justify-center items-center gap-2">
+                <Link href="/bidang" onClick={() => setIsOpen(false)} className="btn btn-primary rounded-full w-full flex justify-center items-center gap-2 font-semibold">
                   Jelajahi <ArrowRight size={16} />
-                </button>
+                </Link>
               </div>
             </div>
           </motion.div>

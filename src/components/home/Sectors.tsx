@@ -56,7 +56,7 @@ export default function Sectors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 text-xs font-semibold tracking-wider text-primary uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 mb-6 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
             >
               SEKTOR CSR BERKELANJUTAN
             </motion.div>
@@ -90,7 +90,7 @@ export default function Sectors() {
           >
             <Link 
               href="/bidang"
-              className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-6 py-2 inline-flex items-center gap-2"
+              className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-6 py-2.5 inline-flex items-center gap-2 font-semibold"
             >
               Lihat Semua Sektor <ArrowRight size={16} />
             </Link>
@@ -109,19 +109,19 @@ export default function Sectors() {
             >
               <Link 
                 href={sector.href}
-                className="group flex flex-col h-full bg-[#112316]/[0.02] border border-[#112316]/10 rounded-2xl p-6 hover:border-[#112316]/30 hover:shadow-xl transition-all duration-500"
+                className="group flex flex-col h-full bg-[#112316]/[0.02] border border-[#112316]/10 rounded-2xl p-6 hover:border-[#0F6E56]/40 hover:shadow-xl transition-all duration-500"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-primary/10 text-primary rounded-xl group-hover:bg-primary group-hover:text-white transition-colors">
+                  <div className="p-3 bg-gradient-to-r from-[#0F6E56] to-[#185FA5] text-white rounded-xl shadow-md shadow-[#0F6E56]/20 group-hover:scale-105 transition-transform">
                     {sector.icon}
                   </div>
-                  <ArrowRight size={18} className="text-[#112316]/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  <ArrowRight size={18} className="text-[#112316]/30 group-hover:text-[#0F6E56] group-hover:translate-x-1 transition-all" />
                 </div>
                 
                 <h3 className="font-bold text-xl text-[#112316] mb-1">
                   {sector.title}
                 </h3>
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                <span className="text-xs font-bold text-[#0F6E56] uppercase tracking-wider mb-3">
                   {sector.subtitle}
                 </span>
                 

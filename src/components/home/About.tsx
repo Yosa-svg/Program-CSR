@@ -16,7 +16,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm mb-8 text-xs font-semibold tracking-wider text-primary uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 backdrop-blur-sm mb-8 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
             >
               TENTANG KAMI
             </motion.div>
@@ -52,7 +52,10 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Link href="#pendekatan" className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors group">
+              <Link 
+                href="#csr" 
+                className="inline-flex items-center gap-2 font-bold text-[#0F6E56] hover:text-[#185FA5] transition-colors group"
+              >
                 Kenali pendekatan kami
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>

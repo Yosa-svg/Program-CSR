@@ -3,9 +3,10 @@
 :root {
   --background: #112316; /* Deep dark green */
   --foreground: #ffffff;
-  --primary: #45754f; /* Solid green button color */
+  --primary: #0F6E56; /* Brand Teal */
+  --primary-blue: #185FA5; /* Brand Blue */
   --primary-foreground: #ffffff;
-  --accent: #a3c3aa; /* Light green text accent */
+  --accent: #6ee7b7; /* Light emerald accent */
   --card: #15291C;
   --card-foreground: #ffffff;
   --border: #2a412f;
@@ -41,15 +42,25 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F6E56] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-all;
+    background: linear-gradient(to right, #0F6E56, #185FA5);
+    color: #ffffff;
+    @apply shadow-md hover:opacity-95 hover:shadow-lg hover:brightness-105 active:scale-[0.99] transition-all;
   }
   .btn-outline {
     @apply border border-white/30 bg-transparent hover:bg-white/10 text-white transition-all;
   }
   .glass-card {
     @apply bg-background/50 backdrop-blur-md border border-border shadow-sm;
+  }
+  .gradient-brand {
+    background: linear-gradient(to right, #0F6E56, #185FA5);
+  }
+  .gradient-brand-text {
+    background: linear-gradient(to right, #0F6E56, #185FA5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 }

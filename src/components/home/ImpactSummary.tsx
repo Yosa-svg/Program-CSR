@@ -9,7 +9,7 @@ export default function ImpactSummary() {
     <section 
       className="py-24 text-[#112316] relative overflow-hidden border-t border-gray-100"
       style={{
-        background: `radial-gradient(circle at top right, rgba(69, 117, 79, 0.12), transparent 40%), linear-gradient(180deg, #ffffff 0%, #f4fbf6 50%, #ffffff 100%)`
+        background: `radial-gradient(circle at top right, rgba(15, 110, 86, 0.12), rgba(24, 95, 165, 0.12), transparent 50%), linear-gradient(180deg, #ffffff 0%, #f4fbf6 50%, #ffffff 100%)`
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -21,7 +21,7 @@ export default function ImpactSummary() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6 text-xs font-semibold tracking-wider text-primary uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 mb-6 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
             >
               KINERJA & DAMPAK
             </motion.div>
@@ -54,7 +54,10 @@ export default function ImpactSummary() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Link href="/kinerja" className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-8 py-3 text-base">
+              <Link 
+                href="/kinerja" 
+                className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-8 py-3 text-base font-semibold"
+              >
                 Lihat Laporan Kinerja
               </Link>
             </motion.div>
@@ -69,25 +72,26 @@ export default function ImpactSummary() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl"
               >
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <Activity size={20} className="text-primary" />
+                <div className="w-10 h-10 bg-gradient-to-r from-[#0F6E56]/15 to-[#185FA5]/15 rounded-lg flex items-center justify-center mb-4">
+                  <Activity size={20} className="text-[#0F6E56]" />
                 </div>
                 <h4 className="text-4xl font-bold text-[#112316] mb-2">+45%</h4>
                 <p className="text-[#112316]/70">Peningkatan Pendapatan Petani Binaan</p>
               </motion.div>
 
+              {/* Card with Gradient from Teal to Blue */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-primary border border-primary/50 shadow-md p-8 rounded-2xl"
+                className="bg-gradient-to-r from-[#0F6E56] to-[#185FA5] border border-white/20 shadow-xl shadow-[#0F6E56]/20 p-8 rounded-2xl text-white"
               >
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-4">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-4">
                   <Activity size={20} className="text-white" />
                 </div>
                 <h4 className="text-4xl font-bold text-white mb-2">3.200</h4>
-                <p className="text-white/90">Pohon Ditanam Tahun Ini</p>
+                <p className="text-white/90 font-medium">Pohon Ditanam Tahun Ini</p>
               </motion.div>
 
               <motion.div 
@@ -102,7 +106,7 @@ export default function ImpactSummary() {
                   <p className="text-[#112316]/70">Evaluasi Triwulan Q3 2026</p>
                 </div>
                 <div className="mt-4 sm:mt-0 text-right">
-                  <span className="inline-flex items-center gap-1 text-primary font-bold text-xl bg-primary/10 px-4 py-2 rounded-lg">
+                  <span className="inline-flex items-center gap-1 text-white font-bold text-base bg-gradient-to-r from-[#0F6E56] to-[#185FA5] px-5 py-2.5 rounded-xl shadow-md shadow-[#0F6E56]/25">
                     Sangat Baik
                   </span>
                 </div>
