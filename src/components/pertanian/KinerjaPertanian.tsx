@@ -19,16 +19,15 @@ interface Props {
 }
 
 export default function KinerjaPertanian({ metrics }: Props) {
-  // Array of colors/icons to cycle through for metrics
   const displayConfig = [
-    { icon: <Users size={24} className="text-white" />, color: "bg-blue-500" },
-    { icon: <Sprout size={24} className="text-white" />, color: "bg-emerald-500" },
-    { icon: <TrendingUp size={24} className="text-white" />, color: "bg-orange-500" },
-    { icon: <HandCoins size={24} className="text-white" />, color: "bg-purple-500" }
+    { icon: <Users size={22} className="text-white" />, color: "bg-[#0D726D]" },
+    { icon: <Sprout size={22} className="text-white" />, color: "bg-[#F6A236]" },
+    { icon: <TrendingUp size={22} className="text-white" />, color: "bg-[#0D726D]" },
+    { icon: <HandCoins size={22} className="text-white" />, color: "bg-[#F6A236]" }
   ];
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-24 bg-[#F7FAF9] border-t border-[#E2E8E6] text-[#172121]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <motion.div
@@ -36,7 +35,7 @@ export default function KinerjaPertanian({ metrics }: Props) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center px-4 py-1.5 rounded-full border border-white/20 bg-white/5 mb-6 text-xs font-semibold tracking-wider text-accent uppercase"
+            className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-6 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
           >
             Kinerja Sektor
           </motion.div>
@@ -45,7 +44,7 @@ export default function KinerjaPertanian({ metrics }: Props) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-serif text-3xl md:text-4xl font-bold tracking-tight mb-4 text-white"
+            className="font-serif text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[#172121]"
           >
             Dampak yang Terukur
           </motion.h2>
@@ -54,9 +53,9 @@ export default function KinerjaPertanian({ metrics }: Props) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-white/70"
+            className="text-[#172121]/70 font-normal"
           >
-            Komitmen kami untuk terus memantau dan meningkatkan efektivitas program.
+            Komitmen kami untuk terus memantau dan meningkatkan efektivitas program secara berkelanjutan.
           </motion.p>
         </div>
 
@@ -70,16 +69,14 @@ export default function KinerjaPertanian({ metrics }: Props) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-                className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden"
+                className="bg-white border border-[#E2E8E6] shadow-sm rounded-2xl p-6 relative overflow-hidden"
               >
-                <div className={`absolute top-0 right-0 w-24 h-24 ${config.color} rounded-bl-full opacity-10`}></div>
-                
-                <div className={`w-12 h-12 ${config.color} rounded-xl flex items-center justify-center mb-6`}>
+                <div className={`w-12 h-12 ${config.color} rounded-xl flex items-center justify-center mb-6 shadow-md`}>
                   {config.icon}
                 </div>
-                <h4 className="text-4xl font-bold text-white mb-2">{metric.value} {metric.unit}</h4>
-                <p className="font-semibold text-white/90 mb-1">{metric.name}</p>
-                <p className="text-sm text-white/50">{metric.description}</p>
+                <h4 className="text-3xl font-bold text-[#0D726D] mb-2">{metric.value} {metric.unit}</h4>
+                <p className="font-bold text-[#172121] mb-1 text-sm">{metric.name}</p>
+                <p className="text-xs text-[#172121]/60 font-normal">{metric.description}</p>
               </motion.div>
             );
           })}

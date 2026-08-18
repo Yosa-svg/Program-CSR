@@ -9,43 +9,43 @@ export default function Sectors() {
     {
       id: "pertanian",
       title: "PERTANIAN",
-      subtitle: "Program: Agro Edu Wisata",
+      subtitle: "Agro Edu Wisata",
       desc: "Pertanian ramah lingkungan dan integrasi pariwisata edukatif.",
-      icon: <Sprout size={18} />,
+      icon: <Sprout size={20} />,
       href: "/bidang/pertanian",
-      image: "/images/sectors/pertanian.jpg"
+      accent: "teal",
     },
     {
       id: "peternakan",
       title: "PETERNAKAN",
-      subtitle: "Program: Inkubator Bisnis",
-      desc: "Inkubasi usaha ternak komunal dan formulasi pakan silase.",
-      icon: <Footprints size={18} />,
+      subtitle: "Inkubator Bisnis",
+      desc: "Inkubasi usaha ternak komunal dan formulasi pakan silase mandiri.",
+      icon: <Footprints size={20} />,
       href: "/bidang/peternakan",
-      image: "/images/sectors/peternakan.jpg"
+      accent: "orange-teal",
     },
     {
       id: "lingkungan",
       title: "LINGKUNGAN",
-      subtitle: "Program: Daur Ulang & Pupuk Diversoil",
-      desc: "Pengolahan limbah plastik serta komposting Pupuk Diversoil.",
-      icon: <Recycle size={18} />,
+      subtitle: "Daur Ulang & Pupuk Diversoil",
+      desc: "Pengolahan limbah anorganik serta komposting Pupuk Diversoil.",
+      icon: <Recycle size={20} />,
       href: "/bidang/lingkungan",
-      image: "/images/sectors/lingkungan.jpg"
+      accent: "teal",
     },
     {
       id: "industri-kelapa",
       title: "INDUSTRI KELAPA",
-      subtitle: "Program: Industri Kelapa Terpadu",
-      desc: "Hilirisasi kelapa: Coconet, Cocopeat, Cocopot, & Sapu Sabut Kelapa.",
-      icon: <Palmtree size={18} />,
+      subtitle: "Industri Kelapa Terpadu",
+      desc: "Hilirisasi sabut kelapa: Coconet, Cocopeat, Cocopot, & Sapu.",
+      icon: <Palmtree size={20} />,
       href: "/bidang/industri-kelapa",
-      image: "/images/sectors/kelapa-terpadu.jpg"
+      accent: "orange",
     }
   ];
 
   return (
-    <section id="csr" className="py-24 bg-white text-[#112316]">
+    <section id="csr" className="py-24 bg-white text-[#172121]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
@@ -56,7 +56,7 @@ export default function Sectors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 mb-6 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-6 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
             >
               SEKTOR CSR BERKELANJUTAN
             </motion.div>
@@ -66,7 +66,7 @@ export default function Sectors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-6"
+              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-6 text-[#172121]"
             >
               Ruang untuk tumbuh & berdampak.
             </motion.h2>
@@ -76,7 +76,7 @@ export default function Sectors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg text-[#112316]/80 leading-relaxed"
+              className="text-lg text-[#172121]/75 leading-relaxed font-normal"
             >
               Empat sektor utama pemberdayaan masyarakat dan pelestarian lingkungan dalam Kawasan Ekonomi Berkelanjutan.
             </motion.p>
@@ -90,9 +90,9 @@ export default function Sectors() {
           >
             <Link 
               href="/bidang"
-              className="btn border border-[#112316]/20 bg-transparent hover:bg-[#112316]/5 text-[#112316] transition-all px-6 py-2.5 inline-flex items-center gap-2 font-semibold"
+              className="btn btn-outline-dark px-6 py-2.5 inline-flex items-center gap-2 font-semibold text-sm shadow-sm"
             >
-              Lihat Semua Sektor <ArrowRight size={16} />
+              Lihat Semua Sektor <ArrowRight size={16} className="text-[#F6A236]" />
             </Link>
           </motion.div>
         </div>
@@ -109,23 +109,26 @@ export default function Sectors() {
             >
               <Link 
                 href={sector.href}
-                className="group flex flex-col h-full bg-[#112316]/[0.02] border border-[#112316]/10 rounded-2xl p-6 hover:border-[#0F6E56]/40 hover:shadow-xl transition-all duration-500"
+                className="group flex flex-col h-full bg-white border border-[#E2E8E6] rounded-2xl p-6 hover:border-[#0D726D]/50 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-gradient-to-r from-[#0F6E56] to-[#185FA5] text-white rounded-xl shadow-md shadow-[#0F6E56]/20 group-hover:scale-105 transition-transform">
+                {/* Top subtle accent line */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#0D726D] group-hover:bg-[#F6A236] transition-colors"></div>
+
+                <div className="flex items-center justify-between mb-5 mt-1">
+                  <div className="p-3 bg-[#0D726D] text-white rounded-xl shadow-md group-hover:bg-[#0B5C58] transition-colors">
                     {sector.icon}
                   </div>
-                  <ArrowRight size={18} className="text-[#112316]/30 group-hover:text-[#0F6E56] group-hover:translate-x-1 transition-all" />
+                  <ArrowRight size={18} className="text-[#172121]/30 group-hover:text-[#F6A236] group-hover:translate-x-1 transition-all" />
                 </div>
                 
-                <h3 className="font-bold text-xl text-[#112316] mb-1">
+                <h3 className="font-bold text-xl text-[#172121] mb-1">
                   {sector.title}
                 </h3>
-                <span className="text-xs font-bold text-[#0F6E56] uppercase tracking-wider mb-3">
-                  {sector.subtitle}
+                <span className="text-xs font-bold text-[#F6A236] uppercase tracking-wider mb-3">
+                  Program: {sector.subtitle}
                 </span>
                 
-                <p className="text-sm text-[#112316]/70 leading-relaxed mt-auto">
+                <p className="text-sm text-[#172121]/70 leading-relaxed mt-auto font-normal">
                   {sector.desc}
                 </p>
               </Link>

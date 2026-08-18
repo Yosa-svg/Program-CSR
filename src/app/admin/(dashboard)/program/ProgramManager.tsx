@@ -113,17 +113,17 @@ export default function ProgramManager({
                           {prog.location}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-foreground/50">
-                          <Users size={14} className="text-emerald-500" />
+                          <Users size={14} className="text-[#D85A30]" />
                           {prog.beneficiaries}
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col items-start gap-2">
-                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium border
-                          ${prog.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
-                          ${prog.status === 'PLANNED' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : ''}
-                          ${prog.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold border
+                          ${prog.status === 'ACTIVE' ? 'bg-[#D85A30]/15 text-[#D85A30] border-[#D85A30]/30' : ''}
+                          ${prog.status === 'PLANNED' ? 'bg-amber-500/15 text-amber-500 border-amber-500/30' : ''}
+                          ${prog.status === 'COMPLETED' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30' : ''}
                         `}>
                           {prog.status === 'ACTIVE' && 'Aktif'}
                           {prog.status === 'PLANNED' && 'Direncanakan'}

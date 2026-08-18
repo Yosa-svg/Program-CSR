@@ -1,31 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #112316; /* Deep dark green */
-  --foreground: #ffffff;
-  --primary: #0F6E56; /* Brand Teal */
-  --primary-blue: #185FA5; /* Brand Blue */
-  --primary-foreground: #ffffff;
-  --accent: #6ee7b7; /* Light emerald accent */
-  --card: #15291C;
-  --card-foreground: #ffffff;
-  --border: #2a412f;
+  --background: #FFFFFF; /* Clean White */
+  --foreground: #172121; /* ANTAM Dark Text */
+  --primary: #0D726D; /* Teal ANTAM (70% Dominant) */
+  --primary-hover: #0B5C58;
+  --secondary: #F6A236; /* Orange ANTAM (30% Accent) */
+  --accent: #F6A236;
+  --muted-bg: #F7FAF9; /* Soft Gray / Minty White Section Background */
+  --card: #FFFFFF;
+  --card-foreground: #172121;
+  --border: #E2E8E6;
 }
 
 .admin-theme {
-  --background: #f4fbf6; /* Very light green / off-white */
-  --foreground: #112316; /* Dark green / near black */
-  --card: #ffffff; /* White cards */
-  --card-foreground: #112316;
-  --border: #e2e8f0; /* Light gray border */
+  --background: #F7FAF9;
+  --foreground: #172121;
+  --card: #FFFFFF;
+  --card-foreground: #172121;
+  --border: #E2E8E6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-muted-bg: var(--muted-bg);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
@@ -42,24 +44,29 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F6E56] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D726D] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    background: linear-gradient(to right, #0F6E56, #185FA5);
-    color: #ffffff;
-    @apply shadow-md hover:opacity-95 hover:shadow-lg hover:brightness-105 active:scale-[0.99] transition-all;
+    background-color: #0D726D;
+    color: #FFFFFF;
+    @apply shadow-md hover:bg-[#0B5C58] active:scale-[0.99] transition-all;
+  }
+  .btn-accent {
+    background-color: #F6A236;
+    color: #FFFFFF;
+    @apply shadow-md hover:bg-[#E59124] active:scale-[0.99] transition-all;
   }
   .btn-outline {
-    @apply border border-white/30 bg-transparent hover:bg-white/10 text-white transition-all;
+    @apply border border-white/40 bg-transparent hover:bg-white/10 text-white transition-all;
   }
-  .glass-card {
-    @apply bg-background/50 backdrop-blur-md border border-border shadow-sm;
+  .btn-outline-dark {
+    @apply border border-[#E2E8E6] bg-white hover:bg-[#F7FAF9] text-[#172121] hover:border-[#0D726D]/40 transition-all;
   }
-  .gradient-brand {
-    background: linear-gradient(to right, #0F6E56, #185FA5);
+  .gradient-hero {
+    background: linear-gradient(135deg, #0D726D 0%, #F6A236 100%);
   }
   .gradient-brand-text {
-    background: linear-gradient(to right, #0F6E56, #185FA5);
+    background: linear-gradient(135deg, #0D726D 0%, #F6A236 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

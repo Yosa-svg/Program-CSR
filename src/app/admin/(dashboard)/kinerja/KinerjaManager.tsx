@@ -103,8 +103,8 @@ export default function KinerjaManager({
                 <div className="flex items-center justify-between mb-3 gap-2">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase
-                      ${metric.category === 'OUTPUT' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30' :
-                        metric.category === 'OUTCOME' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
+                      ${metric.category === 'OUTPUT' ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' :
+                        metric.category === 'OUTCOME' ? 'bg-[#D85A30]/15 text-[#D85A30] border border-[#D85A30]/30' :
                         metric.category === 'IMPACT' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/30' :
                         'bg-slate-500/15 text-slate-400 border border-slate-500/30'}
                     `}>
@@ -119,7 +119,7 @@ export default function KinerjaManager({
                   </div>
 
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                    ${metric.isPublished ? 'bg-emerald-500/10 text-emerald-500' : 'bg-foreground/10 text-foreground/50'}
+                    ${metric.isPublished ? 'bg-[#D85A30]/15 text-[#D85A30]' : 'bg-foreground/10 text-foreground/50'}
                   `}>
                     {metric.isPublished ? 'Published' : 'Draft'}
                   </span>
@@ -145,14 +145,14 @@ export default function KinerjaManager({
                     <div>
                       <div className="flex justify-between items-center text-xs font-semibold mb-1">
                         <span className="text-foreground/50">Capaian</span>
-                        <span className={achievement >= 100 ? "text-emerald-400 font-bold" : "text-primary"}>
+                        <span className={achievement >= 100 ? "text-[#D85A30] font-bold" : "text-primary"}>
                           {achievement}%
                         </span>
                       </div>
                       <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
                         <div 
                           className={`h-full rounded-full transition-all duration-500 ${
-                            achievement >= 100 ? 'bg-emerald-500' : 'bg-primary'
+                            achievement >= 100 ? 'bg-[#D85A30]' : 'bg-primary'
                           }`}
                           style={{ width: `${progressWidth}%` }}
                         />
@@ -194,7 +194,7 @@ export default function KinerjaManager({
                   {metric.verificationStatus && (
                     <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${
                       metric.verificationStatus === 'TERVERIFIKASI' 
-                        ? 'text-emerald-400 bg-emerald-500/10' 
+                        ? 'text-[#D85A30] bg-[#D85A30]/10' 
                         : 'text-amber-400 bg-amber-500/10'
                     }`}>
                       {metric.verificationStatus === 'TERVERIFIKASI' ? <CheckCircle size={10} /> : <AlertCircle size={10} />}

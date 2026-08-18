@@ -9,28 +9,28 @@ export default function ProductPreview() {
     {
       id: "beras-organik",
       name: "Beras Organik Premium",
-      desc: "Beras sehat bebas pestisida hasil panen petani binaan.",
+      desc: "Beras sehat bebas pestisida hasil panen petani binaan Agro Edu Wisata.",
       price: "Rp 85.000 / 5kg",
       image: "/images/products/beras.jpg",
     },
     {
-      id: "kopi-robusta",
-      name: "Kopi Robusta Lokal",
-      desc: "Biji kopi pilihan yang dipanggang sempurna oleh UMKM lokal.",
-      price: "Rp 45.000 / 250g",
+      id: "pupuk-diversoil",
+      name: "Pupuk Diversoil Kompos",
+      desc: "Pupuk organik kaya hara hasil komposting sirkular limbah kawasan.",
+      price: "Rp 35.000 / 10kg",
       image: "/images/products/kopi.jpg",
     },
     {
-      id: "kerajinan-bambu",
-      name: "Kerajinan Anyaman Bambu",
-      desc: "Produk ramah lingkungan karya pengrajin desa.",
-      price: "Mulai Rp 20.000",
+      id: "coconet-kelapa",
+      name: "Coconet & Sabut Kelapa",
+      desc: "Produk ramah lingkungan karya pengrajin industri kelapa terpadu.",
+      price: "Mulai Rp 25.000",
       image: "/images/products/anyaman.jpg",
     }
   ];
 
   return (
-    <section className="py-24 bg-white text-[#112316]">
+    <section className="py-24 bg-white text-[#172121]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
@@ -39,7 +39,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0F6E56]/30 bg-gradient-to-r from-[#0F6E56]/10 to-[#185FA5]/10 mb-6 text-xs font-bold tracking-wider text-[#0F6E56] uppercase"
+              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-6 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
             >
               PRODUK LOKAL
             </motion.div>
@@ -48,7 +48,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-6"
+              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-6 text-[#172121]"
             >
               Dari kawasan<br/> untuk semua.
             </motion.h2>
@@ -60,7 +60,7 @@ export default function ProductPreview() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Link href="/produk" className="btn btn-primary px-7 py-3 rounded-xl font-semibold shadow-lg shadow-teal-900/20">
+            <Link href="/produk" className="btn btn-primary px-7 py-3 rounded-full font-bold shadow-md">
               Katalog Produk
             </Link>
           </motion.div>
@@ -74,23 +74,21 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 + (i * 0.1) }}
-              className="group bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden hover:border-[#0F6E56]/50 hover:shadow-xl transition-all"
+              className="group bg-white border border-[#E2E8E6] shadow-sm rounded-2xl overflow-hidden hover:border-[#0D726D]/50 hover:shadow-xl transition-all"
             >
-              <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden flex items-center justify-center">
+              <div className="aspect-[4/3] bg-[#F7FAF9] relative overflow-hidden flex items-center justify-center border-b border-[#E2E8E6]">
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                   style={{ backgroundImage: `url('${product.image}')` }}
                 ></div>
-                {/* Fallback pattern/gradient */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent z-0"></div>
-                <ShoppingBag size={48} className="text-[#112316]/10 z-10 relative" />
+                <ShoppingBag size={44} className="text-[#0D726D]/20 z-10 relative" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-[#112316] mb-2">{product.name}</h3>
-                <p className="text-[#112316]/70 mb-6 text-sm">{product.desc}</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-base text-[#0F6E56]">{product.price}</span>
-                  <Link href={`/produk`} className="text-[#0F6E56] hover:text-[#185FA5] transition-colors">
+                <h3 className="text-xl font-bold text-[#172121] mb-2">{product.name}</h3>
+                <p className="text-[#172121]/70 mb-6 text-sm font-normal leading-relaxed">{product.desc}</p>
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#E2E8E6]/60">
+                  <span className="font-bold text-base text-[#0D726D]">{product.price}</span>
+                  <Link href="/produk" className="text-[#F6A236] hover:text-[#E59124] transition-colors p-1">
                     <ArrowRight size={20} />
                   </Link>
                 </div>

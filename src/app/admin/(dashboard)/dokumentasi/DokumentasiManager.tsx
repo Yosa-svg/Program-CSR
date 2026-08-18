@@ -156,7 +156,7 @@ export default function DokumentasiManager({
                 <div className="space-y-2 mt-auto pt-3 border-t border-border">
                   {doc.date && (
                     <div className="flex items-center gap-2 text-xs text-foreground/50">
-                      <Calendar size={12} className="text-emerald-500" />
+                      <Calendar size={12} className="text-[#D85A30]" />
                       {new Date(doc.date).toLocaleDateString('id-ID', {
                         day: 'numeric', month: 'short', year: 'numeric'
                       })}

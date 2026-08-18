@@ -21,7 +21,7 @@ export default async function LingkunganPage() {
   const sector = await getSectorBySlug("lingkungan");
   
   if (!sector) {
-    return <div className="text-white text-center py-20">Sektor Lingkungan tidak ditemukan.</div>;
+    return <div className="text-center py-20">Sektor Lingkungan tidak ditemukan.</div>;
   }
 
   const programs = await getPublishedPrograms(sector.id);
@@ -31,19 +31,21 @@ export default async function LingkunganPage() {
   const metrics = await getPublishedMetrics(sector.id);
 
   return (
-    <div className="bg-[#0A160D] text-white min-h-screen pt-20">
-      <section className="py-20 px-6 border-b border-white/10 bg-gradient-to-b from-[#112316] to-[#0A160D]">
-        <div className="max-w-7xl mx-auto text-center">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-widest mb-6">
-            ♻️ Sektor Lingkungan
+    <div className="bg-white min-h-screen pt-20 text-[#172121]">
+      <section 
+        className="py-24 px-6 border-b border-[#E2E8E6] text-white relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #0D726D 0%, #158F88 60%, #F6A236 100%)" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 text-white border border-white/30 text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm">
+            ♻️ Sektor Lingkungan • Teal Dominant
           </span>
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-sm">
             Pengolahan Sampah Plastik & <br />
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-              Pupuk Diversoil
-            </span>
+            Pupuk Diversoil
           </h1>
-          <p className="max-w-2xl mx-auto text-lg text-white/70">
+          <p className="max-w-2xl mx-auto text-lg text-white/90 font-normal leading-relaxed drop-shadow-sm">
             Mengintegrasikan pengelolaan limbah anorganik daur ulang dengan komposting bio-organik Pupuk Diversoil demi keberlanjutan tanah dan ekosistem.
           </p>
         </div>

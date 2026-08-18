@@ -227,7 +227,7 @@ export default function PengaturanView({
             {profileMsg && (
               <div className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
                 profileMsg.type === "success" 
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                  ? "bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20" 
                   : "bg-red-500/10 text-red-400 border border-red-500/20"
               }`}>
                 {profileMsg.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
@@ -309,7 +309,7 @@ export default function PengaturanView({
             {passwordMsg && (
               <div className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
                 passwordMsg.type === "success" 
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                  ? "bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20" 
                   : "bg-red-500/10 text-red-400 border border-red-500/20"
               }`}>
                 {passwordMsg.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
@@ -428,7 +428,7 @@ export default function PengaturanView({
                           ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
                           : user.role === "ADMIN_PUSAT"
                           ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                          : "bg-[#D85A30]/10 text-[#D85A30] border-[#D85A30]/30"
                       }`}>
                         {user.role}
                       </span>
@@ -502,7 +502,7 @@ export default function PengaturanView({
               </div>
               <div className="bg-background/60 p-4 rounded-xl border border-border/60">
                 <span className="text-xs text-foreground/50 font-semibold uppercase">Metrik Kinerja</span>
-                <p className="text-2xl font-black text-emerald-400 mt-1">{stats.totalMetrics}</p>
+                <p className="text-2xl font-black text-[#D85A30] mt-1">{stats.totalMetrics}</p>
               </div>
             </div>
           </div>
