@@ -14,6 +14,7 @@
 ---
 
 ## 📑 Daftar Isi
+
 - [📖 Tentang Proyek](#-tentang-proyek)
 - [🛠️ Teknologi & Peralatan yang Digunakan](#️-teknologi--peralatan-yang-digunakan)
 - [🎨 Konsep Desain & Identitas Visual](#-konsep-desain--identitas-visual)
@@ -31,34 +32,38 @@
 **Kawasan Ekonomi Keberkelanjutan (KEK) CSR App** adalah platform web terintegrasi berbasis **Next.js (App Router)** yang dikembangkan untuk mengelola, memantau, mendokumentasikan, dan mempublikasikan seluruh pelaksanaan inisiatif Tanggung Jawab Sosial dan Lingkungan (TJSL / CSR).
 
 Platform ini dirancang dengan dua pilar utama:
-1. **Portal Publik Transparan**: Etalase visual modern dan interaktif yang menyajikan komitmen keberlanjutan, profil sektor, program pemberdayaan, produk binaan masyarakat, galeri dokumentasi terverifikasi, hingga dasbor indikator capaian dampak (*Impact Metrics*).
-2. **Dasbor Manajemen Admin**: Pusat kendali terisolasi dengan **Role-Based Access Control (RBAC)** untuk tim pengelola CSR dalam melakukan operasi data (*Create, Read, Update, Delete*) secara aman, cepat, dan terisolasi antar sektor binaan.
+
+1. **Portal Publik Transparan**: Etalase visual modern dan interaktif yang menyajikan komitmen keberlanjutan, profil sektor, program pemberdayaan, produk binaan masyarakat, galeri dokumentasi terverifikasi, hingga dasbor indikator capaian dampak (_Impact Metrics_).
+2. **Dasbor Manajemen Admin**: Pusat kendali terisolasi dengan **Role-Based Access Control (RBAC)** untuk tim pengelola CSR dalam melakukan operasi data (_Create, Read, Update, Delete_) secara aman, cepat, dan terisolasi antar sektor binaan.
 
 ---
 
 ## 🛠️ Teknologi & Peralatan yang Digunakan
 
-Proyek ini dibangun menggunakan ekosistem teknologi modern (*Modern Fullstack TypeScript*):
+Proyek ini dibangun menggunakan ekosistem teknologi modern (_Modern Fullstack TypeScript_):
 
 ### 1. Frontend & Antarmuka Pengguna
-- **[Next.js 16 (App Router)](https://nextjs.org/)**: Framework React modern dengan *Server Components (RSC)* untuk optimasi SEO, rendering cepat, dan arsitektur route yang terstruktur.
-- **[TypeScript](https://www.typescriptlang.org/)**: Menjamin *type-safety*, meminimalkan runtime error, dan mempercepat proses refaktorisasi.
+
+- **[Next.js 16 (App Router)](https://nextjs.org/)**: Framework React modern dengan _Server Components (RSC)_ untuk optimasi SEO, rendering cepat, dan arsitektur route yang terstruktur.
+- **[TypeScript](https://www.typescriptlang.org/)**: Menjamin _type-safety_, meminimalkan runtime error, dan mempercepat proses refaktorisasi.
 - **[Tailwind CSS](https://tailwindcss.com/) & Vanilla Design Tokens**: Pengelolaan sistem styling terpusat berbasis variabel CSS dengan palet resmi perusahaan.
-- **[Framer Motion](https://www.framer.com/motion/)**: Animasi mikro dinamis, transisi kartu, dan interaksi visual yang halus (*fluid micro-interactions*).
+- **[Framer Motion](https://www.framer.com/motion/)**: Animasi mikro dinamis, transisi kartu, dan interaksi visual yang halus (_fluid micro-interactions_).
 - **[Lucide React](https://lucide.dev/)**: Kumpulan ikon SVG konsisten untuk navigasi dan indikator data.
 - **[Recharts](https://recharts.org/)**: Visualisasi grafik interaktif pada dashboard admin (distribusi kegiatan, status program, tren penerima manfaat).
 - **[date-fns](https://date-fns.org/)**: Format penanggalan terstandarisasi dengan lokalisasi Bahasa Indonesia (`id`).
 
 ### 2. Backend, Database & Arsitektur Data
+
 - **Next.js Server Actions**: Mutasi data backend secara native tanpa perlu konfigurasi boilerplate REST API manual.
-- **[Prisma ORM](https://www.prisma.io/)**: Pemetaan data relasional skema MySQL, migrasi terotomatisasi, dan query data bertipe aman (*type-safe queries*).
+- **[Prisma ORM](https://www.prisma.io/)**: Pemetaan data relasional skema MySQL, migrasi terotomatisasi, dan query data bertipe aman (_type-safe queries_).
 - **[MySQL](https://www.mysql.com/)**: Database relasional utama untuk menyimpan entitas Pengguna, Sektor, Program, Kegiatan, Produk, Dokumentasi, dan Metrik Kinerja.
 
 ### 3. Keamanan & Autentikasi
+
 - **[Jose (JWT)](https://github.com/panva/jose)**: Manajemen token otentikasi sesi admin berbasis enkripsi JSON Web Token yang disimpan di `HttpOnly, Secure Cookie`.
-- **[Bcryptjs](https://github.com/dcodeIO/bcrypt.js)**: Algoritma hashing *salted* satu arah untuk mengamankan kata sandi seluruh level akun admin.
+- **[Bcryptjs](https://github.com/dcodeIO/bcrypt.js)**: Algoritma hashing _salted_ satu arah untuk mengamankan kata sandi seluruh level akun admin.
 - **Next.js Middleware Guard**: Proteksi rute dinamis pada jalur `/admin/*` untuk memblokir akses tanpa token valid.
-- **Multi-Layer Server Pipeline Guard**: Validasi otorisasi di tingkat Server Action mencakup verifikasi role, *Sector Isolation Guard*, dan *Relational Consistency Guard*.
+- **Multi-Layer Server Pipeline Guard**: Validasi otorisasi di tingkat Server Action mencakup verifikasi role, _Sector Isolation Guard_, dan _Relational Consistency Guard_.
 - **Magic Bytes Validation (`mediaService.ts`)**: Pemeriksaan header biner asli file gambar yang diunggah untuk mencegah eksploitasi ekstensi berbahaya.
 
 ---
@@ -67,14 +72,14 @@ Proyek ini dibangun menggunakan ekosistem teknologi modern (*Modern Fullstack Ty
 
 Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** yang mengadopsi palet identitas resmi:
 
-| Warna Identitas | Kode HEX | Porsi | Penerapan Desain |
-|---|---|:---:|---|
-| 🟢 **Teal ANTAM** | `#0D726D` | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
-| 🟠 **Orange ANTAM** | `#F6A236` | **30%** (Aksen) | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak |
-| ⚪ **Clean White** | `#FFFFFF` | Utama | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor |
-| ◻️ **Soft Gray** | `#F7FAF9` | Seksi | Latar belakang seksi selang-seling (Program Unggulan, Dampak & Kerangka Kerja) |
-| ⚫ **Dark Text & Footer** | `#172121` | Kontras | Tipografi teks utama yang kontras tinggi dan latar belakang footer |
-| 🌈 **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` | Selektif | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi |
+| Warna Identitas             | Kode HEX                                            |       Porsi       | Penerapan Desain                                                                              |
+| --------------------------- | --------------------------------------------------- | :---------------: | --------------------------------------------------------------------------------------------- |
+| 🟢 **Teal ANTAM**           | `#0D726D`                                           | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
+| 🟠 **Orange ANTAM**         | `#F6A236`                                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
+| ⚪ **Clean White**          | `#FFFFFF`                                           |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
+| ◻️ **Soft Gray**            | `#F7FAF9`                                           |       Seksi       | Latar belakang seksi selang-seling (Program Unggulan, Dampak & Kerangka Kerja)                |
+| ⚫ **Dark Text & Footer**   | `#172121`                                           |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
+| 🌈 **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
 
 ---
 
@@ -82,16 +87,16 @@ Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** ya
 
 Platform mengintegrasikan 4 sektor utama Kawasan Ekonomi Keberkelanjutan:
 
-1. **🌱 Sektor Pertanian (*Agro Edu Wisata*)**:
+1. **🌱 Sektor Pertanian (_Agro Edu Wisata_)**:
    - Pertanian ramah lingkungan terintegrasi pariwisata edukatif.
    - Produk: Beras Organik Premium, sayuran hidroponik, dan edukasi pertanian modern.
-2. **🐄 Sektor Peternakan (*Inkubator Bisnis Peternakan*)**:
+2. **🐄 Sektor Peternakan (_Inkubator Bisnis Peternakan_)**:
    - Inkubasi usaha ternak komunal dan formulasi pakan silase mandiri.
    - Produk: Daging sapi/kambing berkualitas, olahan susu, dan pupuk kandang.
-3. **♻️ Sektor Lingkungan (*Pengolahan Sampah Plastik & Pupuk Diversoil*)**:
-   - Pengolahan limbah anorganik sirkular serta komposting pupuk organik bermutu tinggi (*Pupuk Diversoil*).
-4. **🥥 Sektor Industri Kelapa (*Industri Kelapa Terpadu*)**:
-   - Hilirisasi sabut kelapa menjadi produk ekspor dan bernilai tambah tinggi (*Coconet, Cocopeat, Cocopot, & Sapu Serat Kelapa*).
+3. **♻️ Sektor Lingkungan (_Pengolahan Sampah Plastik & Pupuk Diversoil_)**:
+   - Pengolahan limbah anorganik sirkular serta komposting pupuk organik bermutu tinggi (_Pupuk Diversoil_).
+4. **🥥 Sektor Industri Kelapa (_Industri Kelapa Terpadu_)**:
+   - Hilirisasi sabut kelapa menjadi produk ekspor dan bernilai tambah tinggi (_Coconet, Cocopeat, Cocopot, & Sapu Serat Kelapa_).
 5. **🏪 Sektor UMKM & Ekonomi Lokal**:
    - Pendampingan legalitas, sertifikasi halal/P-IRT, dan perluasan akses pasar produk warga binaan.
 
@@ -115,6 +120,7 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 ```
 
 ### 🔹 Tahap 1: Perancangan Arsitektur Basis Data & Relasi Prisma
+
 - Menyusun model data relasional pada [`prisma/schema.prisma`](file:///e:/Coding/CSR/prisma/schema.prisma):
   - `User`: Akun pengguna dan pemetaan hak akses sektor.
   - `Sector`: Master taksonomi 4 sektor program utama.
@@ -126,14 +132,16 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 - Pembuatan seeder database otomatis ([`prisma/seed.ts`](file:///e:/Coding/CSR/prisma/seed.ts)) berisi data percontohan riil.
 
 ### 🔹 Tahap 2: Otentikasi, Keamanan Sesi & RBAC
+
 - Implementasi sistem login dengan enkripsi password Bcrypt dan token JWT berbasis `jose`.
-- Pemisahan 3 tingkatan hak akses (*Roles*):
+- Pemisahan 3 tingkatan hak akses (_Roles_):
   - **SUPER_ADMIN**: Akses penuh ke seluruh data sektor dan manajemen akun pengguna.
-  - **ADMIN_PUSAT**: Pemantauan lintas sektor (*read-only* atau monitoring agregat).
+  - **ADMIN_PUSAT**: Pemantauan lintas sektor (_read-only_ atau monitoring agregat).
   - **ADMIN_SEKTOR**: Akses mutasi yang diisolasi ketat hanya ke sektor miliknya.
 - Pembuatan Next.js Middleware untuk pengamanan rute `/admin/*` dan sanitasi env `JWT_SECRET`.
 
 ### 🔹 Tahap 3: Pembangunan Dasbor Admin & Server Actions
+
 - Membangun antarmuka dashboard admin yang responsif dan terpadu:
   - **Overview Dashboard** (`/admin`): Grafik aktivitas, rasio status program, dan ringkasan angka dampak.
   - **Modul Program** (`/admin/program`): Pengelolaan program, status publikasi, dan keterhubungan sektor.
@@ -144,6 +152,7 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
   - **Modul Pengaturan** (`/admin/pengaturan`): Manajemen akun admin, ganti password mandiri, dan monitoring sektor.
 
 ### 🔹 Tahap 4: Pengembangan Portal Publik & Katalog Interaktif
+
 - Pembuatan halaman publik berorientasi pengguna:
   - **Beranda (`/`)**: Hero section visual, statistik dampak masyarakat, preview sektor, program, dan produk.
   - **Katalog Program (`/program` & `/program/[slug]`)**: Filter sektor interaktif dan halaman detail narasi program.
@@ -153,12 +162,14 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
   - **Halaman Bidang Sektor (`/bidang`, `/bidang/[slug]`)**: Rincian mendalam tiap sektor (Pertanian, Peternakan, Lingkungan, Industri Kelapa).
 
 ### 🔹 Tahap 5: Integritas Data & Validasi Sumber Resmi
+
 - Penambahan standardisasi atribusi sumber pada setiap data (`RESMI_ANTAM`, `PEMERINTAH`, `JURNAL_AKADEMIK`, dll.).
-- Badge status verifikasi data (*Terverifikasi / Belum Terverifikasi*).
-- *Relational Integrity Guard* untuk memastikan kegiatan, produk, atau dokumentasi tidak terhubung silang ke program sektor lain.
+- Badge status verifikasi data (_Terverifikasi / Belum Terverifikasi_).
+- _Relational Integrity Guard_ untuk memastikan kegiatan, produk, atau dokumentasi tidak terhubung silang ke program sektor lain.
 
 ### 🔹 Tahap 6: Redesain Identitas Visual & Optimasi Responsivitas
-- Transformasi skema warna menyeluruh ke **Teal ANTAM (`#0D726D`)** & **Orange ANTAM (`#F6A236`)** dengan *white space* bersih.
+
+- Transformasi skema warna menyeluruh ke **Teal ANTAM (`#0D726D`)** & **Orange ANTAM (`#F6A236`)** dengan _white space_ bersih.
 - Optimasi tata letak responsif pada tampilan mobile (perbaikan flexbox alignment agar tidak bergeser di layar HP).
 - Verifikasi build penuh (`npm run build`) dengan 100% rute statis & dinamis lulus tanpa kendala.
 
@@ -168,8 +179,8 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 
 - 🌐 **Public-Facing Impact Dashboard**: Menampilkan capaian riil CSR (penerima manfaat, desa binaan, pohon tertanam).
 - 🔒 **Sector-Isolated RBAC**: Mencegah admin sektor A mengubah atau melihat draft admin sektor B.
-- ⚡ **Zero Client-Side Leakage**: Data berstatus *Draft* tidak pernah terkirim ke klien pada portal publik.
-- 📊 **Dynamic Percentage Calculation**: Perhitungan capaian target (%) secara otomatis dengan penanganan aman *division by zero*.
+- ⚡ **Zero Client-Side Leakage**: Data berstatus _Draft_ tidak pernah terkirim ke klien pada portal publik.
+- 📊 **Dynamic Percentage Calculation**: Perhitungan capaian target (%) secara otomatis dengan penanganan aman _division by zero_.
 - 🖼️ **Secure Media Upload**: Layanan unggah media lokal dengan validasi MIME-Type dan Magic Bytes.
 - 📱 **Fully Responsive Layout**: Tampilan adaptif yang nyaman diakses dari smartphone, tablet, maupun layar desktop.
 
@@ -178,22 +189,27 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 ## 💻 Panduan Instalasi & Menjalankan Proyek
 
 ### Prasyarat:
+
 - [Node.js](https://nodejs.org/) versi 18.18+ atau 20+
 - Database [MySQL](https://www.mysql.com/) lokal (XAMPP / MySQL Server) atau cloud
 
 ### 1. Clone & Masuk ke Direktori Proyek
+
 ```bash
 git clone https://github.com/Yosa-svg/Program-CSR.git
 cd Program-CSR
 ```
 
 ### 2. Pasang Dependensi
+
 ```bash
 npm install
 ```
 
 ### 3. Konfigurasi Environment Variable (`.env`)
+
 Buat file `.env` di root direktori atau sesuaikan dengan contoh:
+
 ```env
 DATABASE_URL="mysql://root:@localhost:3306/csr"
 JWT_SECRET="masukkan-string-jwt-secret-acak-anda"
@@ -201,7 +217,9 @@ NODE_ENV="development"
 ```
 
 ### 4. Sinkronisasi Database & Seeding Data
+
 Jalankan migrasi Prisma dan script seeding:
+
 ```bash
 npx prisma generate
 npx prisma db push
@@ -209,9 +227,11 @@ npx prisma db seed
 ```
 
 ### 5. Jalankan Server Pengembangan
+
 ```bash
 npm run dev
 ```
+
 Buka peramban di [http://localhost:3000](http://localhost:3000).
 
 ---
@@ -220,15 +240,15 @@ Buka peramban di [http://localhost:3000](http://localhost:3000).
 
 Semua akun pengujian lokal telah terkonfigurasi dengan kata sandi terenkripsi Bcrypt:
 
-| Peran (Role) | Email Login | Kata Sandi (*Password*) | Lingkup Hak Akses |
-| --- | --- | --- | --- |
-| **Super Admin** | `super@csr.com` | `super2026` | Akses penuh seluruh sektor & manajemen pengguna |
-| **Admin Pusat** | `pusat@csr.com` | `pusat2026` | Monitoring agregat seluruh sektor CSR |
-| **Admin Pertanian** | `pertanian@csr.com` | `tani2026` | Pengelolaan data sektor **Pertanian** |
-| **Admin Peternakan** | `peternakan@csr.com` | `ternak2026` | Pengelolaan data sektor **Peternakan** |
-| **Admin Lingkungan** | `lingkungan@csr.com` | `lingkungan2026` | Pengelolaan data sektor **Lingkungan** |
-| **Admin Industri Kelapa** | `kelapa@csr.com` | `kelapa2026` | Pengelolaan data sektor **Industri Kelapa** |
-| **Admin UMKM** | `umkm@csr.com` | `umkm2026` | Pengelolaan data sektor **UMKM** |
+| Peran (Role)              | Lingkup Hak Akses                               |
+| ------------------------- | ----------------------------------------------- |
+| **Super Admin**           | Akses penuh seluruh sektor & manajemen pengguna |
+| **Admin Pusat**           | Monitoring agregat seluruh sektor CSR           |
+| **Admin Pertanian**       | Pengelolaan data sektor **Pertanian**           |
+| **Admin Peternakan**      | Pengelolaan data sektor **Peternakan**          |
+| **Admin Lingkungan**      | Pengelolaan data sektor **Lingkungan**          |
+| **Admin Industri Kelapa** | Pengelolaan data sektor **Industri Kelapa**     |
+| **Admin UMKM**            | Pengelolaan data sektor **UMKM**                |
 
 ---
 
