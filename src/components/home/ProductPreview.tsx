@@ -32,7 +32,7 @@ export default function ProductPreview() {
   return (
     <section className="py-24 bg-white text-[#172121]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8">
           <div className="max-w-2xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -48,7 +48,7 @@ export default function ProductPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-6 text-[#172121]"
+              className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-4 md:mb-6 text-[#172121]"
             >
               Dari kawasan<br/> untuk semua.
             </motion.h2>
