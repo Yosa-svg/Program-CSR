@@ -74,12 +74,12 @@ Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** ya
 
 | Warna Identitas             | Kode HEX                                            |       Porsi       | Penerapan Desain                                                                              |
 | --------------------------- | --------------------------------------------------- | :---------------: | --------------------------------------------------------------------------------------------- |
-| 🟢 **Teal ANTAM**           | `#0D726D`                                           | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
-| 🟠 **Orange ANTAM**         | `#F6A236`                                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
-| ⚪ **Clean White**          | `#FFFFFF`                                           |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
-| ◻️ **Soft Gray**            | `#F7FAF9`                                           |       Seksi       | Latar belakang seksi selang-seling (Program Unggulan, Dampak & Kerangka Kerja)                |
-| ⚫ **Dark Text & Footer**   | `#172121`                                           |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
-| 🌈 **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
+| **Teal ANTAM**           | `#0D726D`                                           | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
+| **Orange ANTAM**         | `#F6A236`                                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
+| **Clean White**          | `#FFFFFF`                                           |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
+| **Soft Gray**            | `#F7FAF9`                                           |       Seksi       | Latar belakang seksi selang-seling (Program Unggulan, Dampak & Kerangka Kerja)                |
+| **Dark Text & Footer**   | `#172121`                                           |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
+| **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
 
 ---
 
