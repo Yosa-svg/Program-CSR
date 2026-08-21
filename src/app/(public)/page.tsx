@@ -1,4 +1,5 @@
 import Hero from "@/components/home/Hero";
+import PhotoSlider from "@/components/home/PhotoSlider";
 import About from "@/components/home/About";
 import Sectors from "@/components/home/Sectors";
 import ProgramPreview from "@/components/home/ProgramPreview";
@@ -9,6 +10,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <PhotoSlider />
       <About />
       <Sectors />
       <ProgramPreview />
