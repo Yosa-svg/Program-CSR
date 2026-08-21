@@ -4,7 +4,7 @@ import LoginForm from "./LoginForm";
 
 export default async function LoginPage() {
   const session = await getSession();
-  
+
   if (session) {
     redirect("/admin");
   }
@@ -17,16 +17,12 @@ export default async function LoginPage() {
             <span className="text-primary font-bold text-xl">KEB</span>
           </div>
           <h1 className="text-2xl font-bold">Admin Login</h1>
-          <p className="text-foreground/60 text-sm mt-2">Masuk ke Dashboard CSR Kawasan Ekonomi Berkelanjutan</p>
+          <p className="text-foreground/60 text-sm mt-2">
+            Masuk ke Dashboard CSR Kawasan Ekonomi Berkelanjutan
+          </p>
         </div>
 
         <LoginForm />
-        
-        <div className="mt-8 pt-6 border-t border-border text-center text-xs text-foreground/40">
-          <p>Demo Akun:</p>
-          <p>pusat@csr.com / password123</p>
-          <p>pertanian@csr.com / password123</p>
-        </div>
       </div>
     </div>
   );

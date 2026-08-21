@@ -1,7 +1,5 @@
-import { writeFile, unlink } from "fs/promises";
-import { join } from "path";
+import { put, del } from "@vercel/blob";
 import crypto from "crypto";
-import fs from "fs";
 
 // Ukuran maksimal file (5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -80,23 +78,19 @@ export async function uploadImage(file: File, folder: string): Promise<{ url?: s
     // 3. Sanitasi folder dan nama file
     const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, "");
     const fileName = `${crypto.randomUUID()}.${extension}`;
-    
-    // Path direktori upload
-    const uploadDir = join(process.cwd(), "public", "uploads", safeFolder);
-    
-    // Pastikan folder ada
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    const pathname = `uploads/${safeFolder}/${fileName}`;
 
-    // 4. Simpan file fisik
-    const filePath = join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
+    // 4. Upload ke Vercel Blob (bukan filesystem lokal — filesystem Vercel
+    // bersifat sementara/read-only saat runtime produksi)
+    const blob = await put(pathname, buffer, {
+      access: "public",
+      contentType:
+        extension === "jpg" ? "image/jpeg" : extension === "png" ? "image/png" : "image/webp",
+    });
 
-    // 5. Kembalikan URL publik
-    const publicUrl = `/uploads/${safeFolder}/${fileName}`;
-    return { url: publicUrl };
-    
+    // 5. Kembalikan URL publik dari Vercel Blob
+    return { url: blob.url };
+
   } catch (error) {
     console.error("Gagal mengunggah gambar:", error);
     return { error: "Terjadi kesalahan sistem saat menyimpan gambar." };
@@ -105,16 +99,12 @@ export async function uploadImage(file: File, folder: string): Promise<{ url?: s
 
 export async function deleteImage(imageUrl: string): Promise<void> {
   try {
-    // Hindari path traversal dan manipulasi path di luar /uploads/
-    if (!imageUrl || !imageUrl.startsWith("/uploads/") || imageUrl.includes("..")) {
+    // Hanya hapus URL yang memang berasal dari Vercel Blob storage
+    if (!imageUrl || !imageUrl.includes(".public.blob.vercel-storage.com")) {
       return;
     }
 
-    const filePath = join(process.cwd(), "public", imageUrl);
-    
-    if (fs.existsSync(filePath)) {
-      await unlink(filePath);
-    }
+    await del(imageUrl);
   } catch (error) {
     console.error("Gagal menghapus gambar:", error);
   }
