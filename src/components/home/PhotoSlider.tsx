@@ -1,67 +1,24 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Camera, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
-interface SlideItem {
+interface PlaceholderItem {
   id: string;
-  title: string;
-  image: string;
   sectorSlug: string;
 }
 
-const SLIDES: SlideItem[] = [
-  {
-    id: "1",
-    title: "Budidaya & Edukasi Pertanian Ramah Lingkungan",
-    image: "/images/slider/csr_pertanian_1.jpg",
-    sectorSlug: "pertanian",
-  },
-  {
-    id: "2",
-    title: "Konservasi Pesisir & Penanaman Mangrove",
-    image: "/images/slider/csr_mangrove.jpg",
-    sectorSlug: "lingkungan",
-  },
-  {
-    id: "3",
-    title: "Inkubasi Usaha Peternakan Komunal",
-    image: "/images/slider/csr_peternakan_1.jpg",
-    sectorSlug: "peternakan",
-  },
-  {
-    id: "4",
-    title: "Survei Lapangan & Pemetaan Kawasan",
-    image: "/images/slider/csr_survey.jpg",
-    sectorSlug: "bidang",
-  },
-  {
-    id: "5",
-    title: "Panen Raya Bersama Kelompok Tani Binaan",
-    image: "/images/slider/csr_pertanian_2.jpg",
-    sectorSlug: "pertanian",
-  },
-  {
-    id: "6",
-    title: "Forum Dialog & Diskusi Bersama Tokoh Warga",
-    image: "/images/slider/csr_discussion.jpg",
-    sectorSlug: "bidang",
-  },
-  {
-    id: "7",
-    title: "Pengolahan Limbah Sirkular & Fasilitas Hijau",
-    image: "/images/slider/csr_plant.jpg",
-    sectorSlug: "lingkungan",
-  },
-  {
-    id: "8",
-    title: "Pemberdayaan Pengrajin & Keterampilan UMKM",
-    image: "/images/slider/csr_empowerment.jpg",
-    sectorSlug: "industri-kelapa",
-  },
+const PLACEHOLDERS: PlaceholderItem[] = [
+  { id: "1", sectorSlug: "pertanian" },
+  { id: "2", sectorSlug: "lingkungan" },
+  { id: "3", sectorSlug: "peternakan" },
+  { id: "4", sectorSlug: "bidang" },
+  { id: "5", sectorSlug: "pertanian" },
+  { id: "6", sectorSlug: "bidang" },
+  { id: "7", sectorSlug: "lingkungan" },
+  { id: "8", sectorSlug: "industri-kelapa" },
 ];
 
 export default function PhotoSlider() {
@@ -76,7 +33,7 @@ export default function PhotoSlider() {
   };
 
   // Duplicate for seamless infinite marquee effect
-  const marqueeItems = [...SLIDES, ...SLIDES];
+  const marqueeItems = [...PLACEHOLDERS, ...PLACEHOLDERS];
 
   return (
     <section className="relative py-14 md:py-20 bg-[#F7FAF9] border-b border-[#E2E8E6] overflow-hidden">
@@ -154,7 +111,7 @@ export default function PhotoSlider() {
         </div>
       </div>
 
-      {/* CONTINUOUS PURE PHOTO TRACK (no text overlays) */}
+      {/* CONTINUOUS GRAY PLACEHOLDER TRACK */}
       <div 
         className="relative w-full"
         onMouseEnter={() => setIsHovered(true)}
@@ -170,22 +127,16 @@ export default function PhotoSlider() {
           className="overflow-x-auto scrollbar-none scroll-smooth px-4 sm:px-6"
         >
           <div className={`flex gap-5 sm:gap-6 py-2 ${!isHovered ? "animate-marquee" : ""}`}>
-            {marqueeItems.map((slide, idx) => {
-              const targetUrl = slide.sectorSlug === "bidang" ? "/bidang" : `/bidang/${slide.sectorSlug}`;
+            {marqueeItems.map((item, idx) => {
+              const targetUrl = item.sectorSlug === "bidang" ? "/bidang" : `/bidang/${item.sectorSlug}`;
               return (
                 <Link
-                  key={`${slide.id}-${idx}`}
+                  key={`${item.id}-${idx}`}
                   href={targetUrl}
-                  className="relative group w-[260px] sm:w-[300px] md:w-[340px] h-[300px] sm:h-[340px] md:h-[360px] shrink-0 rounded-3xl overflow-hidden bg-white border border-[#E2E8E6] shadow-sm hover:shadow-xl hover:border-[#0D726D]/50 transition-all duration-500 cursor-pointer block"
+                  className="relative group w-[240px] sm:w-[280px] md:w-[320px] h-[260px] sm:h-[300px] md:h-[320px] shrink-0 rounded-3xl overflow-hidden bg-gradient-to-br from-[#E2E8E6] to-[#D5DEDC] border border-[#CBD5D1] shadow-sm hover:shadow-md hover:border-[#0D726D]/40 transition-all duration-300 cursor-pointer block"
                 >
-                  {/* Pure Photo Image with clean rounded presentation */}
-                  <Image
-                    src={slide.image}
-                    alt={slide.title}
-                    fill
-                    sizes="(max-width: 768px) 260px, 340px"
-                    className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                  />
+                  {/* Subtle hover pulse / light sheen effect */}
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
                 </Link>
               );
             })}
