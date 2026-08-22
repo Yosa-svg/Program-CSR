@@ -4,13 +4,11 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Camera, ChevronLeft, ChevronRight, ArrowRight, MapPin } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 interface SlideItem {
   id: string;
   title: string;
-  category: string;
-  location: string;
   image: string;
   sectorSlug: string;
 }
@@ -19,64 +17,48 @@ const SLIDES: SlideItem[] = [
   {
     id: "1",
     title: "Budidaya & Edukasi Pertanian Ramah Lingkungan",
-    category: "Agro Edu Wisata",
-    location: "Desa Suka Maju",
     image: "/images/slider/csr_pertanian_1.jpg",
     sectorSlug: "pertanian",
   },
   {
     id: "2",
     title: "Konservasi Pesisir & Penanaman Mangrove",
-    category: "Lingkungan",
-    location: "Kawasan Reklamasi",
     image: "/images/slider/csr_mangrove.jpg",
     sectorSlug: "lingkungan",
   },
   {
     id: "3",
     title: "Inkubasi Usaha Peternakan Komunal",
-    category: "Peternakan",
-    location: "Kandang Komunal",
     image: "/images/slider/csr_peternakan_1.jpg",
     sectorSlug: "peternakan",
   },
   {
     id: "4",
     title: "Survei Lapangan & Pemetaan Kawasan",
-    category: "Perencanaan",
-    location: "Kawasan Ekonomi Terpadu",
     image: "/images/slider/csr_survey.jpg",
     sectorSlug: "bidang",
   },
   {
     id: "5",
     title: "Panen Raya Bersama Kelompok Tani Binaan",
-    category: "Pertanian",
-    location: "Lahan Tani Berkelanjutan",
     image: "/images/slider/csr_pertanian_2.jpg",
     sectorSlug: "pertanian",
   },
   {
     id: "6",
     title: "Forum Dialog & Diskusi Bersama Tokoh Warga",
-    category: "Pemberdayaan",
-    location: "Balai Komunitas",
     image: "/images/slider/csr_discussion.jpg",
     sectorSlug: "bidang",
   },
   {
     id: "7",
     title: "Pengolahan Limbah Sirkular & Fasilitas Hijau",
-    category: "Lingkungan",
-    location: "Pusat Daur Ulang",
     image: "/images/slider/csr_plant.jpg",
     sectorSlug: "lingkungan",
   },
   {
     id: "8",
     title: "Pemberdayaan Pengrajin & Keterampilan UMKM",
-    category: "Industri Kelapa",
-    location: "Sentra Olahan Kelapa",
     image: "/images/slider/csr_empowerment.jpg",
     sectorSlug: "industri-kelapa",
   },
@@ -97,12 +79,12 @@ export default function PhotoSlider() {
   const marqueeItems = [...SLIDES, ...SLIDES];
 
   return (
-    <section className="relative py-16 md:py-24 bg-[#F7FAF9] border-b border-[#E2E8E6] overflow-hidden">
+    <section className="relative py-14 md:py-20 bg-[#F7FAF9] border-b border-[#E2E8E6] overflow-hidden">
       {/* Decorative ambient background glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#0D726D]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#F6A236]/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 md:mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 md:mb-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <motion.div
@@ -172,7 +154,7 @@ export default function PhotoSlider() {
         </div>
       </div>
 
-      {/* CONTINUOUS PHOTO TRACK (with pause-on-hover & interactive swipe) */}
+      {/* CONTINUOUS PURE PHOTO TRACK (no text overlays) */}
       <div 
         className="relative w-full"
         onMouseEnter={() => setIsHovered(true)}
@@ -194,48 +176,16 @@ export default function PhotoSlider() {
                 <Link
                   key={`${slide.id}-${idx}`}
                   href={targetUrl}
-                  className="relative group w-[280px] sm:w-[320px] md:w-[350px] h-[340px] sm:h-[380px] md:h-[400px] shrink-0 rounded-3xl overflow-hidden bg-white border border-[#E2E8E6] shadow-sm hover:shadow-2xl hover:border-[#0D726D]/50 transition-all duration-500 cursor-pointer block"
+                  className="relative group w-[260px] sm:w-[300px] md:w-[340px] h-[300px] sm:h-[340px] md:h-[360px] shrink-0 rounded-3xl overflow-hidden bg-white border border-[#E2E8E6] shadow-sm hover:shadow-xl hover:border-[#0D726D]/50 transition-all duration-500 cursor-pointer block"
                 >
-                  {/* Photo Image */}
+                  {/* Pure Photo Image with clean rounded presentation */}
                   <Image
                     src={slide.image}
                     alt={slide.title}
                     fill
-                    sizes="(max-width: 768px) 280px, 350px"
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    sizes="(max-width: 768px) 260px, 340px"
+                    className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
                   />
-
-                  {/* Top Category Badge */}
-                  <div className="absolute top-4 left-4 z-20">
-                    <span className="px-3.5 py-1 rounded-full text-[11px] font-bold tracking-wide bg-white/95 text-[#0D726D] shadow-md backdrop-blur-md border border-white/60">
-                      {slide.category}
-                    </span>
-                  </div>
-
-                  {/* Top Right Orange Dot Indicator */}
-                  <div className="absolute top-4 right-4 z-20 w-2.5 h-2.5 rounded-full bg-[#F6A236] ring-4 ring-white/60 shadow-sm" />
-
-                  {/* Dark Gradient Overlay for Caption Readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent opacity-75 group-hover:opacity-90 transition-opacity duration-300 z-10" />
-
-                  {/* Caption & Location Info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 z-20 flex flex-col justify-end transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-                    <div className="flex items-center gap-1.5 text-white/80 text-xs font-semibold mb-2">
-                      <MapPin size={13} className="text-[#F6A236] shrink-0" />
-                      <span>{slide.location}</span>
-                    </div>
-
-                    <h3 className="text-white font-bold text-base sm:text-lg leading-snug line-clamp-2 drop-shadow-sm group-hover:text-white transition-colors">
-                      {slide.title}
-                    </h3>
-
-                    <div className="mt-3 pt-3 border-t border-white/15 flex items-center justify-between text-xs font-semibold text-white/75 group-hover:text-white">
-                      <span className="text-[#F6A236]">Aksi Lapangan</span>
-                      <span className="inline-flex items-center gap-1 text-white/90 group-hover:translate-x-1 transition-transform">
-                        Detail <ArrowRight size={13} className="text-[#F6A236]" />
-                      </span>
-                    </div>
-                  </div>
                 </Link>
               );
             })}
