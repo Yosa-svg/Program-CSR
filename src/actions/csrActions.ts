@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
 // Helper: generate URL-safe slug from title
 function generateSlug(title: string): string {
@@ -20,23 +20,13 @@ function generateSlug(title: string): string {
 
 export async function getPrograms() {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      const session = await getSession();
-      if (!session || session.role === "ADMIN_SEKTOR") return []; 
-      
-      return await prisma.program.findMany({
-        include: { sector: true },
-        orderBy: { title: 'asc' }
-      });
-    }
-
-    await requireSectorAccess(activeSectorId);
 
     return await prisma.program.findMany({
-      where: { sectorId: activeSectorId },
+      where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: { sector: true },
-      orderBy: { title: 'asc' }
+      orderBy: { title: "asc" },
     });
   } catch (error) {
     console.error("Failed to fetch programs:", error);
@@ -46,12 +36,13 @@ export async function getPrograms() {
 
 export async function createProgram(formData: FormData) {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
-    }
+    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
-    await requireSectorAccess(activeSectorId);
+    if (!sectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data program." };
+    }
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -62,7 +53,7 @@ export async function createProgram(formData: FormData) {
     const imageUrl = (formData.get("imageUrl") as string) || "/images/placeholder.jpg";
 
     const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string; // Nullable
+    const sourceType = formData.get("sourceType") as string;
     const sourceUrl = formData.get("sourceUrl") as string;
     const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
@@ -98,7 +89,7 @@ export async function createProgram(formData: FormData) {
         sourceType: sourceType || null,
         sourceUrl: sourceUrl || null,
         verificationStatus,
-        sectorId: activeSectorId,
+        sectorId,
       },
     });
 
@@ -114,10 +105,9 @@ export async function createProgram(formData: FormData) {
 
 export async function updateProgram(id: string, formData: FormData) {
   try {
+    await requireAuth();
     const program = await prisma.program.findUnique({ where: { id } });
     if (!program) throw new Error("Program not found");
-    
-    await requireSectorAccess(program.sectorId);
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -175,13 +165,12 @@ export async function updateProgram(id: string, formData: FormData) {
 
 export async function deleteProgram(id: string) {
   try {
+    await requireAuth();
     const program = await prisma.program.findUnique({ where: { id } });
     if (!program) throw new Error("Program not found");
-    
-    await requireSectorAccess(program.sectorId);
 
     await prisma.program.delete({
-      where: { id }
+      where: { id },
     });
     revalidatePath("/admin/program");
     revalidatePath("/admin");

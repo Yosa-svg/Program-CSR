@@ -27,7 +27,7 @@ type Documentation = {
   activity?: {
     title: string;
   } | null;
-  product?: { title: string } | null;
+  product?: { name?: string; title?: string } | null;
   sector?: { name: string };
 };
 

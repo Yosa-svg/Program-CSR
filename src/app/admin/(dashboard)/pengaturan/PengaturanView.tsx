@@ -182,7 +182,7 @@ export default function PengaturanView({
           Profil & Keamanan
         </button>
 
-        {(sessionRole === "SUPER_ADMIN" || sessionRole === "ADMIN_PUSAT") && (
+        {(sessionRole === "ADMIN_CSR" || sessionRole === "SUPER_ADMIN" || sessionRole === "ADMIN_PUSAT") && (
           <button
             onClick={() => setActiveTab("users")}
             className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
@@ -192,7 +192,7 @@ export default function PengaturanView({
             }`}
           >
             <Users size={16} />
-            Manajemen Pengguna {sessionRole === "SUPER_ADMIN" ? "(Super Admin)" : "(Direktori)"}
+            Direktori Akun Admin
           </button>
         )}
 

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
 // Helper: generate unique URL-safe slug for Product
 async function generateUniqueProductSlug(name: string, sectorId: string): Promise<string> {
@@ -34,26 +34,16 @@ async function generateUniqueProductSlug(name: string, sectorId: string): Promis
 
 export async function getProducts() {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      const session = await getSession();
-      if (!session || session.role === "ADMIN_SEKTOR") return []; 
-      
-      return await prisma.product.findMany({
-        include: { sector: true, program: true },
-        orderBy: { name: 'asc' }
-      });
-    }
-
-    await requireSectorAccess(activeSectorId);
 
     return await prisma.product.findMany({
-      where: { sectorId: activeSectorId },
+      where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
         program: true,
-        sector: true
+        sector: true,
       },
-      orderBy: { name: 'asc' }
+      orderBy: { name: "asc" },
     });
   } catch (error) {
     console.error("Failed to fetch products:", error);
@@ -63,12 +53,13 @@ export async function getProducts() {
 
 export async function createProduct(formData: FormData) {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+
+    if (!sectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data produk." };
     }
-    
-    await requireSectorAccess(activeSectorId);
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -76,12 +67,12 @@ export async function createProduct(formData: FormData) {
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string; // Optional
-    
+
     const capacity = formData.get("capacity") as string;
     const unit = formData.get("unit") as string;
     const marketing = formData.get("marketing") as string;
     const certification = formData.get("certification") as string;
-    
+
     const source = formData.get("source") as string;
     const sourceType = formData.get("sourceType") as string;
     const sourceUrl = formData.get("sourceUrl") as string;
@@ -90,8 +81,8 @@ export async function createProduct(formData: FormData) {
     // Server-Side Relational Consistency Check
     if (programId) {
       const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
-      if (!parentProgram || parentProgram.sectorId !== activeSectorId) {
-        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor yang sedang Anda kelola." };
+      if (!parentProgram || parentProgram.sectorId !== sectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari produk ini." };
       }
     }
 
@@ -108,7 +99,7 @@ export async function createProduct(formData: FormData) {
       }
     }
 
-    const slug = await generateUniqueProductSlug(name, activeSectorId);
+    const slug = await generateUniqueProductSlug(name, sectorId);
 
     await prisma.product.create({
       data: {
@@ -127,7 +118,7 @@ export async function createProduct(formData: FormData) {
         sourceUrl: sourceUrl || null,
         verificationStatus,
         programId: programId || null,
-        sectorId: activeSectorId,
+        sectorId,
         imageUrl: "/images/placeholder.jpg",
       },
     });
@@ -144,22 +135,22 @@ export async function createProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
   try {
+    await requireAuth();
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw new Error("Product not found");
-    
-    await requireSectorAccess(product.sectorId);
+
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
     const programId = formData.get("programId") as string;
-    
+
     const capacity = formData.get("capacity") as string;
     const unit = formData.get("unit") as string;
     const marketing = formData.get("marketing") as string;
     const certification = formData.get("certification") as string;
-    
+
     const source = formData.get("source") as string;
     const sourceType = formData.get("sourceType") as string;
     const sourceUrl = formData.get("sourceUrl") as string;
@@ -218,13 +209,12 @@ export async function updateProduct(id: string, formData: FormData) {
 
 export async function deleteProduct(id: string) {
   try {
+    await requireAuth();
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw new Error("Product not found");
-    
-    await requireSectorAccess(product.sectorId);
 
     await prisma.product.delete({
-      where: { id }
+      where: { id },
     });
     revalidatePath("/admin/produk");
     revalidatePath("/admin");

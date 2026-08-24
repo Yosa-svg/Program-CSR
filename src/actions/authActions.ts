@@ -67,7 +67,6 @@ export async function loginAction(formData: FormData) {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { sector: true }
   });
 
   if (!user) {
@@ -85,23 +84,10 @@ export async function loginAction(formData: FormData) {
   // Bersihkan catatan percobaan jika login berhasil
   clearRateLimit(email);
 
-  // Set Cookie Active Sector untuk ADMIN_PUSAT/SUPER_ADMIN akan dibiarkan kosong,
-  // sehingga mereka masuk dalam mode agregasi "Semua Sektor" secara default.
-  if (user.role === "ADMIN_SEKTOR" && user.sectorId) {
-    const cookieStore = await cookies();
-    cookieStore.set("active_sector", user.sectorId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 hari
-      path: "/",
-    });
-  }
-
   const session = await encrypt({
     userId: user.id,
     role: user.role,
-    sectorId: user.sectorId,
-    name: user.name
+    name: user.name,
   });
 
   const cookieStore = await cookies();

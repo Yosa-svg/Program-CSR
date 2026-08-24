@@ -17,24 +17,13 @@ export default async function AdminLayout({
   const session = await getSession();
   if (!session) redirect("/admin/login");
 
-  let sectors: { id: string, name: string }[] = [];
-  
-  if (session?.role !== "ADMIN_SEKTOR") {
-    sectors = await prisma.sector.findMany({
-      select: { id: true, name: true },
-      orderBy: { name: 'asc' }
-    });
-  } else if (session?.sectorId) {
-    const s = await prisma.sector.findUnique({
-      where: { id: session.sectorId },
-      select: { id: true, name: true }
-    });
-    if (s) sectors = [s];
-  }
+  const sectors = await prisma.sector.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' }
+  });
 
   const activeSectorId = await getActiveSectorId();
-  const allowAll = session?.role !== "ADMIN_SEKTOR";
-  const activeSector = sectors.find(s => s.id === activeSectorId);
+  const allowAll = true;
 
   return (
     <div className="min-h-screen bg-[#F7FAF9] flex flex-col md:flex-row font-sans">
@@ -103,14 +92,8 @@ export default async function AdminLayout({
           <div className="flex items-center gap-4">
             <h2 className="text-[#172121] font-bold text-base">Dashboard CSR</h2>
             
-            {/* Pemilihan Sektor untuk Admin Pusat / Super Admin */}
-            {session.role !== "ADMIN_SEKTOR" ? (
-              <SectorSelector sectors={sectors} activeSectorId={activeSectorId} allowAll={allowAll} />
-            ) : (
-              <div className="px-3.5 py-1 bg-[#0D726D]/10 text-[#0D726D] border border-[#0D726D]/20 rounded-full text-xs font-bold flex items-center gap-2">
-                Sektor Aktif: {activeSector?.name} 🔒
-              </div>
-            )}
+            {/* Filter Sektor untuk Seluruh Admin CSR */}
+            <SectorSelector sectors={sectors} activeSectorId={activeSectorId} allowAll={allowAll} />
           </div>
           
           <div className="flex items-center gap-4">

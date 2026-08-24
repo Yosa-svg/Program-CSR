@@ -12,7 +12,6 @@ export default async function PengaturanPage() {
 
   const currentUser = await prisma.user.findUnique({
     where: { id: session.userId },
-    include: { sector: true },
   });
 
   if (!currentUser) {
@@ -23,9 +22,7 @@ export default async function PengaturanPage() {
     orderBy: { name: "asc" },
   });
 
-  const usersList = (session.role === "SUPER_ADMIN" || session.role === "ADMIN_PUSAT")
-    ? await getUsersList()
-    : [];
+  const usersList = await getUsersList();
 
   const [totalPrograms, totalActivities, totalProducts, totalDocs, totalMetrics] = await Promise.all([
     prisma.program.count(),

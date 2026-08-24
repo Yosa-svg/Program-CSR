@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // ACTIVITY (KEGIATAN) ACTIONS
@@ -10,26 +10,16 @@ import { getActiveSectorId, requireSectorAccess, getSession } from "@/lib/auth";
 
 export async function getActivities() {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      const session = await getSession();
-      if (!session || session.role === "ADMIN_SEKTOR") return []; 
-      
-      return await prisma.activity.findMany({
-        include: { sector: true, program: true },
-        orderBy: { date: 'desc' }
-      });
-    }
-
-    await requireSectorAccess(activeSectorId);
 
     return await prisma.activity.findMany({
-      where: { sectorId: activeSectorId },
+      where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
         program: true,
-        sector: true
+        sector: true,
       },
-      orderBy: { date: 'desc' }
+      orderBy: { date: "desc" },
     });
   } catch (error) {
     console.error("Failed to fetch activities:", error);
@@ -39,12 +29,13 @@ export async function getActivities() {
 
 export async function createActivity(formData: FormData) {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+
+    if (!sectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data kegiatan." };
     }
-    
-    await requireSectorAccess(activeSectorId);
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -62,8 +53,8 @@ export async function createActivity(formData: FormData) {
     // Server-Side Relational Consistency Check
     if (programId) {
       const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
-      if (!parentProgram || parentProgram.sectorId !== activeSectorId) {
-        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor yang sedang Anda kelola." };
+      if (!parentProgram || parentProgram.sectorId !== sectorId) {
+        return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari kegiatan ini." };
       }
     }
 
@@ -96,7 +87,7 @@ export async function createActivity(formData: FormData) {
         sourceType: sourceType || null,
         sourceUrl: sourceUrl || null,
         verificationStatus,
-        sectorId: activeSectorId,
+        sectorId,
       },
     });
 
@@ -112,10 +103,9 @@ export async function createActivity(formData: FormData) {
 
 export async function updateActivity(id: string, formData: FormData) {
   try {
+    await requireAuth();
     const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) throw new Error("Activity not found");
-    
-    await requireSectorAccess(activity.sectorId);
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -183,13 +173,12 @@ export async function updateActivity(id: string, formData: FormData) {
 
 export async function deleteActivity(id: string) {
   try {
+    await requireAuth();
     const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) throw new Error("Activity not found");
-    
-    await requireSectorAccess(activity.sectorId);
 
     await prisma.activity.delete({
-      where: { id }
+      where: { id },
     });
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");

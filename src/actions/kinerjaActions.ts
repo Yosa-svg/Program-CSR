@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // KINERJA (METRIC) ACTIONS
@@ -10,29 +10,16 @@ import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from 
 
 export async function getMetrics() {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      const session = await getSession();
-      if (!session || session.role === "ADMIN_SEKTOR") return []; 
-      
-      return await prisma.metric.findMany({
-        include: { 
-          sector: true,
-          program: { select: { id: true, title: true } }
-        },
-        orderBy: { createdAt: 'desc' }
-      });
-    }
-
-    await requireSectorAccess(activeSectorId);
 
     return await prisma.metric.findMany({
-      where: { sectorId: activeSectorId },
-      include: { 
+      where: activeSectorId ? { sectorId: activeSectorId } : {},
+      include: {
         sector: true,
-        program: { select: { id: true, title: true } }
+        program: { select: { id: true, title: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   } catch (error) {
     console.error("Failed to fetch metrics:", error);
@@ -42,18 +29,19 @@ export async function getMetrics() {
 
 export async function createMetric(formData: FormData) {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
+    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+
+    if (!sectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data indikator." };
     }
-    
-    await requireSectorAccess(activeSectorId);
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = (formData.get("category") as string) || "OUTCOME";
     const unit = formData.get("unit") as string;
-    
+
     const targetRaw = formData.get("target") as string;
     const realizationRaw = formData.get("realization") as string;
     const target = targetRaw !== "" && !isNaN(parseFloat(targetRaw)) ? parseFloat(targetRaw) : null;
@@ -76,7 +64,7 @@ export async function createMetric(formData: FormData) {
     // Server-Side Relational Consistency Check
     if (programId) {
       const p = await prisma.program.findUnique({ where: { id: programId } });
-      if (!p || p.sectorId !== activeSectorId) {
+      if (!p || p.sectorId !== sectorId) {
         return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari indikator ini." };
       }
     }
@@ -112,7 +100,7 @@ export async function createMetric(formData: FormData) {
         programId: programId || null,
         status,
         isPublished,
-        sectorId: activeSectorId,
+        sectorId,
       },
     });
 
@@ -129,10 +117,9 @@ export async function createMetric(formData: FormData) {
 
 export async function updateMetric(id: string, formData: FormData) {
   try {
+    await requireAuth();
     const metric = await prisma.metric.findUnique({ where: { id } });
     if (!metric) throw new Error("Metric not found");
-    
-    await requireSectorAccess(metric.sectorId);
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -214,13 +201,12 @@ export async function updateMetric(id: string, formData: FormData) {
 
 export async function deleteMetric(id: string) {
   try {
+    await requireAuth();
     const metric = await prisma.metric.findUnique({ where: { id } });
     if (!metric) throw new Error("Metric not found");
-    
-    await requireSectorAccess(metric.sectorId);
 
     await prisma.metric.delete({
-      where: { id }
+      where: { id },
     });
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");

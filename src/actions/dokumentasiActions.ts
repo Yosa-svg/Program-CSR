@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadImage, deleteImage } from "@/lib/mediaService";
-import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from "@/lib/auth";
+import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
 // ==========================================
 // DOCUMENTATION ACTIONS
@@ -11,28 +11,18 @@ import { getActiveSectorId, requireSectorAccess, requireAuth, getSession } from 
 
 export async function getDocumentations() {
   try {
+    await requireAuth();
     const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      const session = await getSession();
-      if (!session || session.role === "ADMIN_SEKTOR") return []; 
-      
-      return await prisma.documentation.findMany({
-        include: { sector: true },
-        orderBy: { createdAt: 'desc' }
-      });
-    }
-
-    await requireSectorAccess(activeSectorId);
 
     return await prisma.documentation.findMany({
-      where: { sectorId: activeSectorId },
+      where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
         sector: true,
         program: true,
         activity: true,
-        product: true
+        product: true,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   } catch (error) {
     console.error("Failed to fetch documentations:", error);
@@ -42,6 +32,14 @@ export async function getDocumentations() {
 
 export async function createDocumentation(formData: FormData) {
   try {
+    await requireAuth();
+    const activeSectorId = await getActiveSectorId();
+    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+
+    if (!sectorId) {
+      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data dokumentasi." };
+    }
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const dateStr = formData.get("date") as string;
@@ -56,29 +54,22 @@ export async function createDocumentation(formData: FormData) {
     const sourceUrl = formData.get("sourceUrl") as string;
     const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
-    const activeSectorId = await getActiveSectorId();
-    if (!activeSectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data." };
-    }
-    
-    await requireSectorAccess(activeSectorId);
-
     // Server-Side Relational Consistency Checks
     if (programId) {
       const p = await prisma.program.findUnique({ where: { id: programId } });
-      if (!p || p.sectorId !== activeSectorId) {
+      if (!p || p.sectorId !== sectorId) {
         return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari dokumentasi ini." };
       }
     }
     if (activityId) {
       const a = await prisma.activity.findUnique({ where: { id: activityId } });
-      if (!a || a.sectorId !== activeSectorId) {
+      if (!a || a.sectorId !== sectorId) {
         return { success: false, error: "Kegiatan yang dipilih berada di luar Sektor dari dokumentasi ini." };
       }
     }
     if (productId) {
       const prod = await prisma.product.findUnique({ where: { id: productId } });
-      if (!prod || prod.sectorId !== activeSectorId) {
+      if (!prod || prod.sectorId !== sectorId) {
         return { success: false, error: "Produk yang dipilih berada di luar Sektor dari dokumentasi ini." };
       }
     }
@@ -121,7 +112,7 @@ export async function createDocumentation(formData: FormData) {
         sourceType: sourceType || null,
         sourceUrl: sourceUrl || null,
         verificationStatus,
-        sectorId: activeSectorId,
+        sectorId,
         imageUrl: uploadResult.url,
       },
     });
@@ -138,6 +129,10 @@ export async function createDocumentation(formData: FormData) {
 
 export async function updateDocumentation(id: string, formData: FormData) {
   try {
+    await requireAuth();
+    const oldDoc = await prisma.documentation.findUnique({ where: { id } });
+    if (!oldDoc) return { success: false, error: "Dokumentasi tidak ditemukan." };
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const dateStr = formData.get("date") as string;
@@ -151,11 +146,6 @@ export async function updateDocumentation(id: string, formData: FormData) {
     const sourceType = formData.get("sourceType") as string;
     const sourceUrl = formData.get("sourceUrl") as string;
     const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
-
-    const oldDoc = await prisma.documentation.findUnique({ where: { id } });
-    if (!oldDoc) return { success: false, error: "Dokumentasi tidak ditemukan." };
-    
-    await requireSectorAccess(oldDoc.sectorId);
 
     // Server-Side Relational Consistency Checks
     if (programId) {
@@ -238,12 +228,12 @@ export async function updateDocumentation(id: string, formData: FormData) {
 
 export async function deleteDocumentation(id: string) {
   try {
+    await requireAuth();
     const doc = await prisma.documentation.findUnique({ where: { id } });
     
     if (doc) {
-      await requireSectorAccess(doc.sectorId);
       await prisma.documentation.delete({
-        where: { id }
+        where: { id },
       });
       await deleteImage(doc.imageUrl);
     }
