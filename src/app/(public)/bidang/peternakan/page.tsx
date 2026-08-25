@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Beef, Wheat, Recycle, Users } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Peternakan | Bidang CSR",
   description: "Meningkatkan kesejahteraan melalui pembibitan unggul dan pakan organik.",

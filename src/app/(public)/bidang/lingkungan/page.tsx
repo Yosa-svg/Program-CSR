@@ -12,6 +12,8 @@ import { getPublishedProducts } from "@/lib/queries/products";
 import { getPublishedDocumentation } from "@/lib/queries/documentation";
 import { getPublishedMetrics } from "@/lib/queries/metrics";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Lingkungan | Sektor CSR",
   description: "Pengolahan Sampah Plastik & Pupuk Diversoil untuk pelestarian ekosistem dan ekonomi sirkular.",

@@ -12,6 +12,8 @@ import { getPublishedProducts } from "@/lib/queries/products";
 import { getPublishedDocumentation } from "@/lib/queries/documentation";
 import { getPublishedMetrics } from "@/lib/queries/metrics";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Industri Kelapa | Sektor CSR",
   description: "Program Industri Kelapa Terpadu: Hilirisasi Coconet, Cocopeat, Cocopot, & Sapu Sabut Kelapa.",
