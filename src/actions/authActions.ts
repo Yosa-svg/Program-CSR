@@ -102,7 +102,7 @@ export async function loginAction(formData: FormData) {
     return { success: true };
   } catch (error: any) {
     console.error("LOGIN_ACTION_ERROR:", error);
-    return { error: "Gagal terhubung ke database atau memproses login. Silakan periksa koneksi." };
+    return { error: `Gagal login: ${error?.message || "Kesalahan koneksi database."}` };
   }
 }
 
