@@ -50,55 +50,60 @@ function clearRateLimit(key: string) {
 }
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get("email")?.toString()?.trim().toLowerCase();
-  const password = formData.get("password")?.toString();
+  try {
+    const email = formData.get("email")?.toString()?.trim().toLowerCase();
+    const password = formData.get("password")?.toString();
 
-  if (!email || !password) {
-    return { error: "Email dan password wajib diisi." };
+    if (!email || !password) {
+      return { error: "Email dan password wajib diisi." };
+    }
+
+    // Rate Limiting Check
+    const rateLimitStatus = checkRateLimit(email);
+    if (rateLimitStatus.isLocked) {
+      return { 
+        error: `Terlalu banyak percobaan login gagal. Akun sementara dikunci. Silakan coba lagi dalam ${rateLimitStatus.remainingMinutes} menit.` 
+      };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      recordFailedAttempt(email);
+      return { error: "Email atau password yang Anda masukkan salah." };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      recordFailedAttempt(email);
+      return { error: "Email atau password yang Anda masukkan salah." };
+    }
+
+    // Bersihkan catatan percobaan jika login berhasil
+    clearRateLimit(email);
+
+    const session = await encrypt({
+      userId: user.id,
+      role: user.role,
+      name: user.name,
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set("session", session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24, // 1 hari
+      path: "/",
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("LOGIN_ACTION_ERROR:", error);
+    return { error: "Gagal terhubung ke database atau memproses login. Silakan periksa koneksi." };
   }
-
-  // Rate Limiting Check
-  const rateLimitStatus = checkRateLimit(email);
-  if (rateLimitStatus.isLocked) {
-    return { 
-      error: `Terlalu banyak percobaan login gagal. Akun sementara dikunci. Silakan coba lagi dalam ${rateLimitStatus.remainingMinutes} menit.` 
-    };
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user) {
-    recordFailedAttempt(email);
-    return { error: "Email atau password yang Anda masukkan salah." };
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  
-  if (!isPasswordValid) {
-    recordFailedAttempt(email);
-    return { error: "Email atau password yang Anda masukkan salah." };
-  }
-
-  // Bersihkan catatan percobaan jika login berhasil
-  clearRateLimit(email);
-
-  const session = await encrypt({
-    userId: user.id,
-    role: user.role,
-    name: user.name,
-  });
-
-  const cookieStore = await cookies();
-  cookieStore.set("session", session, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24, // 1 hari
-    path: "/",
-  });
-
-  return { success: true };
 }
 
 export async function logoutAction() {

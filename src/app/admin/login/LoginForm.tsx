@@ -14,14 +14,14 @@ export default function LoginForm() {
     setError(null);
     try {
       const res = await loginAction(formData);
-      if (res.error) {
+      if (res?.error) {
         setError(res.error);
       } else {
         router.push("/admin");
         router.refresh();
       }
-    } catch (err) {
-      setError("Terjadi kesalahan sistem.");
+    } catch (err: any) {
+      setError(err?.message || "Terjadi kesalahan sistem.");
     } finally {
       setLoading(false);
     }
