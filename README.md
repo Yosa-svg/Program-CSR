@@ -56,29 +56,35 @@ Proyek ini dibangun menggunakan ekosistem teknologi modern (_Modern Fullstack Ty
 
 - **Next.js Server Actions**: Mutasi data backend secara native tanpa perlu konfigurasi boilerplate REST API manual.
 - **[Prisma ORM](https://www.prisma.io/)**: Pemetaan data relasional skema MySQL, migrasi terotomatisasi, dan query data bertipe aman (_type-safe queries_).
-- **[MySQL](https://www.mysql.com/)**: Database relasional utama untuk menyimpan entitas Pengguna, Sektor, Program, Kegiatan, Produk, Dokumentasi, dan Metrik Kinerja.
+### 2. Backend, Database & Arsitektur Data
+
+- **Next.js Server Actions**: Mutasi data backend secara native tanpa perlu konfigurasi boilerplate REST API manual.
+- **[Prisma ORM (v5.22)](https://www.prisma.io/)**: Pemetaan data relasional skema MySQL, migrasi terotomatisasi, dan query data bertipe aman (_type-safe queries_).
+- **[TiDB Cloud / MySQL](https://tidbcloud.com/)**: Database relasional terdistribusi cloud berkinerja tinggi dengan enkripsi SSL/TLS ketat (`sslaccept=strict`).
 
 ### 3. Keamanan & Autentikasi
 
 - **[Jose (JWT)](https://github.com/panva/jose)**: Manajemen token otentikasi sesi admin berbasis enkripsi JSON Web Token yang disimpan di `HttpOnly, Secure Cookie`.
-- **[Bcryptjs](https://github.com/dcodeIO/bcrypt.js)**: Algoritma hashing _salted_ satu arah untuk mengamankan kata sandi seluruh level akun admin.
+- **[Bcryptjs](https://github.com/dcodeIO/bcrypt.js)**: Algoritma hashing _salted_ satu arah untuk mengamankan kata sandi seluruh akun admin.
+- **Unified Single-Role Admin CSR (`ADMIN_CSR`)**: Akses terpadu dan fleksibel untuk mengelola seluruh sektor program CSR melalui fitur *Active Sector Selector*.
 - **Next.js Middleware Guard**: Proteksi rute dinamis pada jalur `/admin/*` untuk memblokir akses tanpa token valid.
-- **Multi-Layer Server Pipeline Guard**: Validasi otorisasi di tingkat Server Action mencakup verifikasi role, _Sector Isolation Guard_, dan _Relational Consistency Guard_.
+- **Multi-Layer Server Pipeline Guard**: Validasi otorisasi di tingkat Server Action mencakup verifikasi role, _Sector Selector Guard_, dan _Relational Consistency Guard_.
 - **Magic Bytes Validation (`mediaService.ts`)**: Pemeriksaan header biner asli file gambar yang diunggah untuk mencegah eksploitasi ekstensi berbahaya.
 
 ---
 
 ## 🎨 Konsep Desain & Identitas Visual
 
-Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** yang mengadopsi palet identitas resmi:
+Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** yang mengadopsi palet identitas resmi dengan variabel CSS terpusat (`.admin-theme` & `:root`):
 
-| Warna Identitas             | Kode HEX                                            |       Porsi       | Penerapan Desain                                                                              |
+| Warna Identitas             | Kode HEX / Token CSS                                |       Porsi       | Penerapan Desain                                                                              |
 | --------------------------- | --------------------------------------------------- | :---------------: | --------------------------------------------------------------------------------------------- |
-| **Teal ANTAM**           | `#0D726D`                                           | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
-| **Orange ANTAM**         | `#F6A236`                                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
-| **Clean White**          | `#FFFFFF`                                           |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
-| **Soft Gray**            | `#F7FAF9`                                           |       Seksi       | Latar belakang seksi selang-seling (Program Unggulan, Dampak & Kerangka Kerja)                |
-| **Dark Text & Footer**   | `#172121`                                           |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
+| **Teal ANTAM**           | `--primary` (`#0D726D`)                             | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
+| **Orange ANTAM**         | `--secondary` (`#F6A236`)                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
+| **Clean White**          | `--card` (`#FFFFFF`)                                |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
+| **Soft Gray**            | `--muted-bg` (`#F7FAF9`)                            |       Seksi       | Latar belakang seksi selang-seling dan dasbor admin                                           |
+| **Dark Text & Footer**   | `--foreground` (`#172121`)                          |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
+| **Sidebar Dark & Border**| `--admin-sidebar-bg` (`#111E1D`) / `#1D3331`        |       Admin       | Panel samping navigasi dasbor admin yang elegan dan modern                                    |
 | **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
 
 ---
@@ -116,73 +122,56 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 │  Tahap 6: Redesain      │ <── │ Tahap 5: Integritas     │ <── ┌─────────────────────────┐
 │  Brand & Visual Polish  │     │ Data & Verifikasi Sumber│     │ Tahap 4: Portal Publik  │
 └─────────────────────────┘     └─────────────────────────┘     │ & Katalog Interaktif    │
-                                                                └─────────────────────────┘
+             │                                                  └─────────────────────────┘
+             ▼
+┌─────────────────────────┐     ┌─────────────────────────┐
+│  Tahap 7: Migrasi Cloud │ ──> │ Tahap 8: Eliminasi Data │
+│  & Single-Role RBAC     │     │ Fiktif & Desain Token   │
+└─────────────────────────┘     └─────────────────────────┘
 ```
 
 ### 🔹 Tahap 1: Perancangan Arsitektur Basis Data & Relasi Prisma
+- Menyusun model data relasional pada [`prisma/schema.prisma`](file:///e:/Coding/CSR/prisma/schema.prisma): `User`, `Sector`, `Program`, `Activity`, `Product`, `Documentation`, `Metric`.
 
-- Menyusun model data relasional pada [`prisma/schema.prisma`](file:///e:/Coding/CSR/prisma/schema.prisma):
-  - `User`: Akun pengguna dan pemetaan hak akses sektor.
-  - `Sector`: Master taksonomi 4 sektor program utama.
-  - `Program`: Program inisiatif CSR berjenjang dengan relasi ke kegiatan, produk, dan metrik.
-  - `Activity`: Jadwal dan rincian kegiatan lapangan yang terhubung ke program/sektor.
-  - `Product`: Etalase komoditas/produk binaan dengan atribut kapasitas dan sertifikasi.
-  - `Documentation`: Galeri foto kegiatan dengan status verifikasi dan keterhubungan multi-entitas.
-  - `Metric`: Indikator kinerja terukur (Target, Realisasi, Satuan, Tahun, Kategori Pilar).
-- Pembuatan seeder database otomatis ([`prisma/seed.ts`](file:///e:/Coding/CSR/prisma/seed.ts)) berisi data percontohan riil.
-
-### 🔹 Tahap 2: Otentikasi, Keamanan Sesi & RBAC
-
+### 🔹 Tahap 2: Otentikasi & Keamanan Sesi Awal
 - Implementasi sistem login dengan enkripsi password Bcrypt dan token JWT berbasis `jose`.
-- Pemisahan 3 tingkatan hak akses (_Roles_):
-  - **SUPER_ADMIN**: Akses penuh ke seluruh data sektor dan manajemen akun pengguna.
-  - **ADMIN_PUSAT**: Pemantauan lintas sektor (_read-only_ atau monitoring agregat).
-  - **ADMIN_SEKTOR**: Akses mutasi yang diisolasi ketat hanya ke sektor miliknya.
-- Pembuatan Next.js Middleware untuk pengamanan rute `/admin/*` dan sanitasi env `JWT_SECRET`.
+- Pembuatan Next.js Middleware untuk pengamanan rute `/admin/*`.
 
 ### 🔹 Tahap 3: Pembangunan Dasbor Admin & Server Actions
-
-- Membangun antarmuka dashboard admin yang responsif dan terpadu:
-  - **Overview Dashboard** (`/admin`): Grafik aktivitas, rasio status program, dan ringkasan angka dampak.
-  - **Modul Program** (`/admin/program`): Pengelolaan program, status publikasi, dan keterhubungan sektor.
-  - **Modul Kegiatan** (`/admin/kegiatan`): Penjadwalan agenda, lokasi, dan deskripsi kegiatan lapangan.
-  - **Modul Produk** (`/admin/produk`): Manajemen katalog komoditas, stok, kapasitas, dan sertifikasi.
-  - **Modul Dokumentasi** (`/admin/dokumentasi`): Media manager dengan fitur upload gambar terverifikasi.
-  - **Modul Kinerja** (`/admin/kinerja`): Pengisian target kuantitatif dan realisasi metrik program.
-  - **Modul Pengaturan** (`/admin/pengaturan`): Manajemen akun admin, ganti password mandiri, dan monitoring sektor.
+- Membangun antarmuka dashboard admin yang responsif untuk Program, Kegiatan, Produk, Dokumentasi, Kinerja, dan Pengaturan.
 
 ### 🔹 Tahap 4: Pengembangan Portal Publik & Katalog Interaktif
-
-- Pembuatan halaman publik berorientasi pengguna:
-  - **Beranda (`/`)**: Hero section visual, statistik dampak masyarakat, preview sektor, program, dan produk.
-  - **Katalog Program (`/program` & `/program/[slug]`)**: Filter sektor interaktif dan halaman detail narasi program.
-  - **Katalog Produk (`/produk` & `/produk/[slug]`)**: Etalase produk karya binaan dengan spesifikasi lengkap.
-  - **Galeri Dokumentasi (`/dokumentasi`)**: Grid dokumentasi beresolusi tinggi dengan filter sektor.
-  - **Dasbor Kinerja & Dampak (`/kinerja`)**: Visualisasi capaian target, persentase realisasi, dan penjelasan 3 pilar (Output, Outcome, Impact).
-  - **Halaman Bidang Sektor (`/bidang`, `/bidang/[slug]`)**: Rincian mendalam tiap sektor (Pertanian, Peternakan, Lingkungan, Industri Kelapa).
+- Pembuatan halaman Beranda (`/`), Katalog Program (`/program`), Produk (`/produk`), Dokumentasi (`/dokumentasi`), Kinerja (`/kinerja`), dan Bidang Sektor (`/bidang`).
 
 ### 🔹 Tahap 5: Integritas Data & Validasi Sumber Resmi
-
-- Penambahan standardisasi atribusi sumber pada setiap data (`RESMI_ANTAM`, `PEMERINTAH`, `JURNAL_AKADEMIK`, dll.).
-- Badge status verifikasi data (_Terverifikasi / Belum Terverifikasi_).
-- _Relational Integrity Guard_ untuk memastikan kegiatan, produk, atau dokumentasi tidak terhubung silang ke program sektor lain.
+- Standardisasi atribusi sumber data resmi (`RESMI_ANTAM`, `PEMERINTAH`, dll.) serta verifikasi data.
 
 ### 🔹 Tahap 6: Redesain Identitas Visual & Optimasi Responsivitas
+- Transformasi skema warna menyeluruh ke **Teal ANTAM (`#0D726D`)** & **Orange ANTAM (`#F6A236`)**.
+- Optimasi tata letak responsif pada tampilan mobile.
 
-- Transformasi skema warna menyeluruh ke **Teal ANTAM (`#0D726D`)** & **Orange ANTAM (`#F6A236`)** dengan _white space_ bersih.
-- Optimasi tata letak responsif pada tampilan mobile (perbaikan flexbox alignment agar tidak bergeser di layar HP).
-- Verifikasi build penuh (`npm run build`) dengan 100% rute statis & dinamis lulus tanpa kendala.
+### 🔹 Tahap 7: Migrasi TiDB Cloud & Unifikasi Role Admin CSR
+- Migrasi database ke **TiDB Cloud (AWS ap-southeast-1)** dengan koneksi terenkripsi SSL.
+- Unifikasi model RBAC menjadi single role **`ADMIN_CSR`** yang dapat mengelola seluruh sektor program secara terpadu melalui *Sector Selector*.
+- Pembersihan akun lama dan inisialisasi akun administrator CSR baru.
+
+### 🔹 Tahap 8: Eliminasi Data Fiktif, Empty States & Sentralisasi Token Desain
+- **Real-Data Chart Aggregation**: Menghapus data fiktif grafik aktivitas bulanan dan menggantinya dengan agregasi tanggal aktual 6 bulan dari tabel `Activity` dan `Documentation`.
+- **Zero Fallback & Empty State**: Mengganti angka fallback buatan dengan komponen *Empty State* visual yang elegan saat data kosong.
+- **Sentralisasi CSS Theme Tokens**: Memindahkan seluruh warna hardcoded hex ke variabel CSS `.admin-theme` di [`globals.css`](file:///e:/Coding/CSR/src/app/globals.css).
+- **Wide-Screen Layout Optimization**: Memperluas lebar dashboard menjadi `max-w-7xl` untuk pengalaman visual yang lebih lega di monitor layar lebar.
 
 ---
 
 ## ✨ Fitur-Fitur Utama Platform
 
-- 🌐 **Public-Facing Impact Dashboard**: Menampilkan capaian riil CSR (penerima manfaat, desa binaan, pohon tertanam).
-- 🔒 **Sector-Isolated RBAC**: Mencegah admin sektor A mengubah atau melihat draft admin sektor B.
+- 🌐 **Public-Facing Impact Dashboard**: Menampilkan capaian riil CSR (penerima manfaat, desa binaan, kegiatan binaan).
+- 🔒 **Unified ADMIN_CSR Role**: Tata kelola lintas sektor terpusat dengan filter sektor aktif yang fleksibel.
+- 📈 **Real-Time Data Analytics**: Grafik aktivitas bulanan dan capaian metrik kinerja yang terhubung langsung dengan basis data riil tanpa rekayasa data.
 - ⚡ **Zero Client-Side Leakage**: Data berstatus _Draft_ tidak pernah terkirim ke klien pada portal publik.
 - 📊 **Dynamic Percentage Calculation**: Perhitungan capaian target (%) secara otomatis dengan penanganan aman _division by zero_.
-- 🖼️ **Secure Media Upload**: Layanan unggah media lokal dengan validasi MIME-Type dan Magic Bytes.
-- 📱 **Fully Responsive Layout**: Tampilan adaptif yang nyaman diakses dari smartphone, tablet, maupun layar desktop.
+- 🖼️ **Secure Media Upload**: Layanan unggah media dengan validasi MIME-Type dan Magic Bytes.
+- 📱 **Fully Responsive & Wide-Screen Optimized**: Tampilan adaptif mulai dari smartphone hingga monitor layar lebar (`max-w-7xl`).
 
 ---
 
@@ -191,7 +180,7 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 ### Prasyarat:
 
 - [Node.js](https://nodejs.org/) versi 18.18+ atau 20+
-- Database [MySQL](https://www.mysql.com/) lokal (XAMPP / MySQL Server) atau cloud
+- Database MySQL / TiDB Cloud
 
 ### 1. Clone & Masuk ke Direktori Proyek
 
@@ -208,22 +197,19 @@ npm install
 
 ### 3. Konfigurasi Environment Variable (`.env`)
 
-Buat file `.env` di root direktori atau sesuaikan dengan contoh:
+Buat file `.env` di root direktori:
 
 ```env
-DATABASE_URL="mysql://root:@localhost:3306/csr"
+DATABASE_URL="mysql://username:password@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/csr?sslaccept=strict"
 JWT_SECRET="masukkan-string-jwt-secret-acak-anda"
 NODE_ENV="development"
 ```
 
-### 4. Sinkronisasi Database & Seeding Data
-
-Jalankan migrasi Prisma dan script seeding:
+### 4. Sinkronisasi Database
 
 ```bash
 npx prisma generate
-npx prisma db push
-npx prisma db seed
+npx prisma migrate deploy
 ```
 
 ### 5. Jalankan Server Pengembangan
@@ -238,17 +224,14 @@ Buka peramban di [http://localhost:3000](http://localhost:3000).
 
 ## 🔑 Kredensial Pengujian (Development Seed)
 
-Semua akun pengujian lokal telah terkonfigurasi dengan kata sandi terenkripsi Bcrypt:
+Semua akun pengujian telah terkonfigurasi dengan kata sandi terenkripsi Bcrypt:
 
-| Peran (Role)              | Lingkup Hak Akses                               |
-| ------------------------- | ----------------------------------------------- |
-| **Super Admin**           | Akses penuh seluruh sektor & manajemen pengguna |
-| **Admin Pusat**           | Monitoring agregat seluruh sektor CSR           |
-| **Admin Pertanian**       | Pengelolaan data sektor **Pertanian**           |
-| **Admin Peternakan**      | Pengelolaan data sektor **Peternakan**          |
-| **Admin Lingkungan**      | Pengelolaan data sektor **Lingkungan**          |
-| **Admin Industri Kelapa** | Pengelolaan data sektor **Industri Kelapa**     |
-| **Admin UMKM**            | Pengelolaan data sektor **UMKM**                |
+| Email | Peran (Role) | Lingkup Hak Akses |
+| :--- | :--- | :--- |
+| **`admin1@csr.com`** | `ADMIN_CSR` | Akses penuh seluruh modul & seluruh sektor CSR |
+| **`admin2@csr.com`** | `ADMIN_CSR` | Akses penuh seluruh modul & seluruh sektor CSR |
+
+*Kata sandi default:* `AdminCSR2026!`
 
 ---
 
@@ -256,21 +239,22 @@ Semua akun pengujian lokal telah terkonfigurasi dengan kata sandi terenkripsi Bc
 
 ```text
 ├── prisma/
-│   ├── schema.prisma          # Skema model basis data relasional (MySQL)
+│   ├── schema.prisma          # Skema model basis data relasional (MySQL / TiDB)
+│   ├── migrations/            # Riwayat migrasi skema database Prisma
 │   └── seed.ts                # Skrip pembenihan data awal & akun admin
 ├── public/
 │   ├── images/                # Aset gambar & ilustrasi statis
 │   └── uploads/               # Direktori penyimpanan media unggahan lokal
 ├── src/
-│   ├── actions/               # Server Actions (Mutasi data program, produk, docs, kinerja, auth)
+│   ├── actions/               # Server Actions (Program, Kegiatan, Produk, Dokumentasi, Kinerja, Auth)
 │   ├── app/
 │   │   ├── (public)/          # Halaman portal publik (beranda, bidang, program, produk, galeri, kinerja)
-│   │   ├── admin/             # Panel dasbor admin terproteksi RBAC
-│   │   ├── globals.css        # Variabel token warna & style global
+│   │   ├── admin/             # Panel dasbor admin terproteksi JWT & RBAC
+│   │   ├── globals.css        # Variabel token warna & style global (.admin-theme)
 │   │   └── layout.tsx         # Layout dasar aplikasi
-│   ├── components/            # Komponen modular UI (Navbar, Footer, Hero, Managers, Forms)
+│   ├── components/            # Komponen modular UI (Navbar, Footer, Hero, Managers, Charts, Forms)
 │   ├── lib/
-│   │   ├── auth.ts            # Manajemen otentikasi JWT & validasi izin sektor
+│   │   ├── auth.ts            # Manajemen otentikasi JWT & validasi sesi Admin CSR
 │   │   ├── mediaService.ts    # Layanan upload & validasi magic bytes gambar
 │   │   ├── prisma.ts          # Singleton Prisma Client Instance
 │   │   └── queries/           # Helper query data aman untuk halaman publik
