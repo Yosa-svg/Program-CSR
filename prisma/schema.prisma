@@ -113,6 +113,7 @@ model Documentation {
   date               DateTime?
   status             String    @default("PUBLISHED")
   isPublished        Boolean   @default(false)
+  isFeatured         Boolean   @default(false)
   source             String?
   sourceType         String?
   sourceUrl          String?
@@ -132,6 +133,7 @@ model Documentation {
   @@index([productId], map: "Documentation_productId_fkey")
   @@index([programId], map: "Documentation_programId_fkey")
   @@index([sectorId], map: "Documentation_sectorId_fkey")
+  @@index([isFeatured, isPublished], map: "Documentation_isFeatured_isPublished_idx")
 }
 
 model Metric {

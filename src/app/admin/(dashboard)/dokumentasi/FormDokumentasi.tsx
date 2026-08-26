@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { X, Loader2, ImagePlus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { X, Loader2, ImagePlus, AlertCircle, Star } from "lucide-react";
 import Image from "next/image";
 import { createDocumentation, updateDocumentation } from "@/actions/dokumentasiActions";
 
@@ -17,6 +17,7 @@ type Documentation = {
   imageUrl: string;
   date: Date | null;
   isPublished: boolean;
+  isFeatured?: boolean;
   programId: string | null;
   activityId: string | null;
   productId: string | null;
@@ -44,27 +45,37 @@ export default function FormDokumentasi({
   setIsOpen: (val: boolean) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.imageUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEditing = !!initialData;
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage(null);
+      setPreviewUrl(initialData?.imageUrl || null);
+    }
+  }, [isOpen, initialData]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("Ukuran file tidak boleh lebih dari 5MB");
+        setErrorMessage("Ukuran file tidak boleh lebih dari 5MB");
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
       
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
+      setErrorMessage(null);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
     
     const formData = new FormData(e.currentTarget);
     let result;
@@ -81,7 +92,7 @@ export default function FormDokumentasi({
       setIsOpen(false);
       onSuccess();
     } else {
-      alert(result.error);
+      setErrorMessage(result.error || "Gagal menyimpan data dokumentasi.");
     }
   };
 
@@ -93,8 +104,8 @@ export default function FormDokumentasi({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto">
-        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
+      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50 shrink-0">
           <h3 className="font-semibold text-foreground">
             {isEditing ? "Edit Dokumentasi" : "Unggah Dokumentasi Baru"}
           </h3>
@@ -106,104 +117,129 @@ export default function FormDokumentasi({
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* FOTO UPLOAD AREA */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-foreground/70">Foto Dokumentasi <span className="text-red-400">*</span></label>
-            <div 
-              className={`relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl transition-colors overflow-hidden group
-                ${previewUrl ? 'border-primary/50 bg-black/40' : 'border-border bg-background hover:bg-white/[0.02] hover:border-primary/50 cursor-pointer'}
-              `}
-              onClick={() => !previewUrl && fileInputRef.current?.click()}
-            >
-              {previewUrl ? (
-                <>
-                  <Image 
-                    src={previewUrl} 
-                    alt="Preview" 
-                    fill 
-                    className="object-contain"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-white/10 backdrop-blur text-foreground rounded-lg border border-white/20 text-sm font-medium"
-                    >
-                      Ganti Foto
-                    </button>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          {errorMessage && (
+            <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-sm animate-in fade-in">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium">{errorMessage}</div>
+            </div>
+          )}
+
+          {/* Upload Image Section */}
+          <div>
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
+              File Foto / Dokumentasi {!isEditing && <span className="text-red-400">*</span>}
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border border-dashed rounded-xl hover:border-primary/50 transition-colors bg-background/30 relative">
+              <div className="space-y-2 text-center flex flex-col items-center">
+                {previewUrl ? (
+                  <div className="relative w-full max-w-sm h-48 rounded-lg overflow-hidden border border-border">
+                    <Image 
+                      src={previewUrl} 
+                      alt="Preview" 
+                      fill 
+                      className="object-cover" 
+                    />
                   </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                  <ImagePlus className="w-10 h-10 text-foreground/20 mb-3" />
-                  <p className="mb-1 text-sm text-foreground/70"><span className="font-semibold text-primary">Klik untuk unggah</span></p>
-                  <p className="text-xs text-foreground/40">JPG, PNG atau WEBP (Maks. 5MB)</p>
+                ) : (
+                  <ImagePlus className="mx-auto h-12 w-12 text-foreground/30" />
+                )}
+                
+                <div className="flex text-sm text-foreground/60">
+                  <label className="relative cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary font-medium px-3 py-1.5 rounded-lg transition-colors">
+                    <span>{previewUrl ? "Ganti Foto" : "Pilih File Foto"}</span>
+                    <input 
+                      ref={fileInputRef}
+                      name="image" 
+                      type="file" 
+                      accept="image/jpeg,image/png,image/webp" 
+                      required={!isEditing}
+                      onChange={handleImageChange}
+                      className="sr-only" 
+                    />
+                  </label>
                 </div>
-              )}
-              <input 
-                ref={fileInputRef}
-                name="image"
-                type="file" 
-                className="hidden" 
-                accept="image/jpeg, image/png, image/webp"
-                onChange={handleImageChange}
-                required={!isEditing}
-              />
+                <p className="text-xs text-foreground/40">PNG, JPG, WEBP hingga 5MB</p>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Judul Dokumentasi <span className="text-red-400">*</span></label>
-              <input 
-                name="title" 
-                required 
-                defaultValue={initialData?.title}
-                type="text" 
-                placeholder="Contoh: Panen Raya Q3"
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
-              />
+          {/* Toggle Slider Beranda (Featured) */}
+          <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
+                <Star size={18} className="fill-amber-500" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-foreground">Tampilkan di Slider Beranda</div>
+                <div className="text-xs text-foreground/60">Pin foto ini agar berputar di carousel utama halaman depan publik</div>
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Tanggal Kegiatan</label>
+            <label className="relative inline-flex items-center cursor-pointer">
               <input 
-                name="date" 
-                defaultValue={formattedDate}
-                type="date" 
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary [color-scheme:dark]"
+                type="checkbox" 
+                name="isFeatured" 
+                value="true"
+                defaultChecked={initialData?.isFeatured ?? false}
+                className="sr-only peer" 
               />
-            </div>
+              <div className="w-11 h-6 bg-foreground/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+            </label>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-foreground/70 mb-1">Deskripsi Ringkas</label>
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
+              Judul Foto / Dokumentasi <span className="text-red-400">*</span>
+            </label>
+            <input 
+              name="title" 
+              required 
+              defaultValue={initialData?.title}
+              type="text" 
+              placeholder="Contoh: Panen Raya Bersama Kelompok Tani Binaan"
+              className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
+              Deskripsi Singkat (Opsional)
+            </label>
             <textarea 
               name="description" 
               defaultValue={initialData?.description || ""}
               rows={2}
-              placeholder="Ceritakan momen dalam foto ini..."
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
+              placeholder="Keterangan tambahan terkait dokumentasi kegiatan ini..."
+              className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Tanggal Kegiatan</label>
+            <input 
+              name="date" 
+              defaultValue={formattedDate}
+              type="date" 
+              className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
             />
           </div>
 
           {/* Section Source Management & Verification */}
           <div className="p-4 bg-background border border-border rounded-xl space-y-4">
             <div className="text-xs font-bold uppercase tracking-wider text-foreground/60 border-b border-border/60 pb-2">
-              Integritas & Sumber Data Resmi (Fase 15.5)
+              Integritas & Sumber Data Resmi (Verifikasi)
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-foreground/70 mb-1">
-                  Nama Sumber Data <span className="text-xs text-amber-400">(Wajib untuk publish)</span>
+                  Nama Sumber Data <span className="text-xs text-amber-500 font-medium">(Wajib untuk publish)</span>
                 </label>
                 <input 
                   name="source" 
                   defaultValue={initialData?.source || ""}
                   type="text" 
-                  placeholder="Contoh: Arsip Lapangan & Dokumentasi Tim"
+                  placeholder="Contoh: Laporan Dokumentasi Lapangan"
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
                 />
               </div>
@@ -212,7 +248,7 @@ export default function FormDokumentasi({
                 <label className="block text-xs font-medium text-foreground/70 mb-1">Jenis Sumber Data</label>
                 <select 
                   name="sourceType"
-                  defaultValue={initialData?.sourceType || ""}
+                  defaultValue={initialData?.sourceType || "RESMI_ANTAM"}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="">-- Belum Ditentukan --</option>
@@ -238,43 +274,46 @@ export default function FormDokumentasi({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Status Verifikasi <span className="text-xs text-amber-500 font-medium">(Wajib Terverifikasi/Review untuk publish)</span>
+                </label>
                 <select 
                   name="verificationStatus"
-                  defaultValue={initialData?.verificationStatus || "BELUM_TERVERIFIKASI"}
+                  defaultValue={initialData?.verificationStatus || "TERVERIFIKASI"}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
                 >
-                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
-                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
                   <option value="TERVERIFIKASI">TERVERIFIKASI (Sah / Valid)</option>
+                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
+                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
                 </select>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-background border border-border rounded-xl">
+          {/* Relasi ke Program / Kegiatan / Produk */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Program Induk</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Program Terkait</label>
               <select 
                 name="programId"
                 defaultValue={initialData?.programId || ""}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
-                <option value="">-- Bebas --</option>
+                <option value="">-- Bebas / Umum --</option>
                 {programs.map(p => (
                   <option key={p.id} value={p.id}>{p.title}</option>
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Kegiatan</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Kegiatan Terkait</label>
               <select 
                 name="activityId"
                 defaultValue={initialData?.activityId || ""}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
-                <option value="">-- Bebas --</option>
+                <option value="">-- Bebas / Umum --</option>
                 {activities.map(a => (
                   <option key={a.id} value={a.id}>{a.title}</option>
                 ))}
@@ -282,13 +321,13 @@ export default function FormDokumentasi({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Produk</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Produk Terkait</label>
               <select 
                 name="productId"
                 defaultValue={initialData?.productId || ""}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
-                <option value="">-- Bebas --</option>
+                <option value="">-- Bebas / Umum --</option>
                 {products.map(p => (
                   <option key={p.id} value={p.id}>{p.title}</option>
                 ))}
@@ -296,14 +335,14 @@ export default function FormDokumentasi({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Visibilitas</label>
+              <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">Visibilitas Publik</label>
               <select 
                 name="isPublished"
                 defaultValue={initialData?.isPublished ? "true" : "false"}
                 className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="false">Simpan Draft</option>
-                <option value="true">Publikasikan</option>
+                <option value="true">Publikasikan (Tampilkan di Portal)</option>
               </select>
             </div>
           </div>

@@ -152,6 +152,12 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 │  Tahap 7: Migrasi Cloud │ ──> │ Tahap 8: Eliminasi Data │ ──> │ Tahap 9: Manajemen      │
 │  & Single-Role RBAC     │     │ Fiktif & Desain Token   │     │ Sektor & Kontekstualisasi│
 └─────────────────────────┘     └─────────────────────────┘     └─────────────────────────┘
+                                                                             │
+                                                                             ▼
+                                                                ┌─────────────────────────┐
+                                                                │ Tahap 10: Kurasi Slider │
+                                                                │ Beranda Dinamis         │
+                                                                └─────────────────────────┘
 ```
 
 ### 🔹 Tahap 1: Perancangan Arsitektur Basis Data & Relasi Prisma
@@ -190,6 +196,12 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 - **Katalog Sektor Publik Dinamis (`/bidang`)**: Halaman `/bidang` mengambil data sektor secara *real-time* dari basis data Prisma.
 - **Dynamic Public Route (`/bidang/[slug]`)**: Template halaman publik otomatis untuk setiap sektor baru yang ditambahkan oleh admin.
 - **Kontekstualisasi Judul & Deskripsi Dasbor**: Seluruh modul manager (`Program`, `Kegiatan`, `Produk`, `Dokumentasi`, `Kinerja`, dan `Dashboard Overview`) secara dinamis menampilkan nama sektor yang sedang dipilih di filter header (menghapus seluruh teks statis yang sebelumnya kaku).
+
+### 🔹 Tahap 10: Kurasi & Manajemen Slider Beranda Dinamis
+- **Kolom `isFeatured` di Prisma & Database TiDB**: Menyimpan preferensi foto yang disematkan ke slider utama dengan indeks performa tinggi.
+- **1-Click Star Toggle & Filter di Admin**: Administrator dapat mem-pin/unpin foto ke slider utama dengan 1 klik ikon bintang atau toggle di formulir dokumentasi, disertai tab filter khusus *Slider Beranda*.
+- **Integrasi Slider Beranda Publik (`PhotoSlider.tsx`)**: Mengganti kotak abu-abu placeholder dengan foto dokumentasi asli berkualitas tinggi, lengkap dengan badge sektor (*🌱 Pertanian*, dsb.), judul kegiatan, *dark gradient overlay*, dan animasi *infinite marquee auto-scroll*.
+- **Smart Fallback Mechanism**: Jika belum ada foto yang di-pin secara manual oleh admin, slider otomatis mengambil foto-foto dokumentasi terbaru yang telah dipublikasikan.
 
 ---
 

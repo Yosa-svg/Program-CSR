@@ -92,6 +92,8 @@ export async function createDocumentation(formData: FormData) {
       }
     }
 
+    const isFeatured = formData.get("isFeatured") === "true";
+
     // Upload file
     const uploadResult = await uploadImage(file, "documentation");
     if (uploadResult.error || !uploadResult.url) {
@@ -105,6 +107,7 @@ export async function createDocumentation(formData: FormData) {
         date: dateStr ? new Date(dateStr) : null,
         status: status || "Active",
         isPublished,
+        isFeatured,
         programId: programId || null,
         activityId: activityId || null,
         productId: productId || null,
@@ -138,6 +141,7 @@ export async function updateDocumentation(id: string, formData: FormData) {
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
+    const isFeatured = formData.get("isFeatured") === "true";
     const programId = formData.get("programId") as string;
     const activityId = formData.get("activityId") as string;
     const productId = formData.get("productId") as string;
@@ -201,6 +205,7 @@ export async function updateDocumentation(id: string, formData: FormData) {
         date: dateStr ? new Date(dateStr) : null,
         status: status || "Active",
         isPublished,
+        isFeatured,
         programId: programId || null,
         activityId: activityId || null,
         productId: productId || null,
@@ -219,6 +224,27 @@ export async function updateDocumentation(id: string, formData: FormData) {
   } catch (error: any) {
     console.error("Failed to update documentation:", error);
     return { success: false, error: error?.message || "Gagal memperbarui data dokumentasi" };
+  }
+}
+
+export async function toggleFeaturedDocumentation(id: string) {
+  try {
+    await requireAuth();
+    const doc = await prisma.documentation.findUnique({ where: { id } });
+    if (!doc) return { success: false, error: "Dokumentasi tidak ditemukan." };
+
+    const updated = await prisma.documentation.update({
+      where: { id },
+      data: { isFeatured: !doc.isFeatured },
+    });
+
+    revalidatePath("/admin/dokumentasi");
+    revalidatePath("/admin");
+    revalidatePath("/", "layout");
+    return { success: true, isFeatured: updated.isFeatured };
+  } catch (error: any) {
+    console.error("Failed to toggle featured status:", error);
+    return { success: false, error: error?.message || "Gagal mengubah status slider beranda." };
   }
 }
 
