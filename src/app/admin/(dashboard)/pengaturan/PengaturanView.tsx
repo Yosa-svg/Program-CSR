@@ -22,7 +22,10 @@ import {
   updatePassword, 
   createUser, 
   updateUser, 
-  deleteUser 
+  deleteUser,
+  createSector,
+  updateSector,
+  deleteSector
 } from "@/actions/settingActions";
 
 type Sector = {
@@ -77,12 +80,81 @@ export default function PengaturanView({
   const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
 
+  // Sector Modal state
+  const [isSectorModalOpen, setIsSectorModalOpen] = useState(false);
+  const [editingSector, setEditingSector] = useState<Sector | null>(null);
+  const [sectorModalMsg, setSectorModalMsg] = useState<string | null>(null);
+  const [isSubmittingSector, setIsSubmittingSector] = useState(false);
+  const [deletingSectorId, setDeletingSectorId] = useState<string | null>(null);
+  const [sectorFeedbackMsg, setSectorFeedbackMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   // User Modal state
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [userModalMsg, setUserModalMsg] = useState<string | null>(null);
   const [isSubmittingUser, setIsSubmittingUser] = useState(false);
   const [selectedRoleForModal, setSelectedRoleForModal] = useState<string>("ADMIN_SEKTOR");
+
+  const handleOpenCreateSectorModal = () => {
+    setEditingSector(null);
+    setSectorModalMsg(null);
+    setIsSectorModalOpen(true);
+  };
+
+  const handleOpenEditSectorModal = (sector: Sector) => {
+    setEditingSector(sector);
+    setSectorModalMsg(null);
+    setIsSectorModalOpen(true);
+  };
+
+  const handleSectorModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingSector(true);
+    setSectorModalMsg(null);
+
+    const formData = new FormData(e.currentTarget);
+    let res;
+    if (editingSector) {
+      res = await updateSector(editingSector.id, formData);
+    } else {
+      res = await createSector(formData);
+    }
+
+    setIsSubmittingSector(false);
+    if (res.success) {
+      setIsSectorModalOpen(false);
+      setSectorFeedbackMsg({
+        type: "success",
+        text: editingSector ? "Sektor berhasil diperbarui." : "Sektor baru berhasil ditambahkan."
+      });
+    } else {
+      setSectorModalMsg(res.error || "Gagal menyimpan data sektor.");
+    }
+  };
+
+  const handleDeleteSector = async (sector: Sector) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus sektor "${sector.name}"? Sektor yang masih memiliki data program/kegiatan tidak dapat dihapus.`)) {
+      return;
+    }
+
+    setDeletingSectorId(sector.id);
+    setSectorFeedbackMsg(null);
+
+    const res = await deleteSector(sector.id);
+    setDeletingSectorId(null);
+
+    if (res.success) {
+      setSectorFeedbackMsg({
+        type: "success",
+        text: `Sektor "${sector.name}" berhasil dihapus.`
+      });
+    } else {
+      setSectorFeedbackMsg({
+        type: "error",
+        text: res.error || "Gagal menghapus sektor."
+      });
+    }
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -509,26 +581,67 @@ export default function PengaturanView({
 
           {/* ENVIRONMENT & DAFTAR SEKTOR */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-3 pb-3 border-b border-border">
-              <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
-                <Building2 size={22} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                  <Building2 size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg">Sektor Terdaftar</h3>
+                  <p className="text-xs text-foreground/60">Struktur sektor aktif dalam Kawasan Ekonomi Berkelanjutan</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground text-lg">Sektor Terdaftar</h3>
-                <p className="text-xs text-foreground/60">Struktur sektor aktif dalam Kawasan Ekonomi Berkelanjutan</p>
-              </div>
+              <button
+                onClick={handleOpenCreateSectorModal}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 transition-all shadow-sm self-start sm:self-auto cursor-pointer"
+              >
+                <Plus size={16} />
+                Tambah Sektor Baru
+              </button>
             </div>
+
+            {sectorFeedbackMsg && (
+              <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${
+                sectorFeedbackMsg.type === "success" 
+                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                  : "bg-red-500/10 text-red-400 border border-red-500/20"
+              }`}>
+                {sectorFeedbackMsg.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                {sectorFeedbackMsg.text}
+              </div>
+            )}
 
             <div className="space-y-2.5">
               {sectors.map((s) => (
-                <div key={s.id} className="flex items-center justify-between p-3 bg-background border border-border/60 rounded-xl">
-                  <div>
-                    <span className="font-semibold text-foreground text-sm">{s.name}</span>
-                    <span className="block text-[11px] font-mono text-foreground/40">slug: {s.slug}</span>
+                <div key={s.id} className="flex items-center justify-between p-3.5 bg-background border border-border/60 rounded-xl hover:border-primary/40 transition-colors">
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-foreground text-sm block">{s.name}</span>
+                    <span className="block text-[11px] font-mono text-foreground/50">slug: /bidang/{s.slug}</span>
                   </div>
-                  <span className="text-xs text-primary font-bold bg-primary/10 px-2.5 py-1 rounded-md">
-                    Aktif
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-primary font-bold bg-primary/10 px-2.5 py-1 rounded-md mr-2 hidden sm:inline-block">
+                      Aktif
+                    </span>
+                    <button
+                      onClick={() => handleOpenEditSectorModal(s)}
+                      title="Edit Sektor"
+                      className="p-2 text-foreground/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Edit3 size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSector(s)}
+                      disabled={deletingSectorId === s.id}
+                      title="Hapus Sektor"
+                      className="p-2 text-foreground/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      {deletingSectorId === s.id ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={15} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -654,6 +767,70 @@ export default function PengaturanView({
                 >
                   {isSubmittingUser && <Loader2 size={14} className="animate-spin" />}
                   {editingUser ? "Simpan Perubahan" : "Buat Akun"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH / EDIT SEKTOR */}
+      {isSectorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
+              <h3 className="font-bold text-foreground text-base flex items-center gap-2">
+                <Building2 size={18} className="text-primary" />
+                {editingSector ? "Edit Sektor" : "Tambah Sektor Baru"}
+              </h3>
+              <button
+                onClick={() => setIsSectorModalOpen(false)}
+                className="text-foreground/50 hover:text-foreground p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {sectorModalMsg && (
+              <div className="m-5 mb-0 p-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-xs flex items-center gap-2">
+                <AlertCircle size={16} />
+                {sectorModalMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSectorModalSubmit} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1">
+                  Nama Sektor <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  defaultValue={editingSector?.name || ""}
+                  placeholder="Contoh: Pendidikan & Beasiswa"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+                <p className="text-[11px] text-foreground/50 mt-1.5">
+                  Slug URL akan dibuat otomatis secara aman (contoh: /bidang/pendidikan-dan-beasiswa).
+                </p>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-2.5 border-t border-border mt-5">
+                <button
+                  type="button"
+                  onClick={() => setIsSectorModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingSector}
+                  className="px-5 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingSector && <Loader2 size={14} className="animate-spin" />}
+                  {editingSector ? "Simpan Perubahan" : "Tambahkan Sektor"}
                 </button>
               </div>
             </form>
