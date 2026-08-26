@@ -28,11 +28,13 @@ type Activity = {
 export default function KegiatanManager({ 
   activities, 
   programs,
-  activeSectorId
+  activeSectorId,
+  activeSectorName
 }: { 
   activities: Activity[], 
   programs: { id: string, title: string }[],
-  activeSectorId: string | null
+  activeSectorId: string | null,
+  activeSectorName?: string | null
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
@@ -55,8 +57,14 @@ export default function KegiatanManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Daftar Kegiatan</h1>
-          <p className="text-foreground/60">Kelola jadwal dan aktivitas lapangan sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {activeSectorName ? `Daftar Kegiatan (${activeSectorName})` : "Daftar Seluruh Kegiatan"}
+          </h1>
+          <p className="text-foreground/60">
+            {activeSectorName 
+              ? `Kelola jadwal dan aktivitas lapangan sektor ${activeSectorName}.`
+              : "Kelola jadwal dan aktivitas lapangan dari seluruh sektor CSR."}
+          </p>
         </div>
         
         {activeSectorId ? (

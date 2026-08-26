@@ -36,13 +36,15 @@ export default function DokumentasiManager({
   programs, 
   activities,
   products,
-  activeSectorId
+  activeSectorId,
+  activeSectorName
 }: { 
   documentations: Documentation[];
   programs: { id: string, title: string }[];
   activities: { id: string, title: string }[];
   products: { id: string, title: string }[];
   activeSectorId: string | null;
+  activeSectorName?: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState<Documentation | null>(null);
@@ -65,8 +67,14 @@ export default function DokumentasiManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Galeri Dokumentasi</h1>
-          <p className="text-foreground/60">Kelola arsip foto kegiatan dan dokumentasi visual sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {activeSectorName ? `Galeri Dokumentasi (${activeSectorName})` : "Galeri Seluruh Dokumentasi"}
+          </h1>
+          <p className="text-foreground/60">
+            {activeSectorName 
+              ? `Kelola arsip foto kegiatan dan dokumentasi visual sektor ${activeSectorName}.`
+              : "Kelola arsip foto kegiatan dan dokumentasi visual dari seluruh sektor CSR."}
+          </p>
         </div>
         
         {activeSectorId ? (

@@ -34,11 +34,13 @@ type Product = {
 export default function ProdukManager({ 
   products,
   programs,
-  activeSectorId
+  activeSectorId,
+  activeSectorName
 }: { 
   products: Product[];
   programs: Program[];
   activeSectorId: string | null;
+  activeSectorName?: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -61,8 +63,14 @@ export default function ProdukManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Daftar Produk</h1>
-          <p className="text-foreground/60">Kelola katalog produk unggulan dari sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {activeSectorName ? `Daftar Produk (${activeSectorName})` : "Daftar Seluruh Produk"}
+          </h1>
+          <p className="text-foreground/60">
+            {activeSectorName 
+              ? `Kelola katalog produk unggulan dari sektor ${activeSectorName}.`
+              : "Kelola katalog produk unggulan dari seluruh sektor CSR."}
+          </p>
         </div>
         
         {activeSectorId ? (

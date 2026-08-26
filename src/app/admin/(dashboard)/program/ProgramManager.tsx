@@ -18,10 +18,12 @@ type Program = {
 
 export default function ProgramManager({ 
   programs, 
-  activeSectorId 
+  activeSectorId,
+  activeSectorName
 }: { 
   programs: Program[],
-  activeSectorId: string | null
+  activeSectorId: string | null,
+  activeSectorName?: string | null
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
@@ -45,8 +47,14 @@ export default function ProgramManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Daftar Program</h1>
-          <p className="text-foreground/60">Kelola program-program andalan pada sektor Pertanian.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {activeSectorName ? `Daftar Program (${activeSectorName})` : "Daftar Seluruh Program"}
+          </h1>
+          <p className="text-foreground/60">
+            {activeSectorName 
+              ? `Kelola program-program andalan pada sektor ${activeSectorName}.`
+              : "Kelola program-program andalan dari seluruh sektor CSR."}
+          </p>
         </div>
         
         {activeSectorId ? (

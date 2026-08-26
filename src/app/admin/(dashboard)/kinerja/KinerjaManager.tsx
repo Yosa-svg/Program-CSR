@@ -33,11 +33,13 @@ type ProgramOption = {
 export default function KinerjaManager({ 
   metrics,
   programs = [],
-  activeSectorId
+  activeSectorId,
+  activeSectorName
 }: { 
   metrics: Metric[];
   programs?: ProgramOption[];
   activeSectorId: string | null;
+  activeSectorName?: string | null;
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMetric, setEditingMetric] = useState<Metric | null>(null);
@@ -60,8 +62,14 @@ export default function KinerjaManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Kinerja & Dampak CSR</h1>
-          <p className="text-foreground/60">Kelola metrik capaian target, indikator hasil, serta dampak jangka panjang program.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {activeSectorName ? `Kinerja & Dampak CSR (${activeSectorName})` : "Kinerja & Dampak Seluruh Sektor"}
+          </h1>
+          <p className="text-foreground/60">
+            {activeSectorName 
+              ? `Kelola metrik capaian target dan indikator hasil sektor ${activeSectorName}.`
+              : "Kelola metrik capaian target, indikator hasil, serta dampak jangka panjang seluruh program CSR."}
+          </p>
         </div>
         
         {activeSectorId ? (

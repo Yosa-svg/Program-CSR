@@ -136,9 +136,13 @@ export default async function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm">
         <div>
           <h1 className="text-2xl font-bold text-foreground mb-1">
-            {activeSectorId ? `Dashboard Sektor ${sectorName}` : "Dashboard Semua Sektor"}
+            {activeSectorId 
+              ? (sectorName.toLowerCase().startsWith("sektor") ? `Dashboard ${sectorName}` : `Dashboard Sektor ${sectorName}`)
+              : "Dashboard Semua Sektor"}
           </h1>
-          <p className="text-foreground/60 text-sm">Selamat datang kembali. Berikut adalah ringkasan performa {activeSectorId ? "sektor" : "keseluruhan"}.</p>
+          <p className="text-foreground/60 text-sm">
+            Selamat datang kembali. Berikut adalah ringkasan performa {activeSectorId ? `sektor ${sectorName.replace(/^sektor\s+/i, '')}` : "seluruh sektor CSR"}.
+          </p>
         </div>
         {activeSectorId && (
           <Link 

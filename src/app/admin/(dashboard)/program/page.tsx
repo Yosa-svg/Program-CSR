@@ -1,14 +1,23 @@
 import { getPrograms } from "@/actions/csrActions";
 import ProgramManager from "./ProgramManager";
-
 import { getActiveSectorId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 // Ini akan memaksa re-render setiap kali data berubah (jangan di-cache)
 export const revalidate = 0;
 
 export default async function ProgramDashboard() {
   const activeSectorId = await getActiveSectorId();
-  const programs = await getPrograms();
+  const [programs, activeSector] = await Promise.all([
+    getPrograms(),
+    activeSectorId ? prisma.sector.findUnique({ where: { id: activeSectorId } }) : null,
+  ]);
 
-  return <ProgramManager programs={programs} activeSectorId={activeSectorId} />;
+  return (
+    <ProgramManager 
+      programs={programs} 
+      activeSectorId={activeSectorId} 
+      activeSectorName={activeSector?.name || null} 
+    />
+  );
 }
