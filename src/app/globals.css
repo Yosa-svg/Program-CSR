@@ -11,26 +11,38 @@
   --card: #FFFFFF;
   --card-foreground: #172121;
   --border: #E2E8E6;
+  --admin-sidebar-bg: #111E1D;
+  --admin-sidebar-border: #1D3331;
 }
 
 .admin-theme {
   --background: #F7FAF9;
   --foreground: #172121;
+  --primary: #0D726D;
+  --primary-hover: #0B5C58;
+  --secondary: #F6A236;
+  --accent: #F6A236;
+  --muted-bg: #F7FAF9;
   --card: #FFFFFF;
   --card-foreground: #172121;
   --border: #E2E8E6;
+  --admin-sidebar-bg: #111E1D;
+  --admin-sidebar-border: #1D3331;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-muted-bg: var(--muted-bg);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
+  --color-admin-sidebar: var(--admin-sidebar-bg);
+  --color-admin-sidebar-border: var(--admin-sidebar-border);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
 }
