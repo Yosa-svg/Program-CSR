@@ -8,9 +8,10 @@ export const revalidate = 0;
 
 export default async function ProgramDashboard() {
   const activeSectorId = await getActiveSectorId();
-  const [programs, activeSector] = await Promise.all([
+  const [programs, activeSector, sectors] = await Promise.all([
     getPrograms(),
     activeSectorId ? prisma.sector.findUnique({ where: { id: activeSectorId } }) : null,
+    prisma.sector.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -18,6 +19,7 @@ export default async function ProgramDashboard() {
       programs={programs} 
       activeSectorId={activeSectorId} 
       activeSectorName={activeSector?.name || null} 
+      sectors={sectors}
     />
   );
 }

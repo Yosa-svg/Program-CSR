@@ -13,17 +13,30 @@ type Program = {
   beneficiaries: string;
   status: string;
   isPublished: boolean;
+  imageUrl?: string;
+  source?: string | null;
+  sourceType?: string | null;
+  sourceUrl?: string | null;
+  verificationStatus?: string | null;
+  sectorId?: string;
   sector?: { name: string };
+};
+
+type SectorOption = {
+  id: string;
+  name: string;
 };
 
 export default function ProgramManager({ 
   programs, 
   activeSectorId,
-  activeSectorName
+  activeSectorName,
+  sectors = []
 }: { 
   programs: Program[],
   activeSectorId: string | null,
-  activeSectorName?: string | null
+  activeSectorName?: string | null,
+  sectors?: SectorOption[]
 }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
@@ -57,25 +70,21 @@ export default function ProgramManager({
           </p>
         </div>
         
-        {activeSectorId ? (
-          <button 
-            onClick={handleAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Plus size={18} />
-            Tambah Program
-          </button>
-        ) : (
-          <div className="text-sm px-4 py-2 bg-orange-500/10 text-orange-500 rounded-lg font-medium border border-orange-500/20">
-            Pilih sektor spesifik untuk menambah data
-          </div>
-        )}
+        <button 
+          onClick={handleAdd}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <Plus size={18} />
+          Tambah Program
+        </button>
       </div>
 
       <FormProgram 
         isOpen={isFormOpen}
         setIsOpen={setIsFormOpen}
         initialData={editingProgram}
+        sectors={sectors}
+        activeSectorId={activeSectorId}
         onSuccess={handleSuccess} 
       />
 

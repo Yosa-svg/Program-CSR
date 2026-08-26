@@ -127,9 +127,9 @@ export async function createProduct(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create product:", error);
-    return { success: false, error: "Gagal menyimpan data produk" };
+    return { success: false, error: error?.message || "Gagal menyimpan data produk" };
   }
 }
 
@@ -201,9 +201,9 @@ export async function updateProduct(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update product:", error);
-    return { success: false, error: "Gagal memperbarui data produk" };
+    return { success: false, error: error?.message || "Gagal memperbarui data produk" };
   }
 }
 
@@ -211,7 +211,7 @@ export async function deleteProduct(id: string) {
   try {
     await requireAuth();
     const product = await prisma.product.findUnique({ where: { id } });
-    if (!product) throw new Error("Product not found");
+    if (!product) throw new Error("Product tidak ditemukan");
 
     await prisma.product.delete({
       where: { id },
@@ -220,8 +220,8 @@ export async function deleteProduct(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to delete product:", error);
-    return { success: false, error: "Gagal menghapus data produk" };
+    return { success: false, error: error?.message || "Gagal menghapus data produk" };
   }
 }

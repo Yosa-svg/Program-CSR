@@ -109,9 +109,9 @@ export async function createMetric(formData: FormData) {
     revalidatePath("/kinerja");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create metric:", error);
-    return { success: false, error: "Gagal menyimpan data kinerja" };
+    return { success: false, error: error?.message || "Gagal menyimpan data kinerja" };
   }
 }
 
@@ -119,12 +119,12 @@ export async function updateMetric(id: string, formData: FormData) {
   try {
     await requireAuth();
     const metric = await prisma.metric.findUnique({ where: { id } });
-    if (!metric) throw new Error("Metric not found");
+    if (!metric) throw new Error("Metric tidak ditemukan");
 
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
+    const name = (formData.get("name") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim();
     const category = (formData.get("category") as string) || "OUTCOME";
-    const unit = formData.get("unit") as string;
+    const unit = (formData.get("unit") as string)?.trim();
 
     const targetRaw = formData.get("target") as string;
     const realizationRaw = formData.get("realization") as string;
@@ -193,9 +193,9 @@ export async function updateMetric(id: string, formData: FormData) {
     revalidatePath("/kinerja");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update metric:", error);
-    return { success: false, error: "Gagal memperbarui data kinerja" };
+    return { success: false, error: error?.message || "Gagal memperbarui data kinerja" };
   }
 }
 
@@ -203,7 +203,7 @@ export async function deleteMetric(id: string) {
   try {
     await requireAuth();
     const metric = await prisma.metric.findUnique({ where: { id } });
-    if (!metric) throw new Error("Metric not found");
+    if (!metric) throw new Error("Metric tidak ditemukan");
 
     await prisma.metric.delete({
       where: { id },
@@ -213,8 +213,8 @@ export async function deleteMetric(id: string) {
     revalidatePath("/kinerja");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to delete metric:", error);
-    return { success: false, error: "Gagal menghapus data kinerja" };
+    return { success: false, error: error?.message || "Gagal menghapus data kinerja" };
   }
 }

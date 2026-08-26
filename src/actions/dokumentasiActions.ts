@@ -121,9 +121,9 @@ export async function createDocumentation(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create documentation:", error);
-    return { success: false, error: "Gagal menyimpan data dokumentasi" };
+    return { success: false, error: error?.message || "Gagal menyimpan data dokumentasi" };
   }
 }
 
@@ -180,21 +180,17 @@ export async function updateDocumentation(id: string, formData: FormData) {
       }
     }
     
-    const file = formData.get("image") as File;
     let finalImageUrl = oldDoc.imageUrl;
-
-    if (file && file.size > 0) {
-      const uploadResult = await uploadImage(file, "documentation");
-      
+    const imageFile = formData.get("image") as File;
+    if (imageFile && imageFile.size > 0) {
+      const uploadResult = await uploadImage(imageFile, "documentation");
       if (uploadResult.error || !uploadResult.url) {
         return { success: false, error: uploadResult.error || "Gagal mengunggah gambar." };
       }
-      
-      finalImageUrl = uploadResult.url;
-      
       if (oldDoc.imageUrl) {
         await deleteImage(oldDoc.imageUrl);
       }
+      finalImageUrl = uploadResult.url;
     }
 
     await prisma.documentation.update({
@@ -220,9 +216,9 @@ export async function updateDocumentation(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update documentation:", error);
-    return { success: false, error: "Gagal memperbarui data dokumentasi" };
+    return { success: false, error: error?.message || "Gagal memperbarui data dokumentasi" };
   }
 }
 
@@ -242,8 +238,8 @@ export async function deleteDocumentation(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to delete documentation:", error);
-    return { success: false, error: "Gagal menghapus data dokumentasi" };
+    return { success: false, error: error?.message || "Gagal menghapus data dokumentasi" };
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Loader2, AlertCircle } from "lucide-react";
 import { createProgram, updateProgram } from "@/actions/csrActions";
 
 type Program = {
@@ -12,29 +12,48 @@ type Program = {
   beneficiaries: string;
   status: string;
   isPublished: boolean;
+  imageUrl?: string;
   source?: string | null;
   sourceType?: string | null;
   sourceUrl?: string | null;
   verificationStatus?: string | null;
+  sectorId?: string;
+};
+
+type SectorOption = {
+  id: string;
+  name: string;
 };
 
 export default function FormProgram({ 
   onSuccess,
   initialData,
+  sectors = [],
+  activeSectorId,
   isOpen,
   setIsOpen 
 }: { 
   onSuccess: () => void;
   initialData?: Program | null;
+  sectors?: SectorOption[];
+  activeSectorId?: string | null;
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isEditing = !!initialData;
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage(null);
+    }
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
     
     const formData = new FormData(e.currentTarget);
     let result;
@@ -50,7 +69,7 @@ export default function FormProgram({
       setIsOpen(false);
       onSuccess();
     } else {
-      alert(result.error);
+      setErrorMessage(result.error || "Gagal menyimpan data program.");
     }
   };
 
@@ -58,8 +77,8 @@ export default function FormProgram({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto">
-        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50">
+      <div className="bg-card w-full max-w-2xl rounded-2xl shadow-2xl border border-border overflow-hidden my-auto max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-background/50 shrink-0">
           <h3 className="font-semibold text-foreground">
             {isEditing ? "Edit Program" : "Tambah Program Baru"}
           </h3>
@@ -71,7 +90,35 @@ export default function FormProgram({
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          {errorMessage && (
+            <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-sm animate-in fade-in">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium">{errorMessage}</div>
+            </div>
+          )}
+
+          {/* Sektor Dropdown (jika tersedia banyak sektor) */}
+          {sectors.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">
+                Sektor Program <span className="text-red-400">*</span>
+              </label>
+              <select
+                name="sectorId"
+                defaultValue={initialData?.sectorId || activeSectorId || sectors[0]?.id}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+                required
+              >
+                {sectors.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-foreground/70 mb-1">
               Nama Program <span className="text-red-400">*</span>
@@ -106,7 +153,7 @@ export default function FormProgram({
               <input 
                 name="location" 
                 required 
-                defaultValue={initialData?.location}
+                defaultValue={initialData?.location || "Desa Binaan CSR"}
                 type="text" 
                 placeholder="Desa Suka Maju"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
@@ -117,7 +164,7 @@ export default function FormProgram({
               <input 
                 name="beneficiaries" 
                 required 
-                defaultValue={initialData?.beneficiaries}
+                defaultValue={initialData?.beneficiaries || "Masyarakat Sekitar"}
                 type="text" 
                 placeholder="120+ KK"
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
@@ -125,16 +172,29 @@ export default function FormProgram({
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-foreground/70 mb-1">
+              URL Gambar Banner / Cover
+            </label>
+            <input 
+              name="imageUrl" 
+              defaultValue={initialData?.imageUrl || "/images/placeholder.jpg"}
+              type="text" 
+              placeholder="/images/placeholder.jpg atau link gambar"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
+
           {/* Section Source Management & Verification */}
           <div className="p-4 bg-background border border-border rounded-xl space-y-4">
             <div className="text-xs font-bold uppercase tracking-wider text-foreground/60 border-b border-border/60 pb-2">
-              Integritas & Sumber Data Resmi (Fase 15.5)
+              Integritas & Sumber Data Resmi (Verifikasi)
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-foreground/70 mb-1">
-                  Nama Sumber Data <span className="text-xs text-amber-400">(Wajib untuk publish)</span>
+                  Nama Sumber Data <span className="text-xs text-amber-500 font-medium">(Wajib jika dipublikasikan)</span>
                 </label>
                 <input 
                   name="source" 
@@ -149,7 +209,7 @@ export default function FormProgram({
                 <label className="block text-xs font-medium text-foreground/70 mb-1">Jenis Sumber Data</label>
                 <select 
                   name="sourceType"
-                  defaultValue={initialData?.sourceType || ""}
+                  defaultValue={initialData?.sourceType || "RESMI_ANTAM"}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="">-- Belum Ditentukan --</option>
@@ -175,15 +235,17 @@ export default function FormProgram({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-foreground/70 mb-1">Status Verifikasi</label>
+                <label className="block text-xs font-medium text-foreground/70 mb-1">
+                  Status Verifikasi <span className="text-xs text-amber-500 font-medium">(Wajib Terverifikasi/Review untuk publish)</span>
+                </label>
                 <select 
                   name="verificationStatus"
-                  defaultValue={initialData?.verificationStatus || "BELUM_TERVERIFIKASI"}
+                  defaultValue={initialData?.verificationStatus || "TERVERIFIKASI"}
                   className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary"
                 >
-                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
-                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
                   <option value="TERVERIFIKASI">TERVERIFIKASI (Sah / Valid)</option>
+                  <option value="MENUNGGU_VERIFIKASI">MENUNGGU VERIFIKASI (Proses Review)</option>
+                  <option value="BELUM_TERVERIFIKASI">BELUM TERVERIFIKASI (Mentah)</option>
                 </select>
               </div>
             </div>

@@ -4,14 +4,39 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
 
-// Helper: generate URL-safe slug from title
-function generateSlug(title: string): string {
-  return title
+// Helper: generate unique URL-safe slug from title
+async function generateUniqueSlug(title: string, currentId?: string): Promise<string> {
+  let base = title
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!base) {
+    base = "program";
+  }
+
+  let slug = base;
+  let counter = 1;
+
+  while (true) {
+    const existing = await prisma.program.findFirst({
+      where: {
+        slug,
+        ...(currentId ? { id: { not: currentId } } : {}),
+      },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return slug;
+    }
+
+    counter++;
+    slug = `${base}-${counter}`;
+  }
 }
 
 // ==========================================
@@ -44,28 +69,32 @@ export async function createProgram(formData: FormData) {
       return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data program." };
     }
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const location = formData.get("location") as string;
-    const beneficiaries = formData.get("beneficiaries") as string;
-    const status = formData.get("status") as string;
-    const isPublished = formData.get("isPublished") === "true";
-    const imageUrl = (formData.get("imageUrl") as string) || "/images/placeholder.jpg";
+    const title = (formData.get("title") as string)?.trim();
+    if (!title) {
+      return { success: false, error: "Nama program wajib diisi." };
+    }
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
+    const description = (formData.get("description") as string)?.trim() || "";
+    const location = (formData.get("location") as string)?.trim() || "-";
+    const beneficiaries = (formData.get("beneficiaries") as string)?.trim() || "-";
+    const status = (formData.get("status") as string) || "ACTIVE";
+    const isPublished = formData.get("isPublished") === "true";
+    const imageUrl = (formData.get("imageUrl") as string)?.trim() || "/images/placeholder.jpg";
+
+    const source = (formData.get("source") as string)?.trim() || null;
+    const sourceType = (formData.get("sourceType") as string)?.trim() || null;
+    const sourceUrl = (formData.get("sourceUrl") as string)?.trim() || null;
     const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
     // Entity-Specific Publication Readiness Guard
     if (isPublished) {
-      if (!title || title.trim().length < 3) {
+      if (!title || title.length < 3) {
         return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan (min 3 karakter)." };
       }
-      if (!description || description.trim().length < 10) {
-        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan." };
+      if (!description || description.length < 10) {
+        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan (min 10 karakter)." };
       }
-      if (!source || source.trim().length === 0) {
+      if (!source || source.length === 0) {
         return { success: false, error: "Sumber data wajib diisi sebelum program dipublikasikan." };
       }
       if (verificationStatus === "BELUM_TERVERIFIKASI") {
@@ -73,7 +102,7 @@ export async function createProgram(formData: FormData) {
       }
     }
 
-    const slug = generateSlug(title);
+    const slug = await generateUniqueSlug(title);
 
     await prisma.program.create({
       data: {
@@ -85,9 +114,9 @@ export async function createProgram(formData: FormData) {
         status,
         isPublished,
         imageUrl,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
         sectorId,
       },
@@ -97,9 +126,9 @@ export async function createProgram(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create program:", error);
-    return { success: false, error: "Gagal menyimpan data program" };
+    return { success: false, error: error?.message || "Gagal menyimpan data program" };
   }
 }
 
@@ -107,29 +136,35 @@ export async function updateProgram(id: string, formData: FormData) {
   try {
     await requireAuth();
     const program = await prisma.program.findUnique({ where: { id } });
-    if (!program) throw new Error("Program not found");
+    if (!program) throw new Error("Program tidak ditemukan");
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const location = formData.get("location") as string;
-    const beneficiaries = formData.get("beneficiaries") as string;
-    const status = formData.get("status") as string;
+    const title = (formData.get("title") as string)?.trim();
+    if (!title) {
+      return { success: false, error: "Nama program wajib diisi." };
+    }
+
+    const description = (formData.get("description") as string)?.trim() || "";
+    const location = (formData.get("location") as string)?.trim() || "-";
+    const beneficiaries = (formData.get("beneficiaries") as string)?.trim() || "-";
+    const status = (formData.get("status") as string) || "ACTIVE";
     const isPublished = formData.get("isPublished") === "true";
+    const sectorId = (formData.get("sectorId") as string) || program.sectorId;
+    const imageUrl = (formData.get("imageUrl") as string)?.trim() || program.imageUrl;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
+    const source = (formData.get("source") as string)?.trim() || null;
+    const sourceType = (formData.get("sourceType") as string)?.trim() || null;
+    const sourceUrl = (formData.get("sourceUrl") as string)?.trim() || null;
     const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
 
     // Entity-Specific Publication Readiness Guard
     if (isPublished) {
-      if (!title || title.trim().length < 3) {
+      if (!title || title.length < 3) {
         return { success: false, error: "Judul program terlalu pendek untuk dipublikasikan (min 3 karakter)." };
       }
-      if (!description || description.trim().length < 10) {
-        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan." };
+      if (!description || description.length < 10) {
+        return { success: false, error: "Deskripsi program wajib diisi secara detail untuk dipublikasikan (min 10 karakter)." };
       }
-      if (!source || source.trim().length === 0) {
+      if (!source || source.length === 0) {
         return { success: false, error: "Sumber data wajib diisi sebelum program dipublikasikan." };
       }
       if (verificationStatus === "BELUM_TERVERIFIKASI") {
@@ -137,19 +172,27 @@ export async function updateProgram(id: string, formData: FormData) {
       }
     }
 
+    let slug = program.slug;
+    if (title !== program.title) {
+      slug = await generateUniqueSlug(title, id);
+    }
+
     await prisma.program.update({
       where: { id },
       data: {
         title,
+        slug,
         description,
         location,
         beneficiaries,
         status,
         isPublished,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        imageUrl,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
+        sectorId,
       },
     });
 
@@ -157,9 +200,9 @@ export async function updateProgram(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update program:", error);
-    return { success: false, error: "Gagal memperbarui data program" };
+    return { success: false, error: error?.message || "Gagal memperbarui data program" };
   }
 }
 
@@ -167,7 +210,7 @@ export async function deleteProgram(id: string) {
   try {
     await requireAuth();
     const program = await prisma.program.findUnique({ where: { id } });
-    if (!program) throw new Error("Program not found");
+    if (!program) throw new Error("Program tidak ditemukan");
 
     await prisma.program.delete({
       where: { id },
@@ -176,8 +219,8 @@ export async function deleteProgram(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to delete program:", error);
-    return { success: false, error: "Gagal menghapus data program" };
+    return { success: false, error: error?.message || "Gagal menghapus data program" };
   }
 }

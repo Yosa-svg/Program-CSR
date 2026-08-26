@@ -95,9 +95,9 @@ export async function createActivity(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create activity:", error);
-    return { success: false, error: "Gagal menyimpan data kegiatan" };
+    return { success: false, error: error?.message || "Gagal menyimpan data kegiatan" };
   }
 }
 
@@ -105,11 +105,11 @@ export async function updateActivity(id: string, formData: FormData) {
   try {
     await requireAuth();
     const activity = await prisma.activity.findUnique({ where: { id } });
-    if (!activity) throw new Error("Activity not found");
+    if (!activity) throw new Error("Activity tidak ditemukan");
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const location = formData.get("location") as string;
+    const title = (formData.get("title") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim();
+    const location = (formData.get("location") as string)?.trim();
     const dateStr = formData.get("date") as string;
     const status = formData.get("status") as string;
     const isPublished = formData.get("isPublished") === "true";
@@ -165,9 +165,9 @@ export async function updateActivity(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update activity:", error);
-    return { success: false, error: "Gagal memperbarui data kegiatan" };
+    return { success: false, error: error?.message || "Gagal memperbarui data kegiatan" };
   }
 }
 
@@ -175,7 +175,7 @@ export async function deleteActivity(id: string) {
   try {
     await requireAuth();
     const activity = await prisma.activity.findUnique({ where: { id } });
-    if (!activity) throw new Error("Activity not found");
+    if (!activity) throw new Error("Activity tidak ditemukan");
 
     await prisma.activity.delete({
       where: { id },
@@ -184,8 +184,8 @@ export async function deleteActivity(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to delete activity:", error);
-    return { success: false, error: "Gagal menghapus data kegiatan" };
+    return { success: false, error: error?.message || "Gagal menghapus data kegiatan" };
   }
 }
