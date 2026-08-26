@@ -18,7 +18,7 @@
 - [📖 Tentang Proyek](#-tentang-proyek)
 - [🛠️ Teknologi & Peralatan yang Digunakan](#️-teknologi--peralatan-yang-digunakan)
 - [🎨 Konsep Desain & Identitas Visual](#-konsep-desain--identitas-visual)
-- [🏢 4 Sektor Program Utama CSR](#-4-sektor-program-utama-csr)
+- [🏢 Sektor Program CSR Terintegrasi](#-sektor-program-csr-terintegrasi)
 - [🚀 Tahapan & Alur Pengembangan Proyek](#-tahapan--alur-pengembangan-proyek)
 - [✨ Fitur-Fitur Utama Platform](#-fitur-fitur-utama-platform)
 - [💻 Panduan Instalasi & Menjalankan Proyek](#-panduan-instalasi--menjalankan-proyek)
@@ -75,23 +75,47 @@ Proyek ini dibangun menggunakan ekosistem teknologi modern (_Modern Fullstack Ty
 
 ## 🎨 Konsep Desain & Identitas Visual
 
-Desain platform mengusung konsep **Clean, Spacious, and Premium White Space** yang mengadopsi palet identitas resmi dengan variabel CSS terpusat (`.admin-theme` & `:root`):
+Desain platform mengusung konsep **Clean, Spacious, and Premium Editorial White Space** yang mengadopsi palet identitas resmi dengan variabel CSS terpusat (`.admin-theme` & `:root`):
 
+### 1. Palet Warna Resmi
 | Warna Identitas             | Kode HEX / Token CSS                                |       Porsi       | Penerapan Desain                                                                              |
 | --------------------------- | --------------------------------------------------- | :---------------: | --------------------------------------------------------------------------------------------- |
-| **Teal ANTAM**           | `--primary` (`#0D726D`)                             | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
-| **Orange ANTAM**         | `--secondary` (`#F6A236`)                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
-| **Clean White**          | `--card` (`#FFFFFF`)                                |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
-| **Soft Gray**            | `--muted-bg` (`#F7FAF9`)                            |       Seksi       | Latar belakang seksi selang-seling dan dasbor admin                                           |
-| **Dark Text & Footer**   | `--foreground` (`#172121`)                          |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
-| **Sidebar Dark & Border**| `--admin-sidebar-bg` (`#111E1D`) / `#1D3331`        |       Admin       | Panel samping navigasi dasbor admin yang elegan dan modern                                    |
-| **Hero Gradient (135°)** | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
+| **Teal ANTAM**              | `--primary` (`#0D726D`)                             | **70%** (Dominan) | Tombol utama, badge logo KEK, teks menu aktif, wadah icon, heading utama, dan angka statistik |
+| **Orange ANTAM**            | `--secondary` (`#F6A236`)                           |  **30%** (Aksen)  | Subtitle program, garis aksen kartu, tag kategori, indikator progress bar, dan icon kontak    |
+| **Clean White**             | `--card` (`#FFFFFF`)                                |       Utama       | Latar belakang halaman utama, kontainer kartu program, produk, dan sektor                     |
+| **Soft Gray**               | `--muted-bg` (`#F7FAF9`)                            |       Seksi       | Latar belakang seksi selang-seling dan dasbor admin                                           |
+| **Dark Text & Footer**      | `--foreground` (`#172121`)                          |      Kontras      | Tipografi teks utama yang kontras tinggi dan latar belakang footer                            |
+| **Sidebar Dark & Border**   | `--admin-sidebar-bg` (`#111E1D`) / `#1D3331`        |       Admin       | Panel samping navigasi dasbor admin yang elegan dan modern                                    |
+| **Hero Gradient (135°)**    | `linear-gradient(135deg, #0D726D 0%, #F6A236 100%)` |     Selektif      | Header Hero Section bergradasi elegan dengan teks putih kontras tinggi                        |
+
+### 2. Tipografi & Font Sistem
+Platform memadukan dua font Google pilihan via `next/font/google` untuk estetika visual yang kontras, terstruktur, dan mudah dibaca:
+* **🔤 Inter (`--font-inter` / `--font-sans`)**:
+  * **Fungsi**: Font utama (Sans-Serif) untuk seluruh teks body, antarmuka pengguna (UI), menu navigasi, tabel admin, formulir, badge status, dan angka metrik.
+  * **Karakteristik**: Sangat bersih, modern, dengan keterbacaan tinggi (*high readability*) di segala ukuran layar.
+* **🖋️ Playfair Display (`--font-playfair` / `--font-serif`)**:
+  * **Fungsi**: Font editorial (Serif) untuk judul utama (*Hero Headings* `H1`), judul seksi (`H2`, `H3`), dan kartu bidang CSR pada portal publik.
+  * **Karakteristik**: Memberikan sentuhan elegan, berwibawa, dan bernuansa premium khas publikasi korporat bertaraf internasional.
+
+### 3. Arsitektur Tata Letak (Layouts) & Komponen UI
+* **🌐 Portal Publik (`/src/app/(public)`)**:
+  * **Header & Navbar**: Desain mengambang (*Sticky Navbar*) dengan efek *Glassmorphism* halus (`backdrop-blur-md`) dan menu drop-down responsif.
+  * **Hero Section**: Area sambutan visual dengan *taxonomy pill*, tipografi Playfair Display, dan tombol aksi utama (*Call-to-Action*).
+  * **Infinite Photo Slider**: Komponen slider foto kegiatan interaktif yang berputar otomatis tanpa henti menggunakan animasi CSS murni (`@keyframes marquee` 35 detik).
+  * **Grid Modular Responsif**: Menggunakan CSS Grid (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3/4`) dengan pembatas kontainer terstandar `max-w-7xl mx-auto px-6`.
+  * **Kartu Produk & Program**: Mengadopsi sudut membulat modern (`rounded-2xl`), border tipis (`border-border`), serta efek hover dinamis.
+* **🛠️ Dasbor Admin (`/src/app/admin`)**:
+  * **Multi-Column Layout**: Navigasi sidebar gelap elegan di sebelah kiri (`w-64 bg-admin-sidebar`) dan area kerja utama di sebelah kanan.
+  * **Top Bar Interaktif**: Header ringkas yang memuat judul dasbor, info admin aktif, dan *Sector Selector Dropdown* untuk berganti konteks sektor secara instan.
+  * **Wide-Screen Optimized Container**: Area konten terpusat berukuran `max-w-7xl mx-auto` dengan padding adaptif (`p-4 sm:p-6 lg:p-8`) untuk kenyamanan kerja di layar lebar.
+  * **Modular Widgets & Charts**: Kartu ringkasan statistik (Program, Kegiatan, Produk, Dokumentasi) yang terintegrasi dengan grafik interaktif Recharts.
+  * **Modal & Dialog Form**: Antarmuka input data pop-up terisolasi dengan latar *dark blur* (`backdrop-blur-sm`).
 
 ---
 
-## 🏢 4 Sektor Program Utama CSR
+## 🏢 Sektor Program CSR Terintegrasi
 
-Platform mengintegrasikan 4 sektor utama Kawasan Ekonomi Keberkelanjutan:
+Platform mengelola sektor-sektor pemberdayaan masyarakat dan pelestarian lingkungan dalam Kawasan Ekonomi Keberkelanjutan:
 
 1. **🌱 Sektor Pertanian (_Agro Edu Wisata_)**:
    - Pertanian ramah lingkungan terintegrasi pariwisata edukatif.
@@ -103,8 +127,8 @@ Platform mengintegrasikan 4 sektor utama Kawasan Ekonomi Keberkelanjutan:
    - Pengolahan limbah anorganik sirkular serta komposting pupuk organik bermutu tinggi (_Pupuk Diversoil_).
 4. **🥥 Sektor Industri Kelapa (_Industri Kelapa Terpadu_)**:
    - Hilirisasi sabut kelapa menjadi produk ekspor dan bernilai tambah tinggi (_Coconet, Cocopeat, Cocopot, & Sapu Serat Kelapa_).
-5. **🏪 Sektor UMKM & Ekonomi Lokal**:
-   - Pendampingan legalitas, sertifikasi halal/P-IRT, dan perluasan akses pasar produk warga binaan.
+5. **🏢 Sektor Tambahan yang Dikelola Mandiri**:
+   - Admin dapat menambahkan sektor baru secara dinamis (misal: *Pendidikan*, *Kesehatan*, *UMKM*, dsb.) langsung melalui Dasbor Admin.
 
 ---
 
@@ -124,10 +148,10 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 └─────────────────────────┘     └─────────────────────────┘     │ & Katalog Interaktif    │
              │                                                  └─────────────────────────┘
              ▼
-┌─────────────────────────┐     ┌─────────────────────────┐
-│  Tahap 7: Migrasi Cloud │ ──> │ Tahap 8: Eliminasi Data │
-│  & Single-Role RBAC     │     │ Fiktif & Desain Token   │
-└─────────────────────────┘     └─────────────────────────┘
+┌─────────────────────────┐     ┌─────────────────────────┐     ┌─────────────────────────┐
+│  Tahap 7: Migrasi Cloud │ ──> │ Tahap 8: Eliminasi Data │ ──> │ Tahap 9: Manajemen      │
+│  & Single-Role RBAC     │     │ Fiktif & Desain Token   │     │ Sektor & Kontekstualisasi│
+└─────────────────────────┘     └─────────────────────────┘     └─────────────────────────┘
 ```
 
 ### 🔹 Tahap 1: Perancangan Arsitektur Basis Data & Relasi Prisma
@@ -160,6 +184,12 @@ Proses perancangan dan pembangunan aplikasi dilakukan secara terstruktur melalui
 - **Zero Fallback & Empty State**: Mengganti angka fallback buatan dengan komponen *Empty State* visual yang elegan saat data kosong.
 - **Sentralisasi CSS Theme Tokens**: Memindahkan seluruh warna hardcoded hex ke variabel CSS `.admin-theme` di [`globals.css`](file:///e:/Coding/CSR/src/app/globals.css).
 - **Wide-Screen Layout Optimization**: Memperluas lebar dashboard menjadi `max-w-7xl` untuk pengalaman visual yang lebih lega di monitor layar lebar.
+
+### 🔹 Tahap 9: Manajemen Sektor Dinamis & Kontekstualisasi Sektor Aktif
+- **Fitur CRUD Sektor di Admin**: Admin dapat menambah sektor baru (dengan otomatisasi *URL slug*), mengubah, atau menghapus sektor dengan proteksi relasi basis data di menu Pengaturan.
+- **Katalog Sektor Publik Dinamis (`/bidang`)**: Halaman `/bidang` mengambil data sektor secara *real-time* dari basis data Prisma.
+- **Dynamic Public Route (`/bidang/[slug]`)**: Template halaman publik otomatis untuk setiap sektor baru yang ditambahkan oleh admin.
+- **Kontekstualisasi Judul & Deskripsi Dasbor**: Seluruh modul manager (`Program`, `Kegiatan`, `Produk`, `Dokumentasi`, `Kinerja`, dan `Dashboard Overview`) secara dinamis menampilkan nama sektor yang sedang dipilih di filter header (menghapus seluruh teks statis yang sebelumnya kaku).
 
 ---
 
