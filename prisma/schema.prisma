@@ -36,15 +36,15 @@ model Program {
   id                 String          @id @default(uuid())
   title              String
   slug               String          @unique
-  description        String
+  description        String          @db.Text
   location           String
   beneficiaries      String
   status             String          @default("ACTIVE")
-  imageUrl           String
+  imageUrl           String          @db.VarChar(1000)
   isPublished        Boolean         @default(false)
   source             String?
   sourceType         String?
-  sourceUrl          String?
+  sourceUrl          String?         @db.VarChar(1000)
   verificationStatus String?         @default("BELUM_TERVERIFIKASI")
   sectorId           String
   activities         Activity[]
@@ -59,14 +59,14 @@ model Program {
 model Activity {
   id                 String          @id @default(uuid())
   title              String
-  description        String
+  description        String          @db.Text
   location           String?
   date               DateTime?
   status             String          @default("UPCOMING")
   isPublished        Boolean         @default(false)
   source             String?
   sourceType         String?
-  sourceUrl          String?
+  sourceUrl          String?         @db.VarChar(1000)
   verificationStatus String?         @default("BELUM_TERVERIFIKASI")
   programId          String?
   sectorId           String
@@ -81,10 +81,10 @@ model Activity {
 model Product {
   id                 String          @id @default(uuid())
   name               String
-  description        String
+  description        String          @db.Text
   category           String          @default("Umum")
   status             String          @default("AVAILABLE")
-  imageUrl           String          @default("/images/placeholder.jpg")
+  imageUrl           String          @default("/images/placeholder.jpg") @db.VarChar(1000)
   isPublished        Boolean         @default(false)
   slug               String          @unique
   capacity           String?
@@ -93,7 +93,7 @@ model Product {
   certification      String?
   source             String?
   sourceType         String?
-  sourceUrl          String?
+  sourceUrl          String?         @db.VarChar(1000)
   verificationStatus String?         @default("BELUM_TERVERIFIKASI")
   programId          String?
   sectorId           String
@@ -108,15 +108,15 @@ model Product {
 model Documentation {
   id                 String    @id @default(uuid())
   title              String
-  description        String?
-  imageUrl           String
+  description        String?   @db.Text
+  imageUrl           String    @db.VarChar(1000)
   date               DateTime?
   status             String    @default("PUBLISHED")
   isPublished        Boolean   @default(false)
   isFeatured         Boolean   @default(false)
   source             String?
   sourceType         String?
-  sourceUrl          String?
+  sourceUrl          String?   @db.VarChar(1000)
   verificationStatus String?   @default("BELUM_TERVERIFIKASI")
   programId          String?
   activityId         String?
@@ -139,7 +139,7 @@ model Documentation {
 model Metric {
   id                 String   @id @default(uuid())
   name               String
-  description        String?
+  description        String?  @db.Text
   category           String   @default("OUTCOME")
   unit               String?
   target             Float?
@@ -151,7 +151,7 @@ model Metric {
   isPublished        Boolean  @default(false)
   source             String?
   sourceType         String?
-  sourceUrl          String?
+  sourceUrl          String?  @db.VarChar(1000)
   verificationStatus String?  @default("BELUM_TERVERIFIKASI")
   programId          String?
   sectorId           String
