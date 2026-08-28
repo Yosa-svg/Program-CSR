@@ -158,12 +158,12 @@ export default async function AdminDashboard() {
       {/* 4 KARTU STATISTIK */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { title: "Program", count: programCount, icon: <Layers size={20} className="text-primary" />, href: "/admin/program" },
-          { title: "Kegiatan", count: activityCount, icon: <Sprout size={20} className="text-secondary" />, href: "/admin/kegiatan" },
-          { title: "Produk", count: productCount, icon: <Box size={20} className="text-primary" />, href: "/admin/produk" },
-          { title: "Dokumentasi", count: docCount, icon: <ImageIcon size={20} className="text-secondary" />, href: "/admin/dokumentasi" },
+          { title: "Program", count: programCount, icon: <Layers size={20} className="text-primary" />, href: "/admin/program", accent: "border-l-primary" },
+          { title: "Kegiatan", count: activityCount, icon: <Sprout size={20} className="text-secondary" />, href: "/admin/kegiatan", accent: "border-l-secondary" },
+          { title: "Produk", count: productCount, icon: <Box size={20} className="text-primary" />, href: "/admin/produk", accent: "border-l-primary" },
+          { title: "Dokumentasi", count: docCount, icon: <ImageIcon size={20} className="text-secondary" />, href: "/admin/dokumentasi", accent: "border-l-secondary" },
         ].map((stat, i) => (
-          <Link key={i} href={stat.href} className="bg-card p-5 rounded-2xl border border-border shadow-sm hover:border-primary/50 transition-colors group">
+          <Link key={i} href={stat.href} className={`bg-card p-5 rounded-2xl border border-border border-l-4 ${stat.accent} shadow-sm hover:border-primary/50 transition-colors group`}>
             <div className="flex items-center justify-between mb-3">
               <div className="text-xs font-bold text-foreground/50 uppercase tracking-wider">{stat.title}</div>
               <div className="p-2 bg-muted-bg rounded-lg group-hover:bg-primary/10 transition-colors">{stat.icon}</div>
@@ -187,7 +187,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* CHART STATUS (1/3 width on desktop) */}
-        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <div className="bg-card p-6 rounded-3xl border border-border shadow-sm">
           <h3 className="font-bold text-foreground flex items-center gap-2 mb-6 text-base">
             <CheckCircle2 size={20} className="text-primary" />
             Status Program

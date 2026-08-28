@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Leaf } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
@@ -32,17 +32,17 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-md mb-8 text-xs font-bold tracking-wider text-white uppercase shadow-sm"
           >
-            <Sparkles size={13} className="text-[#F6A236]" />
+            <Leaf size={13} className="text-[#F6A236]" />
             Kawasan Ekonomi Keberkelanjutan
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
             className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-[1.1]"
           >
             <span className="text-white block drop-shadow-sm">
@@ -56,7 +56,7 @@ export default function Hero() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
             className="text-base md:text-lg text-white/90 mb-10 leading-relaxed font-normal max-w-xl drop-shadow-sm"
           >
             Membangun kawasan ekonomi berkelanjutan melalui pemberdayaan
@@ -67,7 +67,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.45 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
           >
             <Link
@@ -92,7 +92,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.55 }}
             className="mt-16 md:mt-20 grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-10 border-t border-white/20 pt-8"
           >
             <div>
