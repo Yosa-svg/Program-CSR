@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Layers, MapPin, Users, ArrowRight, Filter } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 type Program = {
   id: string;
@@ -12,7 +11,6 @@ type Program = {
   location: string;
   beneficiaries: string;
   status: string;
-  imageUrl: string;
   isPublished: boolean;
   sectorId: string;
   slug: string;
@@ -125,37 +123,22 @@ export default function ProgramCatalog({
                   <Link
                     href={`/program/${program.slug}`}
                     key={program.id}
-                    className="group bg-white border border-[#E2E8E6] rounded-2xl overflow-hidden hover:border-[#0D726D]/50 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer shadow-sm relative"
+                    className="group bg-white border border-[#E2E8E6] rounded-2xl hover:border-[#0D726D]/50 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer shadow-sm relative"
                   >
                     {/* Top Accent Line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#0D726D] group-hover:bg-[#F6A236] transition-colors z-20"></div>
-
-                    {/* Card Image */}
-                    <div className="relative aspect-[16/10] bg-[#F7FAF9] overflow-hidden border-b border-[#E2E8E6]">
-                      {program.imageUrl && !program.imageUrl.includes("placeholder") ? (
-                        <Image
-                          src={program.imageUrl}
-                          alt={program.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Layers className="w-12 h-12 text-[#0D726D]/20" />
-                        </div>
-                      )}
-                      {/* Status Badge */}
-                      <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md ${status.color}`}>
-                        {status.text}
-                      </div>
-                    </div>
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#0D726D] group-hover:bg-[#F6A236] transition-colors z-20 rounded-t-2xl"></div>
 
                     {/* Card Body */}
-                    <div className="p-6 flex flex-col flex-1">
-                      {/* Sector Badge */}
-                      <span className="inline-block w-fit px-2.5 py-1 bg-[#F6A236]/15 text-[#E59124] border border-[#F6A236]/30 rounded-lg text-[11px] uppercase font-bold tracking-wider mb-3">
-                        {program.sector.name}
-                      </span>
+                    <div className="p-6 flex flex-col flex-1 pt-7">
+                      {/* Badges Row */}
+                      <div className="flex items-center gap-2 flex-wrap mb-3">
+                        <span className="inline-block w-fit px-2.5 py-1 bg-[#F6A236]/15 text-[#E59124] border border-[#F6A236]/30 rounded-lg text-[11px] uppercase font-bold tracking-wider">
+                          {program.sector.name}
+                        </span>
+                        <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${status.color}`}>
+                          {status.text}
+                        </span>
+                      </div>
 
                       <h3 className="text-xl font-bold text-[#172121] mb-2 group-hover:text-[#0D726D] transition-colors">
                         {program.title}
