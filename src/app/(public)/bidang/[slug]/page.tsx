@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, Layers, Sprout, Box, ImageIcon, BarChart3, MapPin, Users, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, Layers, Sprout, Box, ImageIcon, BarChart3, MapPin, Users, Calendar, PawPrint, Recycle, Factory, Store, GraduationCap, HeartPulse, HardHat, Zap, Palmtree, Leaf, type LucideIcon } from "lucide-react";
 import { getSectorBySlug } from "@/lib/queries/sectors";
 import { getPublishedPrograms } from "@/lib/queries/programs";
 import { getPublishedActivities } from "@/lib/queries/activities";
@@ -11,17 +11,17 @@ import { getPublishedMetrics } from "@/lib/queries/metrics";
 
 export const dynamic = "force-dynamic";
 
-const SECTOR_ICONS: Record<string, string> = {
-  pertanian: "🌱",
-  peternakan: "🐄",
-  lingkungan: "♻️",
-  "industri-kelapa": "🥥",
-  umkm: "🏪",
-  pendidikan: "🎓",
-  kesehatan: "🏥",
-  infrastruktur: "🏗️",
-  energi: "⚡",
-  pariwisata: "🏖️",
+const SECTOR_ICONS: Record<string, LucideIcon> = {
+  pertanian: Sprout,
+  peternakan: PawPrint,
+  lingkungan: Recycle,
+  "industri-kelapa": Factory,
+  umkm: Store,
+  pendidikan: GraduationCap,
+  kesehatan: HeartPulse,
+  infrastruktur: HardHat,
+  energi: Zap,
+  pariwisata: Palmtree,
 };
 
 interface SectorPageProps {
@@ -54,7 +54,7 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
     getPublishedMetrics(sector.id),
   ]);
 
-  const sectorIcon = SECTOR_ICONS[sector.slug] || "🌿";
+  const SectorIcon = SECTOR_ICONS[sector.slug] || Leaf;
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans text-[#172121]">
@@ -75,7 +75,7 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
           </div>
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 text-white border border-white/30 rounded-full text-xs font-bold tracking-widest uppercase mb-4 backdrop-blur-md shadow-sm">
-            <span>{sectorIcon}</span>
+            <SectorIcon size={13} className="text-[#F6A236]" />
             <span>Sektor Binaan CSR</span>
           </div>
 
@@ -125,8 +125,8 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0D726D]/10 to-[#F6A236]/10 text-4xl">
-                          {sectorIcon}
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0D726D]/10 to-[#F6A236]/10">
+                          <SectorIcon size={40} strokeWidth={1.5} className="text-[#0D726D]/40" />
                         </div>
                       )}
                       <div className="absolute top-3 left-3 bg-[#0D726D] text-white text-[11px] font-bold px-2.5 py-1 rounded-md shadow-sm">
@@ -359,7 +359,7 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
       {/* 6. CTA FOOTER */}
       <section className="py-20 px-6 text-center bg-[#F7FAF9]">
         <div className="max-w-3xl mx-auto space-y-4">
-          <span className="text-3xl">{sectorIcon}</span>
+          <div className="flex justify-center"><SectorIcon size={32} strokeWidth={1.5} className="text-[#0D726D]" /></div>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#172121]">
             Ingin mengetahui lebih lanjut tentang program {sector.name}?
           </h3>

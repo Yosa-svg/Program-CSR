@@ -1,20 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, PawPrint, Recycle, Factory, Store, GraduationCap, HeartPulse, HardHat, Zap, Palmtree, Leaf, Sprout, type LucideIcon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const SECTOR_ICONS: Record<string, string> = {
-  pertanian: "🌱",
-  peternakan: "🐄",
-  lingkungan: "♻️",
-  "industri-kelapa": "🥥",
-  umkm: "🏪",
-  pendidikan: "🎓",
-  kesehatan: "🏥",
-  infrastruktur: "🏗️",
-  energi: "⚡",
-  pariwisata: "🏖️",
+const SECTOR_ICONS: Record<string, LucideIcon> = {
+  pertanian: Sprout,
+  peternakan: PawPrint,
+  lingkungan: Recycle,
+  "industri-kelapa": Factory,
+  umkm: Store,
+  pendidikan: GraduationCap,
+  kesehatan: HeartPulse,
+  infrastruktur: HardHat,
+  energi: Zap,
+  pariwisata: Palmtree,
 };
 
 export const metadata = {
@@ -56,7 +56,7 @@ export default async function BidangCSRPage() {
           <div className="border-t border-border">
             {sectors.map((sector, index) => {
               const numStr = String(index + 1).padStart(2, "0");
-              const icon = SECTOR_ICONS[sector.slug] || "🌿";
+              const SectorIcon = SECTOR_ICONS[sector.slug] || Leaf;
               const desc = sector.programs.length > 0 
                 ? `Program: ${sector.programs.map((p) => p.title).join(" • ")}`
                 : "Inisiatif pemberdayaan masyarakat & pengembangan berkelanjutan.";
@@ -86,8 +86,8 @@ export default async function BidangCSRPage() {
 
                   {/* ICON & ARROW */}
                   <div className="flex items-center gap-8 mt-6 md:mt-0 self-end md:self-auto">
-                    <div className="text-4xl md:text-5xl opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 transform origin-right">
-                      {icon}
+                    <div className="text-foreground/30 group-hover:text-primary opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 transform origin-right">
+                      <SectorIcon size={44} strokeWidth={1.5} />
                     </div>
                     <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:border-transparent group-hover:text-white transition-all duration-300 text-foreground/40 shadow-sm">
                       <ArrowRight size={20} />
