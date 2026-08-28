@@ -66,7 +66,7 @@ export default function ProgramCatalog({
             Program Pemberdayaan Kami
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-normal leading-relaxed drop-shadow-sm">
-            Jelajahi seluruh inisiatif tanggung jawab sosial perusahaan yang telah dipublikasikan di berbagai sektor unggulan.
+            Jelajahi seluruh inisiatif tanggung jawab sosial perusahaan yang telah dipublikasikan di berbagai sektor.
           </p>
         </div>
       </section>

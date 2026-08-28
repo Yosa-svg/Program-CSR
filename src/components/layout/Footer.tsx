@@ -37,7 +37,7 @@ export default function Footer() {
             <ul className="space-y-3.5 text-sm text-white/65">
               <li><Link href="/tentang" className="hover:text-[#F6A236] transition-colors">Tentang Kami</Link></li>
               <li><Link href="/bidang" className="hover:text-[#F6A236] transition-colors">Sektor CSR</Link></li>
-              <li><Link href="/program" className="hover:text-[#F6A236] transition-colors">Program Unggulan</Link></li>
+              <li><Link href="/program" className="hover:text-[#F6A236] transition-colors">Program CSR</Link></li>
               <li><Link href="/produk" className="hover:text-[#F6A236] transition-colors">Katalog Produk</Link></li>
               <li><Link href="/kinerja" className="hover:text-[#F6A236] transition-colors">Laporan Kinerja</Link></li>
             </ul>

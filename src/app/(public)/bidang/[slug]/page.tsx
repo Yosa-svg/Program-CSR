@@ -73,7 +73,7 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground flex items-center gap-3">
               <Layers className="text-primary" size={28} />
-              Program Unggulan
+              Program CSR
             </h2>
           </div>
 

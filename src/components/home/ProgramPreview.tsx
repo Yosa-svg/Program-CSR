@@ -33,7 +33,7 @@ export default function ProgramPreview() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-6 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
           >
-            PROGRAM UNGGULAN
+            PROGRAM CSR
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

@@ -52,7 +52,7 @@ export default function ProgramPertanian({ programs }: Props) {
             
             <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-accent mb-6 text-xs font-semibold uppercase tracking-wider w-fit">
-                Program Unggulan
+                Program CSR
               </div>
               
               <h3 className="text-3xl font-bold text-white mb-4">{program.title}</h3>
