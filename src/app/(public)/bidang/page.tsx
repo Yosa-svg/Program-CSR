@@ -86,8 +86,8 @@ export default async function BidangCSRPage() {
 
                   {/* ICON & ARROW */}
                   <div className="flex items-center gap-8 mt-6 md:mt-0 self-end md:self-auto">
-                    <div className="text-foreground/30 group-hover:text-primary opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 transform origin-right">
-                      <SectorIcon size={44} strokeWidth={1.5} />
+                    <div className="text-foreground/40 group-hover:text-primary group-hover:scale-110 transition-all duration-300 transform origin-right">
+                      <SectorIcon size={44} strokeWidth={1.75} />
                     </div>
                     <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:border-transparent group-hover:text-white transition-all duration-300 text-foreground/40 shadow-sm">
                       <ArrowRight size={20} />
