@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import SectorSelector from "./SectorSelector";
 import LogoutButton from "./LogoutButton";
+import SessionHeartbeat from "./SessionHeartbeat";
 
 export default async function AdminLayout({
   children,
@@ -27,6 +28,8 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-muted-bg flex flex-col md:flex-row font-sans">
+      <SessionHeartbeat />
+
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-admin-sidebar border-r border-admin-sidebar-border flex flex-col text-white">
         <div className="p-6 border-b border-admin-sidebar-border">

@@ -11,14 +11,68 @@ enum Role {
   ADMIN_CSR
 }
 
+enum ActivityAction {
+  LOGIN
+  LOGIN_FAILED
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+}
+
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(ADMIN_CSR)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  password     String
+  role         Role           @default(ADMIN_CSR)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+  activityLogs ActivityLog[]
+}
+
+model AdminSession {
+  id            String    @id @default(uuid())
+  userId        String
+  sessionToken  String    @unique @db.VarChar(255)
+  ipAddress     String?   @db.VarChar(45)
+  userAgent     String?   @db.VarChar(500)
+  deviceType    String?   @db.VarChar(50)
+  isActive      Boolean   @default(true)
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedReason String?   @db.VarChar(255)
+  lastActiveAt  DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  endedAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "AdminSession_userId_idx")
+  @@index([lastActiveAt], map: "AdminSession_lastActiveAt_idx")
+  @@index([isActive, isRevoked], map: "AdminSession_active_status_idx")
+}
+
+model ActivityLog {
+  id          String         @id @default(uuid())
+  userId      String?
+  action      ActivityAction
+  entityType  String         @db.VarChar(50)
+  entityId    String?        @db.VarChar(100)
+  entityTitle String?        @db.VarChar(255)
+  description String         @db.VarChar(500)
+  metadata    Json?
+  ipAddress   String?        @db.VarChar(45)
+  userAgent   String?        @db.VarChar(500)
+  createdAt   DateTime       @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "ActivityLog_userId_idx")
+  @@index([action], map: "ActivityLog_action_idx")
+  @@index([entityType], map: "ActivityLog_entityType_idx")
+  @@index([createdAt], map: "ActivityLog_createdAt_idx")
 }
 
 model Sector {

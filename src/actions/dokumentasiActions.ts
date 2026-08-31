@@ -4,6 +4,22 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadImage, deleteImage } from "@/lib/mediaService";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // ==========================================
 // DOCUMENTATION ACTIONS
@@ -32,7 +48,9 @@ export async function getDocumentations() {
 
 export async function createDocumentation(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activeSectorId = await getActiveSectorId();
     const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
@@ -100,7 +118,7 @@ export async function createDocumentation(formData: FormData) {
       return { success: false, error: uploadResult.error || "Gagal mengunggah gambar." };
     }
 
-    await prisma.documentation.create({
+    const created = await prisma.documentation.create({
       data: {
         title,
         description: description || null,
@@ -120,6 +138,26 @@ export async function createDocumentation(formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking, tidak menyimpan URL gambar atau data binary
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "DOCUMENTATION",
+      entityId: created.id,
+      entityTitle: created.title,
+      description: `Admin membuat dokumentasi baru: ${created.title}`,
+      metadata: {
+        status,
+        isPublished,
+        isFeatured,
+        sectorId,
+        verificationStatus,
+        hasImage: true,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -132,7 +170,9 @@ export async function createDocumentation(formData: FormData) {
 
 export async function updateDocumentation(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const oldDoc = await prisma.documentation.findUnique({ where: { id } });
     if (!oldDoc) return { success: false, error: "Dokumentasi tidak ditemukan." };
 
@@ -183,10 +223,11 @@ export async function updateDocumentation(id: string, formData: FormData) {
         return { success: false, error: "Data dokumentasi harus berstatus Menunggu Verifikasi atau Terverifikasi sebelum dipublikasikan." };
       }
     }
-    
+
     let finalImageUrl = oldDoc.imageUrl;
     const imageFile = formData.get("image") as File;
-    if (imageFile && imageFile.size > 0) {
+    const imageChanged = imageFile && imageFile.size > 0;
+    if (imageChanged) {
       const uploadResult = await uploadImage(imageFile, "documentation");
       if (uploadResult.error || !uploadResult.url) {
         return { success: false, error: uploadResult.error || "Gagal mengunggah gambar." };
@@ -196,6 +237,15 @@ export async function updateDocumentation(id: string, formData: FormData) {
       }
       finalImageUrl = uploadResult.url;
     }
+
+    const changedFields: string[] = [];
+    if (title !== oldDoc.title) changedFields.push("title");
+    if (description !== oldDoc.description) changedFields.push("description");
+    if (status !== oldDoc.status) changedFields.push("status");
+    if (isPublished !== oldDoc.isPublished) changedFields.push("isPublished");
+    if (isFeatured !== oldDoc.isFeatured) changedFields.push("isFeatured");
+    if (verificationStatus !== oldDoc.verificationStatus) changedFields.push("verificationStatus");
+    if (imageChanged) changedFields.push("imageUrl");
 
     await prisma.documentation.update({
       where: { id },
@@ -217,6 +267,25 @@ export async function updateDocumentation(id: string, formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking, tidak menyimpan URL gambar atau credential
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "DOCUMENTATION",
+      entityId: id,
+      entityTitle: title,
+      description: `Admin memperbarui dokumentasi: ${title}`,
+      metadata: {
+        changedFields,
+        status,
+        isPublished,
+        isFeatured,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -229,13 +298,31 @@ export async function updateDocumentation(id: string, formData: FormData) {
 
 export async function toggleFeaturedDocumentation(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const doc = await prisma.documentation.findUnique({ where: { id } });
     if (!doc) return { success: false, error: "Dokumentasi tidak ditemukan." };
 
     const updated = await prisma.documentation.update({
       where: { id },
       data: { isFeatured: !doc.isFeatured },
+    });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "DOCUMENTATION",
+      entityId: id,
+      entityTitle: doc.title,
+      description: `Admin ${updated.isFeatured ? "menambahkan" : "menghapus"} dokumentasi dari slider beranda: ${doc.title}`,
+      metadata: {
+        event: "TOGGLE_FEATURED",
+        isFeatured: updated.isFeatured,
+      },
+      ipAddress,
+      userAgent,
     });
 
     revalidatePath("/admin/dokumentasi");
@@ -250,16 +337,35 @@ export async function toggleFeaturedDocumentation(id: string) {
 
 export async function deleteDocumentation(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const doc = await prisma.documentation.findUnique({ where: { id } });
-    
+
     if (doc) {
       await prisma.documentation.delete({
         where: { id },
       });
       await deleteImage(doc.imageUrl);
+
+      // ActivityLog — non-blocking, setelah delete berhasil
+      void logActivity({
+        userId: session.userId,
+        action: ActivityAction.DELETE,
+        entityType: "DOCUMENTATION",
+        entityId: id,
+        entityTitle: doc.title,
+        description: `Admin menghapus dokumentasi: ${doc.title}`,
+        metadata: {
+          sectorId: doc.sectorId,
+          status: doc.status,
+          isFeatured: doc.isFeatured,
+        },
+        ipAddress,
+        userAgent,
+      });
     }
-    
+
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
     revalidatePath("/", "layout");

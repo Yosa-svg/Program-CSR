@@ -3,7 +3,23 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-import { getSession, requireAuth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // ==========================================
 // 1. PROFIL & KEAMANAN (ADMIN_CSR)
@@ -12,15 +28,37 @@ import { getSession, requireAuth } from "@/lib/auth";
 export async function updateProfile(formData: FormData) {
   try {
     const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
 
     const name = formData.get("name") as string;
     if (!name || name.trim().length < 3) {
       return { success: false, error: "Nama minimal 3 karakter." };
     }
 
+    const oldUser = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { name: true },
+    });
+
     await prisma.user.update({
       where: { id: session.userId },
       data: { name: name.trim() },
+    });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "SETTINGS",
+      entityId: session.userId,
+      entityTitle: name.trim(),
+      description: `Admin memperbarui profil: nama diubah`,
+      metadata: {
+        event: "PROFILE_UPDATED",
+        changedFields: oldUser?.name !== name.trim() ? ["name"] : [],
+      },
+      ipAddress,
+      userAgent,
     });
 
     revalidatePath("/admin/pengaturan");
@@ -35,6 +73,7 @@ export async function updateProfile(formData: FormData) {
 export async function updatePassword(formData: FormData) {
   try {
     const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
 
     const currentPassword = formData.get("currentPassword") as string;
     const newPassword = formData.get("newPassword") as string;
@@ -67,6 +106,21 @@ export async function updatePassword(formData: FormData) {
       data: { password: newPasswordHash },
     });
 
+    // ActivityLog — non-blocking, TIDAK menyimpan password lama/baru/hash
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "AUTH",
+      entityId: session.userId,
+      entityTitle: user.name,
+      description: `Admin mengubah kata sandi akun`,
+      metadata: {
+        event: "PASSWORD_CHANGED",
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/pengaturan");
     return { success: true };
   } catch (error) {
@@ -81,10 +135,7 @@ export async function updatePassword(formData: FormData) {
 
 export async function getUsersList() {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "ADMIN_CSR") {
-      return [];
-    }
+    await requireAuth();
 
     return await prisma.user.findMany({
       select: {
@@ -140,7 +191,9 @@ function generateSlug(title: string): string {
 
 export async function createSector(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const name = formData.get("name") as string;
     if (!name || name.trim().length < 3) {
       return { success: false, error: "Nama sektor minimal 3 karakter." };
@@ -163,11 +216,26 @@ export async function createSector(formData: FormData) {
       return { success: false, error: "Sektor dengan nama atau slug ini sudah ada." };
     }
 
-    await prisma.sector.create({
+    const created = await prisma.sector.create({
       data: {
         name: trimmedName,
         slug: slug,
       }
+    });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "SECTOR",
+      entityId: created.id,
+      entityTitle: created.name,
+      description: `Admin membuat sektor baru: ${created.name}`,
+      metadata: {
+        slug: created.slug,
+      },
+      ipAddress,
+      userAgent,
     });
 
     revalidatePath("/admin/pengaturan");
@@ -183,7 +251,9 @@ export async function createSector(formData: FormData) {
 
 export async function updateSector(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const name = formData.get("name") as string;
     if (!name || name.trim().length < 3) {
       return { success: false, error: "Nama sektor minimal 3 karakter." };
@@ -207,12 +277,34 @@ export async function updateSector(id: string, formData: FormData) {
       return { success: false, error: "Sektor lain dengan nama atau slug ini sudah ada." };
     }
 
+    const oldSector = await prisma.sector.findUnique({ where: { id } });
+
     await prisma.sector.update({
       where: { id },
       data: {
         name: trimmedName,
         slug: slug,
       }
+    });
+
+    const changedFields: string[] = [];
+    if (oldSector?.name !== trimmedName) changedFields.push("name");
+    if (oldSector?.slug !== slug) changedFields.push("slug");
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "SECTOR",
+      entityId: id,
+      entityTitle: trimmedName,
+      description: `Admin memperbarui sektor: ${trimmedName}`,
+      metadata: {
+        changedFields,
+        slug,
+      },
+      ipAddress,
+      userAgent,
     });
 
     revalidatePath("/admin/pengaturan");
@@ -228,7 +320,8 @@ export async function updateSector(id: string, formData: FormData) {
 
 export async function deleteSector(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
 
     // Check if sector has related items
     const sector = await prisma.sector.findUnique({
@@ -266,6 +359,21 @@ export async function deleteSector(id: string) {
 
     await prisma.sector.delete({
       where: { id }
+    });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "SECTOR",
+      entityId: id,
+      entityTitle: sector.name,
+      description: `Admin menghapus sektor: ${sector.name}`,
+      metadata: {
+        slug: sector.slug,
+      },
+      ipAddress,
+      userAgent,
     });
 
     revalidatePath("/admin/pengaturan");

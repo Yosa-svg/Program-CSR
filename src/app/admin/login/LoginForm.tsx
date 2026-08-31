@@ -9,10 +9,12 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setError(null);
     try {
+      const formData = new FormData(e.currentTarget);
       const res = await loginAction(formData);
       if (res?.error) {
         setError(res.error);
@@ -28,9 +30,9 @@ export default function LoginForm() {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 bg-red-50 text-red-500 text-sm rounded-lg border border-red-100">
+        <div data-testid="login-error" className="p-3 bg-red-50 text-red-500 text-sm rounded-lg border border-red-100">
           {error}
         </div>
       )}

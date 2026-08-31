@@ -3,6 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // ==========================================
 // ACTIVITY (KEGIATAN) ACTIONS
@@ -29,7 +45,9 @@ export async function getActivities() {
 
 export async function createActivity(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activeSectorId = await getActiveSectorId();
     const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
@@ -74,7 +92,7 @@ export async function createActivity(formData: FormData) {
       }
     }
 
-    await prisma.activity.create({
+    const created = await prisma.activity.create({
       data: {
         title,
         description,
@@ -91,6 +109,25 @@ export async function createActivity(formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "ACTIVITY",
+      entityId: created.id,
+      entityTitle: created.title,
+      description: `Admin membuat kegiatan baru: ${created.title}`,
+      metadata: {
+        status,
+        isPublished,
+        sectorId,
+        programId: programId || null,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -103,7 +140,9 @@ export async function createActivity(formData: FormData) {
 
 export async function updateActivity(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) throw new Error("Activity tidak ditemukan");
 
@@ -144,6 +183,15 @@ export async function updateActivity(id: string, formData: FormData) {
       }
     }
 
+    const changedFields: string[] = [];
+    if (title !== activity.title) changedFields.push("title");
+    if (description !== activity.description) changedFields.push("description");
+    if (location !== activity.location) changedFields.push("location");
+    if (status !== activity.status) changedFields.push("status");
+    if (isPublished !== activity.isPublished) changedFields.push("isPublished");
+    if (verificationStatus !== activity.verificationStatus) changedFields.push("verificationStatus");
+    if ((programId || null) !== activity.programId) changedFields.push("programId");
+
     await prisma.activity.update({
       where: { id },
       data: {
@@ -161,6 +209,24 @@ export async function updateActivity(id: string, formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "ACTIVITY",
+      entityId: id,
+      entityTitle: title,
+      description: `Admin memperbarui kegiatan: ${title}`,
+      metadata: {
+        changedFields,
+        status,
+        isPublished,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -173,13 +239,33 @@ export async function updateActivity(id: string, formData: FormData) {
 
 export async function deleteActivity(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activity = await prisma.activity.findUnique({ where: { id } });
     if (!activity) throw new Error("Activity tidak ditemukan");
 
     await prisma.activity.delete({
       where: { id },
     });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "ACTIVITY",
+      entityId: id,
+      entityTitle: activity.title,
+      description: `Admin menghapus kegiatan: ${activity.title}`,
+      metadata: {
+        sectorId: activity.sectorId,
+        programId: activity.programId,
+        status: activity.status,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kegiatan");
     revalidatePath("/admin");
     revalidatePath("/", "layout");

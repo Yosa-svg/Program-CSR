@@ -3,6 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // ==========================================
 // KINERJA (METRIC) ACTIONS
@@ -29,7 +45,9 @@ export async function getMetrics() {
 
 export async function createMetric(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activeSectorId = await getActiveSectorId();
     const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
@@ -82,7 +100,7 @@ export async function createMetric(formData: FormData) {
       }
     }
 
-    await prisma.metric.create({
+    const created = await prisma.metric.create({
       data: {
         name,
         description: description || null,
@@ -104,6 +122,27 @@ export async function createMetric(formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "METRIC",
+      entityId: created.id,
+      entityTitle: created.name,
+      description: `Admin membuat indikator kinerja baru: ${created.name}`,
+      metadata: {
+        category,
+        year,
+        period: period || null,
+        status,
+        isPublished,
+        sectorId,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
     revalidatePath("/kinerja");
@@ -117,7 +156,9 @@ export async function createMetric(formData: FormData) {
 
 export async function updateMetric(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const metric = await prisma.metric.findUnique({ where: { id } });
     if (!metric) throw new Error("Metric tidak ditemukan");
 
@@ -166,6 +207,17 @@ export async function updateMetric(id: string, formData: FormData) {
       }
     }
 
+    const changedFields: string[] = [];
+    if (name !== metric.name) changedFields.push("name");
+    if (description !== metric.description) changedFields.push("description");
+    if (category !== metric.category) changedFields.push("category");
+    if (status !== metric.status) changedFields.push("status");
+    if (isPublished !== metric.isPublished) changedFields.push("isPublished");
+    if (verificationStatus !== metric.verificationStatus) changedFields.push("verificationStatus");
+    if (target !== metric.target) changedFields.push("target");
+    if (realization !== metric.realization) changedFields.push("realization");
+    if (year !== metric.year) changedFields.push("year");
+
     await prisma.metric.update({
       where: { id },
       data: {
@@ -188,6 +240,26 @@ export async function updateMetric(id: string, formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "METRIC",
+      entityId: id,
+      entityTitle: name,
+      description: `Admin memperbarui indikator kinerja: ${name}`,
+      metadata: {
+        changedFields,
+        category,
+        year,
+        status,
+        isPublished,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
     revalidatePath("/kinerja");
@@ -201,13 +273,34 @@ export async function updateMetric(id: string, formData: FormData) {
 
 export async function deleteMetric(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const metric = await prisma.metric.findUnique({ where: { id } });
     if (!metric) throw new Error("Metric tidak ditemukan");
 
     await prisma.metric.delete({
       where: { id },
     });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "METRIC",
+      entityId: id,
+      entityTitle: metric.name,
+      description: `Admin menghapus indikator kinerja: ${metric.name}`,
+      metadata: {
+        category: metric.category,
+        sectorId: metric.sectorId,
+        year: metric.year,
+        status: metric.status,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/kinerja");
     revalidatePath("/admin");
     revalidatePath("/kinerja");

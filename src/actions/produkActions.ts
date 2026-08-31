@@ -3,6 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // Helper: generate unique URL-safe slug for Product
 async function generateUniqueProductSlug(name: string, sectorId: string): Promise<string> {
@@ -53,7 +69,9 @@ export async function getProducts() {
 
 export async function createProduct(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activeSectorId = await getActiveSectorId();
     const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
@@ -101,7 +119,7 @@ export async function createProduct(formData: FormData) {
 
     const slug = await generateUniqueProductSlug(name, sectorId);
 
-    await prisma.product.create({
+    const created = await prisma.product.create({
       data: {
         name,
         slug,
@@ -123,6 +141,25 @@ export async function createProduct(formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "PRODUCT",
+      entityId: created.id,
+      entityTitle: created.name,
+      description: `Admin membuat produk baru: ${created.name}`,
+      metadata: {
+        category,
+        status,
+        isPublished,
+        sectorId,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/produk");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -135,7 +172,9 @@ export async function createProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw new Error("Product not found");
 
@@ -177,6 +216,14 @@ export async function updateProduct(id: string, formData: FormData) {
       }
     }
 
+    const changedFields: string[] = [];
+    if (name !== product.name) changedFields.push("name");
+    if (description !== product.description) changedFields.push("description");
+    if (category !== product.category) changedFields.push("category");
+    if (status !== product.status) changedFields.push("status");
+    if (isPublished !== product.isPublished) changedFields.push("isPublished");
+    if (verificationStatus !== product.verificationStatus) changedFields.push("verificationStatus");
+
     await prisma.product.update({
       where: { id },
       data: {
@@ -197,6 +244,25 @@ export async function updateProduct(id: string, formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "PRODUCT",
+      entityId: id,
+      entityTitle: name,
+      description: `Admin memperbarui produk: ${name}`,
+      metadata: {
+        changedFields,
+        category,
+        status,
+        isPublished,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/produk");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -209,13 +275,33 @@ export async function updateProduct(id: string, formData: FormData) {
 
 export async function deleteProduct(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw new Error("Product tidak ditemukan");
 
     await prisma.product.delete({
       where: { id },
     });
+
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "PRODUCT",
+      entityId: id,
+      entityTitle: product.name,
+      description: `Admin menghapus produk: ${product.name}`,
+      metadata: {
+        category: product.category,
+        sectorId: product.sectorId,
+        status: product.status,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/produk");
     revalidatePath("/admin");
     revalidatePath("/", "layout");

@@ -3,6 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
+import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { headers } from "next/headers";
+
+// Helper: extract client IP & User-Agent dari request headers
+async function getRequestMeta() {
+  try {
+    const headerList = await headers();
+    const userAgent = headerList.get("user-agent") || null;
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp || null;
+    return { ipAddress, userAgent };
+  } catch {
+    return { ipAddress: null, userAgent: null };
+  }
+}
 
 // Helper: generate unique URL-safe slug from title
 async function generateUniqueSlug(title: string, currentId?: string): Promise<string> {
@@ -61,7 +77,9 @@ export async function getPrograms() {
 
 export async function createProgram(formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const activeSectorId = await getActiveSectorId();
     const sectorId = (formData.get("sectorId") as string) || activeSectorId;
 
@@ -104,7 +122,7 @@ export async function createProgram(formData: FormData) {
 
     const slug = await generateUniqueSlug(title);
 
-    await prisma.program.create({
+    const created = await prisma.program.create({
       data: {
         title,
         slug,
@@ -122,6 +140,24 @@ export async function createProgram(formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking, setelah operasi bisnis berhasil
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.CREATE,
+      entityType: "PROGRAM",
+      entityId: created.id,
+      entityTitle: created.title,
+      description: `Admin membuat program baru: ${created.title}`,
+      metadata: {
+        status,
+        isPublished,
+        sectorId,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/program");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -134,7 +170,9 @@ export async function createProgram(formData: FormData) {
 
 export async function updateProgram(id: string, formData: FormData) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const program = await prisma.program.findUnique({ where: { id } });
     if (!program) throw new Error("Program tidak ditemukan");
 
@@ -177,6 +215,16 @@ export async function updateProgram(id: string, formData: FormData) {
       slug = await generateUniqueSlug(title, id);
     }
 
+    // Catat changedFields secara aman
+    const changedFields: string[] = [];
+    if (title !== program.title) changedFields.push("title");
+    if (description !== program.description) changedFields.push("description");
+    if (location !== program.location) changedFields.push("location");
+    if (beneficiaries !== program.beneficiaries) changedFields.push("beneficiaries");
+    if (status !== program.status) changedFields.push("status");
+    if (isPublished !== program.isPublished) changedFields.push("isPublished");
+    if (verificationStatus !== program.verificationStatus) changedFields.push("verificationStatus");
+
     await prisma.program.update({
       where: { id },
       data: {
@@ -196,6 +244,24 @@ export async function updateProgram(id: string, formData: FormData) {
       },
     });
 
+    // ActivityLog — non-blocking
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "PROGRAM",
+      entityId: id,
+      entityTitle: title,
+      description: `Admin memperbarui program: ${title}`,
+      metadata: {
+        changedFields,
+        status,
+        isPublished,
+        verificationStatus,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/program");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
@@ -208,13 +274,32 @@ export async function updateProgram(id: string, formData: FormData) {
 
 export async function deleteProgram(id: string) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
     const program = await prisma.program.findUnique({ where: { id } });
     if (!program) throw new Error("Program tidak ditemukan");
 
     await prisma.program.delete({
       where: { id },
     });
+
+    // ActivityLog — non-blocking, setelah delete berhasil
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "PROGRAM",
+      entityId: id,
+      entityTitle: program.title,
+      description: `Admin menghapus program: ${program.title}`,
+      metadata: {
+        sectorId: program.sectorId,
+        status: program.status,
+      },
+      ipAddress,
+      userAgent,
+    });
+
     revalidatePath("/admin/program");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
