@@ -150,7 +150,10 @@ export type AdminSessionsPagedResult = {
 /**
  * Format ringkas User Agent untuk tampilan monitoring tabel administrator.
  */
-export function formatUserAgentSummary(userAgent?: string | null, deviceType?: string | null): string {
+export function formatUserAgentSummary(
+  userAgent?: string | null,
+  deviceType?: string | null,
+): string {
   if (!userAgent) return deviceType || "Unknown";
   const ua = userAgent.toLowerCase();
 
@@ -158,7 +161,8 @@ export function formatUserAgentSummary(userAgent?: string | null, deviceType?: s
   if (ua.includes("windows")) os = "Windows";
   else if (ua.includes("macintosh") || ua.includes("mac os")) os = "macOS";
   else if (ua.includes("android")) os = "Android";
-  else if (ua.includes("iphone") || ua.includes("ipad") || ua.includes("ios")) os = "iOS";
+  else if (ua.includes("iphone") || ua.includes("ipad") || ua.includes("ios"))
+    os = "iOS";
   else if (ua.includes("linux")) os = "Linux";
 
   let browser = "Browser";
@@ -180,60 +184,65 @@ export async function getAdministratorDashboardStats(): Promise<AdminDashboardSt
   startOfDay.setHours(0, 0, 0, 0);
 
   // Jalankan query agregasi paralel untuk efisiensi
-  const [totalAdmin, activeSessions, activityToday, failedLoginToday, usersWithSessions] =
-    await Promise.all([
-      // 1. Total Admin terdaftar
-      prisma.user.count(),
+  const [
+    totalAdmin,
+    activeSessions,
+    activityToday,
+    failedLoginToday,
+    usersWithSessions,
+  ] = await Promise.all([
+    // 1. Total Admin terdaftar
+    prisma.user.count(),
 
-      // 5. Active Sessions
-      prisma.adminSession.count({
-        where: {
-          isActive: true,
-          isRevoked: false,
+    // 5. Active Sessions
+    prisma.adminSession.count({
+      where: {
+        isActive: true,
+        isRevoked: false,
+      },
+    }),
+
+    // 6. Activity Today (sejak awal hari ini)
+    prisma.activityLog.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
         },
-      }),
+      },
+    }),
 
-      // 6. Activity Today (sejak awal hari ini)
-      prisma.activityLog.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
+    // 7. Failed Login Today
+    prisma.activityLog.count({
+      where: {
+        action: "LOGIN_FAILED",
+        createdAt: {
+          gte: startOfDay,
+        },
+      },
+    }),
+
+    // Ambil session aktif terbaru untuk setiap admin guna menghitung Online / Idle / Offline
+    prisma.user.findMany({
+      select: {
+        id: true,
+        sessions: {
+          where: {
+            isActive: true,
+            isRevoked: false,
+          },
+          orderBy: {
+            lastActiveAt: "desc",
+          },
+          take: 1,
+          select: {
+            lastActiveAt: true,
+            isActive: true,
+            isRevoked: true,
           },
         },
-      }),
-
-      // 7. Failed Login Today
-      prisma.activityLog.count({
-        where: {
-          action: "LOGIN_FAILED",
-          createdAt: {
-            gte: startOfDay,
-          },
-        },
-      }),
-
-      // Ambil session aktif terbaru untuk setiap admin guna menghitung Online / Idle / Offline
-      prisma.user.findMany({
-        select: {
-          id: true,
-          sessions: {
-            where: {
-              isActive: true,
-              isRevoked: false,
-            },
-            orderBy: {
-              lastActiveAt: "desc",
-            },
-            take: 1,
-            select: {
-              lastActiveAt: true,
-              isActive: true,
-              isRevoked: true,
-            },
-          },
-        },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   // Hitung status masing-masing admin secara unik (satu admin = satu status)
   let onlineAdmin = 0;
@@ -251,7 +260,7 @@ export async function getAdministratorDashboardStats(): Promise<AdminDashboardSt
     const status = calculateSessionStatus(
       latestSession.lastActiveAt,
       latestSession.isActive,
-      latestSession.isRevoked
+      latestSession.isRevoked,
     );
 
     if (status === "ONLINE") {
@@ -279,68 +288,77 @@ export async function getAdministratorDashboardStats(): Promise<AdminDashboardSt
  * Real data dari TiDB Cloud.
  */
 export async function getAdminSessionManagementStats(): Promise<AdminSessionManagementStats> {
-  const [totalSessions, activeSessions, revokedSessions, allActiveSessionsRecords, usersWithSessions] =
-    await Promise.all([
-      // 1. Total Sesi
-      prisma.adminSession.count(),
+  const [
+    totalSessions,
+    activeSessions,
+    revokedSessions,
+    allActiveSessionsRecords,
+    usersWithSessions,
+  ] = await Promise.all([
+    // 1. Total Sesi
+    prisma.adminSession.count(),
 
-      // 2. Sesi Aktif
-      prisma.adminSession.count({
-        where: {
-          isActive: true,
-          isRevoked: false,
-        },
-      }),
+    // 2. Sesi Aktif
+    prisma.adminSession.count({
+      where: {
+        isActive: true,
+        isRevoked: false,
+      },
+    }),
 
-      // 3. Sesi Dicabut
-      prisma.adminSession.count({
-        where: {
-          isRevoked: true,
-        },
-      }),
+    // 3. Sesi Dicabut
+    prisma.adminSession.count({
+      where: {
+        isRevoked: true,
+      },
+    }),
 
-      // 4. Record seluruh sesi aktif untuk menghitung status sesi
-      prisma.adminSession.findMany({
-        where: {
-          isActive: true,
-          isRevoked: false,
-        },
-        select: {
-          lastActiveAt: true,
-          isActive: true,
-          isRevoked: true,
-        },
-      }),
+    // 4. Record seluruh sesi aktif untuk menghitung status sesi
+    prisma.adminSession.findMany({
+      where: {
+        isActive: true,
+        isRevoked: false,
+      },
+      select: {
+        lastActiveAt: true,
+        isActive: true,
+        isRevoked: true,
+      },
+    }),
 
-      // 5. Admin unik beserta sesi aktif terbarunya
-      prisma.user.findMany({
-        select: {
-          id: true,
-          sessions: {
-            where: {
-              isActive: true,
-              isRevoked: false,
-            },
-            orderBy: {
-              lastActiveAt: "desc",
-            },
-            take: 1,
-            select: {
-              lastActiveAt: true,
-              isActive: true,
-              isRevoked: true,
-            },
+    // 5. Admin unik beserta sesi aktif terbarunya
+    prisma.user.findMany({
+      select: {
+        id: true,
+        sessions: {
+          where: {
+            isActive: true,
+            isRevoked: false,
+          },
+          orderBy: {
+            lastActiveAt: "desc",
+          },
+          take: 1,
+          select: {
+            lastActiveAt: true,
+            isActive: true,
+            isRevoked: true,
           },
         },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   let onlineSessions = 0;
   let idleSessions = 0;
   let offlineSessions = totalSessions - activeSessions; // Sesi inactive / ended / revoked otomatis OFFLINE
 
   for (const s of allActiveSessionsRecords) {
-    const status = calculateSessionStatus(s.lastActiveAt, s.isActive, s.isRevoked);
+    const status = calculateSessionStatus(
+      s.lastActiveAt,
+      s.isActive,
+      s.isRevoked,
+    );
     if (status === "ONLINE") {
       onlineSessions++;
     } else if (status === "IDLE") {
@@ -361,7 +379,11 @@ export async function getAdminSessionManagementStats(): Promise<AdminSessionMana
       offlineAdmins++;
       continue;
     }
-    const status = calculateSessionStatus(latest.lastActiveAt, latest.isActive, latest.isRevoked);
+    const status = calculateSessionStatus(
+      latest.lastActiveAt,
+      latest.isActive,
+      latest.isRevoked,
+    );
     if (status === "ONLINE") {
       onlineAdmins++;
     } else if (status === "IDLE") {
@@ -389,8 +411,13 @@ export async function getAdminSessionManagementStats(): Promise<AdminSessionMana
  * Mengambil daftar seluruh AdminSession dari database untuk halaman monitoring sesi (Non-paged legacy fallback).
  * Mengabaikan sessionToken, password, dan kredensial sensitif lainnya.
  */
-export async function getAdministratorSessionsList(): Promise<AdminSessionItem[]> {
-  const result = await getAdministratorSessionsPaged({ page: 1, pageSize: 100 });
+export async function getAdministratorSessionsList(): Promise<
+  AdminSessionItem[]
+> {
+  const result = await getAdministratorSessionsPaged({
+    page: 1,
+    pageSize: 100,
+  });
   return result.sessions;
 }
 
@@ -399,7 +426,7 @@ export async function getAdministratorSessionsList(): Promise<AdminSessionItem[]
  * JANGAN PERNAH MENYERTAKAN sessionToken, JWT, password, atau credential.
  */
 export async function getAdministratorSessionsPaged(
-  filters: AdminSessionQueryFilters = {}
+  filters: AdminSessionQueryFilters = {},
 ): Promise<AdminSessionsPagedResult> {
   const page = Math.max(1, Number(filters.page) || 1);
   const pageSize = Math.max(1, Math.min(100, Number(filters.pageSize) || 20));
@@ -496,7 +523,11 @@ export async function getAdministratorSessionsPaged(
     const mappedSessions: AdminSessionItem[] = [];
 
     for (const s of rawSessions) {
-      const status = calculateSessionStatus(s.lastActiveAt, s.isActive, s.isRevoked);
+      const status = calculateSessionStatus(
+        s.lastActiveAt,
+        s.isActive,
+        s.isRevoked,
+      );
       if (status !== targetStatus) continue;
 
       let sessionState: "Active" | "Ended" | "Revoked" = "Ended";
@@ -529,7 +560,10 @@ export async function getAdministratorSessionsPaged(
 
     const totalCount = mappedSessions.length;
     const totalPages = Math.ceil(totalCount / pageSize) || 1;
-    const paginatedSessions = mappedSessions.slice((page - 1) * pageSize, page * pageSize);
+    const paginatedSessions = mappedSessions.slice(
+      (page - 1) * pageSize,
+      page * pageSize,
+    );
 
     return {
       sessions: paginatedSessions,
@@ -555,7 +589,11 @@ export async function getAdministratorSessionsPaged(
   ]);
 
   const sessions: AdminSessionItem[] = rawSessions.map((s) => {
-    const status = calculateSessionStatus(s.lastActiveAt, s.isActive, s.isRevoked);
+    const status = calculateSessionStatus(
+      s.lastActiveAt,
+      s.isActive,
+      s.isRevoked,
+    );
     let sessionState: "Active" | "Ended" | "Revoked" = "Ended";
     if (s.isRevoked) {
       sessionState = "Revoked";
@@ -654,7 +692,7 @@ export async function getActivityLogStats(): Promise<ActivityLogStats> {
  * Sanitasi ketat: Tidak pernah mengambil atau mengekspos token, password, atau credential.
  */
 export async function getAdministratorActivityLogs(
-  filters: ActivityLogQueryFilters = {}
+  filters: ActivityLogQueryFilters = {},
 ): Promise<ActivityLogsResult> {
   const page = Math.max(1, Number(filters.page) || 1);
   const pageSize = Math.min(100, Math.max(5, Number(filters.pageSize) || 20));
@@ -697,10 +735,7 @@ export async function getAdministratorActivityLogs(
       { ipAddress: { contains: query } },
       {
         user: {
-          OR: [
-            { name: { contains: query } },
-            { email: { contains: query } },
-          ],
+          OR: [{ name: { contains: query } }, { email: { contains: query } }],
         },
       },
     ];
@@ -745,7 +780,8 @@ export async function getAdministratorActivityLogs(
     return {
       id: log.id,
       userId: log.userId,
-      adminName: log.user?.name || (log.userId ? "Admin" : "System / Anonymous"),
+      adminName:
+        log.user?.name || (log.userId ? "Admin" : "System / Anonymous"),
       adminEmail: log.user?.email || "-",
       action: log.action,
       entityType: log.entityType,
@@ -917,7 +953,7 @@ export async function getAdministratorSecurityStats(): Promise<SecurityConsoleSt
     const status = calculateSessionStatus(
       latestSession.lastActiveAt,
       latestSession.isActive,
-      latestSession.isRevoked
+      latestSession.isRevoked,
     );
 
     if (status === "ONLINE") {
@@ -1000,7 +1036,7 @@ export async function getAdministratorSecurityStats(): Promise<SecurityConsoleSt
  * Mengambil daftar Security Events (LOGIN, LOGIN_FAILED, LOGOUT) dengan filter dan pagination.
  */
 export async function getAdministratorSecurityEvents(
-  filters: ActivityLogQueryFilters = {}
+  filters: ActivityLogQueryFilters = {},
 ): Promise<ActivityLogsResult> {
   const page = Math.max(1, Number(filters.page) || 1);
   const pageSize = Math.min(100, Math.max(5, Number(filters.pageSize) || 20));
@@ -1093,7 +1129,8 @@ export async function getAdministratorSecurityEvents(
     return {
       id: log.id,
       userId: log.userId,
-      adminName: log.user?.name || (log.userId ? "Admin" : "System / Anonymous"),
+      adminName:
+        log.user?.name || (log.userId ? "Admin" : "System / Anonymous"),
       adminEmail: log.user?.email || "-",
       action: log.action,
       entityType: log.entityType,

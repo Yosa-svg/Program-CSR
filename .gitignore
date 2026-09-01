@@ -61,3 +61,8 @@ public/uploads/*
 cypress/screenshots/
 cypress/videos/
 cypress/downloads/
+
+#script sql
+*.sql
+scripts/
+        

@@ -108,7 +108,7 @@ export default async function AdministratorDashboardPage() {
               <span className="text-3xl font-bold text-slate-600 dark:text-slate-400">
                 {stats.offlineAdmin}
               </span>
-              <p className="text-xs text-foreground/50 mt-1">&gt; 10 menit / sesi berakhir</p>
+              <p className="text-xs text-foreground/50 mt-1">Tidak aktif / sesi berakhir / revoked</p>
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default async function AdministratorDashboardPage() {
               <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats.activeSessions}
               </span>
-              <p className="text-xs text-foreground/50 mt-1">Sesi token aktif di database</p>
+              <p className="text-xs text-foreground/50 mt-1">Lifecycle sesi aktif di DB</p>
             </div>
           </div>
 

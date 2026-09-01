@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "postinstall": "prisma generate && next build",
+    "build": "prisma generate --schema=prisma/schema.prisma && next build",
+    "postinstall": "prisma generate --schema=prisma/schema.prisma",
     "start": "next start",
     "lint": "eslint"
   },
@@ -40,6 +40,7 @@
     "typescript": "^5"
   },
   "prisma": {
+    "schema": "prisma/schema.prisma",
     "seed": "npx tsx prisma/seed.ts"
   }
 }

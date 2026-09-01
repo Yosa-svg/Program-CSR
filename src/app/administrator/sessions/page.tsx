@@ -83,7 +83,7 @@ export default async function AdminSessionsPage({ searchParams }: AdminSessionsP
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {stats.activeSessions}
               </span>
-              <p className="text-[11px] text-foreground/50 mt-0.5">Sesi aktif di DB</p>
+              <p className="text-[11px] text-foreground/50 mt-0.5">Lifecycle sesi aktif di DB</p>
             </div>
           </div>
 
@@ -143,7 +143,7 @@ export default async function AdminSessionsPage({ searchParams }: AdminSessionsP
               <span className="text-2xl font-bold text-slate-600 dark:text-slate-400">
                 {stats.offlineSessions}
               </span>
-              <p className="text-[11px] text-foreground/50 mt-0.5">&gt; 10 mnt / ended</p>
+              <p className="text-[11px] text-foreground/50 mt-0.5">Tidak aktif / ended / revoked</p>
             </div>
           </div>
 
