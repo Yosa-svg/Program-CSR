@@ -17,6 +17,8 @@ function loginAdmin(email = defaultEmail, password = defaultPassword) {
 
 describe("Authentication & Session Lifecycle", () => {
   it("Test 1: gagal login dengan kredensial salah dan tetap di halaman login", () => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
     cy.visit("/admin/login");
     cy.get('input[name="email"]').type("nonexistent-admin@csr.com");
     cy.get('input[name="password"]').type("WrongPassword123!");
@@ -33,8 +35,10 @@ describe("Authentication & Session Lifecycle", () => {
   });
 
   it("Test 3: berhasil logout dan sesi dicabut", () => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
     cy.visit("/admin/login");
-    cy.get('input[name="email"]').type(defaultEmail);
+    cy.get('input[name="email"]').type("admin2@csr.com");
     cy.get('input[name="password"]').type(defaultPassword);
     cy.get('button[type="submit"]').click();
     cy.url({ timeout: 30000 }).should("match", /\/admin(\/)?$/);
@@ -179,7 +183,7 @@ describe("Administrator Activity Logs & Audit Trail", () => {
     loginAdmin();
   });
 
-  it("Test 19: akses /administrator/activity-logs dan verifikasi 7 kartu statistik audit", () => {
+  it("Test 19: akses /administrator/activity-logs dan verifikasi 8 kartu statistik audit", () => {
     cy.visit("/administrator/activity-logs");
     cy.url({ timeout: 15000 }).should("include", "/administrator/activity-logs");
 
@@ -188,6 +192,7 @@ describe("Administrator Activity Logs & Audit Trail", () => {
     cy.contains("Hari Ini", { timeout: 15000 }).should("be.visible");
     cy.contains("Login", { timeout: 15000 }).should("be.visible");
     cy.contains("Login Gagal", { timeout: 15000 }).should("be.visible");
+    cy.contains("Logout", { timeout: 15000 }).should("be.visible");
     cy.contains("Create", { timeout: 15000 }).should("be.visible");
     cy.contains("Update", { timeout: 15000 }).should("be.visible");
     cy.contains("Delete", { timeout: 15000 }).should("be.visible");

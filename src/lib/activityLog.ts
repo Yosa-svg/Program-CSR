@@ -12,9 +12,14 @@ const SENSITIVE_KEYS = [
   "secret",
   "authorization",
   "database_url",
+  "database",
+  "databaseurl",
   "credential",
   "apikey",
+  "api_key",
   "cookie",
+  "session",
+  "privkey",
 ];
 
 /**

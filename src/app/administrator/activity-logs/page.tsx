@@ -3,6 +3,7 @@ import {
   Clock,
   ShieldAlert,
   ShieldCheck,
+  LogOut,
   PlusCircle,
   Edit3,
   Trash2,
@@ -74,7 +75,7 @@ export default async function AdministratorActivityLogsPage({
           Statistik Aktivitas Administratif
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3.5">
           {/* 1. Total Activity */}
           <div className="bg-card border border-border rounded-xl p-3.5 shadow-sm">
             <div className="flex items-center justify-between">
@@ -105,7 +106,7 @@ export default async function AdministratorActivityLogsPage({
               <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stats.todayActivity}
               </span>
-              <p className="text-[10px] text-foreground/50 mt-0.5">Aktivitas 24 jam</p>
+              <p className="text-[10px] text-foreground/50 mt-0.5">Aktivitas hari ini</p>
             </div>
           </div>
 
@@ -145,7 +146,25 @@ export default async function AdministratorActivityLogsPage({
             </div>
           </div>
 
-          {/* 5. Create Count */}
+          {/* 5. Logout Count */}
+          <div className="bg-card border border-border rounded-xl p-3.5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/60">
+                Logout
+              </span>
+              <div className="w-7 h-7 rounded-lg bg-slate-500/10 text-slate-600 dark:text-slate-400 flex items-center justify-center">
+                <LogOut size={15} />
+              </div>
+            </div>
+            <div className="mt-1.5">
+              <span className="text-xl font-bold text-slate-600 dark:text-slate-400">
+                {stats.logoutCount}
+              </span>
+              <p className="text-[10px] text-foreground/50 mt-0.5">Logout berhasil</p>
+            </div>
+          </div>
+
+          {/* 6. Create Count */}
           <div className="bg-card border border-border rounded-xl p-3.5 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/60">
@@ -163,7 +182,7 @@ export default async function AdministratorActivityLogsPage({
             </div>
           </div>
 
-          {/* 6. Update Count */}
+          {/* 7. Update Count */}
           <div className="bg-card border border-border rounded-xl p-3.5 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/60">
@@ -181,7 +200,7 @@ export default async function AdministratorActivityLogsPage({
             </div>
           </div>
 
-          {/* 7. Delete Count */}
+          {/* 8. Delete Count */}
           <div className="bg-card border border-border rounded-xl p-3.5 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/60">

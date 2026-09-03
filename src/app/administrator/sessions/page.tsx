@@ -143,7 +143,7 @@ export default async function AdminSessionsPage({ searchParams }: AdminSessionsP
               <span className="text-2xl font-bold text-slate-600 dark:text-slate-400">
                 {stats.offlineSessions}
               </span>
-              <p className="text-[11px] text-foreground/50 mt-0.5">Tidak aktif / ended / revoked</p>
+              <p className="text-[11px] text-foreground/50 mt-0.5">Aktif di DB, tanpa heartbeat &gt; 10 mnt</p>
             </div>
           </div>
 

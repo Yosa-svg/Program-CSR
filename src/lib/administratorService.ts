@@ -288,70 +288,58 @@ export async function getAdministratorDashboardStats(): Promise<AdminDashboardSt
  * Real data dari TiDB Cloud.
  */
 export async function getAdminSessionManagementStats(): Promise<AdminSessionManagementStats> {
-  const [
-    totalSessions,
-    activeSessions,
-    revokedSessions,
-    allActiveSessionsRecords,
-    usersWithSessions,
-  ] = await Promise.all([
-    // 1. Total Sesi
-    prisma.adminSession.count(),
+  // Query 1: Total Sesi
+  const totalSessions = await prisma.adminSession.count();
 
-    // 2. Sesi Aktif
-    prisma.adminSession.count({
-      where: {
-        isActive: true,
-        isRevoked: false,
-      },
-    }),
+  // Query 2: Sesi Dicabut
+  const revokedSessions = await prisma.adminSession.count({
+    where: {
+      isRevoked: true,
+    },
+  });
 
-    // 3. Sesi Dicabut
-    prisma.adminSession.count({
-      where: {
-        isRevoked: true,
-      },
-    }),
+  // Query 3: Record seluruh sesi aktif untuk menghitung status sesi & jumlah sesi aktif
+  const allActiveSessionsRecords = await prisma.adminSession.findMany({
+    where: {
+      isActive: true,
+      isRevoked: false,
+    },
+    select: {
+      lastActiveAt: true,
+      isActive: true,
+      isRevoked: true,
+    },
+  });
 
-    // 4. Record seluruh sesi aktif untuk menghitung status sesi
-    prisma.adminSession.findMany({
-      where: {
-        isActive: true,
-        isRevoked: false,
-      },
-      select: {
-        lastActiveAt: true,
-        isActive: true,
-        isRevoked: true,
-      },
-    }),
-
-    // 5. Admin unik beserta sesi aktif terbarunya
-    prisma.user.findMany({
-      select: {
-        id: true,
-        sessions: {
-          where: {
-            isActive: true,
-            isRevoked: false,
-          },
-          orderBy: {
-            lastActiveAt: "desc",
-          },
-          take: 1,
-          select: {
-            lastActiveAt: true,
-            isActive: true,
-            isRevoked: true,
-          },
+  // Query 4: Admin unik beserta sesi aktif terbarunya
+  const usersWithSessions = await prisma.user.findMany({
+    select: {
+      id: true,
+      sessions: {
+        where: {
+          isActive: true,
+          isRevoked: false,
+        },
+        orderBy: {
+          lastActiveAt: "desc",
+        },
+        take: 1,
+        select: {
+          lastActiveAt: true,
+          isActive: true,
+          isRevoked: true,
         },
       },
-    }),
-  ]);
+    },
+  });
 
+  const activeSessions = allActiveSessionsRecords.length;
+
+  // Status aktivitas hanya dihitung dari session yang masih aktif.
+  // Session yang sudah ended/revoked tidak masuk ke kategori Online/Idle/Offline.
   let onlineSessions = 0;
   let idleSessions = 0;
-  let offlineSessions = totalSessions - activeSessions; // Sesi inactive / ended / revoked otomatis OFFLINE
+  let offlineSessions = 0;
 
   for (const s of allActiveSessionsRecords) {
     const status = calculateSessionStatus(
@@ -640,27 +628,25 @@ export async function getActivityLogStats(): Promise<ActivityLogStats> {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
-  const [totalActivity, todayActivity, actionGroups] = await Promise.all([
-    // Total log aktivitas keseluruhan
-    prisma.activityLog.count(),
+  // Total log aktivitas keseluruhan
+  const totalActivity = await prisma.activityLog.count();
 
-    // Total log aktivitas hari ini
-    prisma.activityLog.count({
-      where: {
-        createdAt: {
-          gte: startOfDay,
-        },
+  // Total log aktivitas hari ini
+  const todayActivity = await prisma.activityLog.count({
+    where: {
+      createdAt: {
+        gte: startOfDay,
       },
-    }),
+    },
+  });
 
-    // Agregasi jumlah berdasarkan ActivityAction
-    prisma.activityLog.groupBy({
-      by: ["action"],
-      _count: {
-        _all: true,
-      },
-    }),
-  ]);
+  // Agregasi jumlah berdasarkan ActivityAction
+  const actionGroups = await prisma.activityLog.groupBy({
+    by: ["action"],
+    _count: {
+      _all: true,
+    },
+  });
 
   const counts: Record<string, number> = {
     LOGIN: 0,
@@ -741,38 +727,36 @@ export async function getAdministratorActivityLogs(
     ];
   }
 
-  // Jalankan query count dan findMany secara paralel
-  const [totalCount, rawLogs] = await Promise.all([
-    prisma.activityLog.count({ where }),
-    prisma.activityLog.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        userId: true,
-        action: true,
-        entityType: true,
-        entityId: true,
-        entityTitle: true,
-        description: true,
-        metadata: true,
-        ipAddress: true,
-        userAgent: true,
-        createdAt: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+  // Jalankan query secara sekuensial untuk stabilitas connection pool
+  const totalCount = await prisma.activityLog.count({ where });
+  const rawLogs = await prisma.activityLog.findMany({
+    where,
+    skip,
+    take: pageSize,
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      userId: true,
+      action: true,
+      entityType: true,
+      entityId: true,
+      entityTitle: true,
+      description: true,
+      metadata: true,
+      ipAddress: true,
+      userAgent: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
         },
       },
-    }),
-  ]);
+    },
+  });
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
 

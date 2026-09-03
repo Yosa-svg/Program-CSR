@@ -373,7 +373,7 @@ export default function ActivityLogsTableClient({
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="space-y-0.5">
                           <span className="font-mono text-xs text-foreground/70 bg-muted-bg px-2 py-0.5 rounded border border-border/60 block w-fit">
-                            {log.ipAddress || "127.0.0.1"}
+                            {log.ipAddress || "-"}
                           </span>
                           <span className="text-[11px] text-foreground/50 block truncate max-w-[140px]" title={log.userAgent || ""}>
                             {log.userAgentSummary}
@@ -521,7 +521,7 @@ export default function ActivityLogsTableClient({
                     IP Address
                   </span>
                   <div className="p-2.5 bg-muted-bg/50 rounded-lg border border-border font-mono text-xs text-foreground">
-                    {selectedLog.ipAddress || "127.0.0.1"}
+                    {selectedLog.ipAddress || "-"}
                   </div>
                 </div>
                 <div>

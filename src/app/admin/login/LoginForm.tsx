@@ -11,10 +11,10 @@ export default function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     setLoading(true);
     setError(null);
     try {
-      const formData = new FormData(e.currentTarget);
       const res = await loginAction(formData);
       if (res?.error) {
         setError(res.error);
