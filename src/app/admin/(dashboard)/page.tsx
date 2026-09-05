@@ -34,7 +34,10 @@ export default async function AdminDashboard() {
   const docCount = await prisma.documentation.count({ where: whereClause });
 
   // 2. DATA CHART STATUS PROGRAM (Tanpa data fiktif)
-  const programs = await prisma.program.findMany({ where: whereClause });
+  const programs = await prisma.program.findMany({
+    where: whereClause,
+    select: { status: true },
+  });
   let activeCount = 0;
   let completedCount = 0;
   let plannedCount = 0;
@@ -90,7 +93,15 @@ export default async function AdminDashboard() {
   // 4. DATA CHART KINERJA & DAMPAK (Data Asli Tanpa Angka Palsu)
   const metrics = await prisma.metric.findMany({ 
     where: whereClause,
-    orderBy: [{ year: 'asc' }, { createdAt: 'asc' }]
+    select: {
+      period: true,
+      year: true,
+      name: true,
+      realization: true,
+      value: true,
+    },
+    orderBy: [{ year: 'asc' }, { createdAt: 'asc' }],
+    take: 100,
   });
   
   const impactData = metrics
@@ -103,11 +114,13 @@ export default async function AdminDashboard() {
   // 5. AKTIVITAS TERBARU
   const recentActivities = await prisma.activity.findMany({
     where: whereClause,
+    select: { id: true, title: true, date: true },
     orderBy: { date: 'desc' },
     take: 3
   });
   const recentDocs = await prisma.documentation.findMany({
     where: whereClause,
+    select: { id: true, title: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
     take: 3
   });

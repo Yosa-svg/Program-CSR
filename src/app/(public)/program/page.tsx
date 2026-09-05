@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { getAllPublishedPrograms } from "@/lib/queries/programs";
 import { getAllSectors } from "@/lib/queries/sectors";
+import { createMetadata } from "@/lib/seo";
 import ProgramCatalog from "./ProgramCatalog";
 
-export const metadata = {
-  title: "Program CSR | Kawasan Ekonomi Berkelanjutan",
-  description: "Jelajahi seluruh program Corporate Social Responsibility yang telah dipublikasikan di berbagai sektor.",
-};
+export const metadata: Metadata = createMetadata({
+  title: "Program CSR",
+  description:
+    "Jelajahi seluruh program Corporate Social Responsibility (CSR) yang telah dipublikasikan di berbagai sektor keberlanjutan.",
+  canonical: "/program",
+});
 
 export const revalidate = 0;
 

@@ -4,45 +4,86 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sprout, Footprints, Recycle, Palmtree } from "lucide-react";
 import Link from "next/link";
 
-export default function Sectors() {
-  const sectors = [
-    {
-      id: "pertanian",
-      title: "PERTANIAN",
-      subtitle: "Agro Edu Wisata",
-      desc: "Pertanian ramah lingkungan dan integrasi pariwisata edukatif.",
-      icon: <Sprout size={20} />,
-      href: "/bidang/pertanian",
-      accent: "teal",
-    },
-    {
-      id: "peternakan",
-      title: "PETERNAKAN",
-      subtitle: "Inkubator Bisnis",
-      desc: "Inkubasi usaha ternak komunal dan formulasi pakan silase mandiri.",
-      icon: <Footprints size={20} />,
-      href: "/bidang/peternakan",
-      accent: "orange-teal",
-    },
-    {
-      id: "lingkungan",
-      title: "LINGKUNGAN",
-      subtitle: "Daur Ulang & Pupuk Diversoil",
-      desc: "Pengolahan limbah anorganik serta komposting Pupuk Diversoil.",
-      icon: <Recycle size={20} />,
-      href: "/bidang/lingkungan",
-      accent: "teal",
-    },
-    {
-      id: "industri-kelapa",
-      title: "INDUSTRI KELAPA",
-      subtitle: "Industri Kelapa Terpadu",
-      desc: "Hilirisasi sabut kelapa: Coconet, Cocopeat, Cocopot, & Sapu.",
-      icon: <Palmtree size={20} />,
-      href: "/bidang/industri-kelapa",
-      accent: "orange",
-    }
-  ];
+export interface SectorHomeItem {
+  id: string;
+  name: string;
+  slug: string;
+  programs?: Array<{
+    id: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+interface SectorsProps {
+  sectors?: SectorHomeItem[];
+}
+
+const SECTOR_ICONS: Record<string, React.ReactNode> = {
+  pertanian: <Sprout size={20} />,
+  peternakan: <Footprints size={20} />,
+  lingkungan: <Recycle size={20} />,
+  "industri-kelapa": <Palmtree size={20} />,
+};
+
+const DEFAULT_SECTOR_SUBTITLES: Record<string, string> = {
+  pertanian: "Agro Edu Wisata",
+  peternakan: "Inkubator Bisnis",
+  lingkungan: "Daur Ulang & Pupuk Diversoil",
+  "industri-kelapa": "Industri Kelapa Terpadu",
+};
+
+const DEFAULT_SECTOR_DESCS: Record<string, string> = {
+  pertanian: "Pertanian ramah lingkungan dan integrasi pariwisata edukatif.",
+  peternakan: "Inkubasi usaha ternak komunal dan formulasi pakan silase mandiri.",
+  lingkungan: "Pengolahan limbah anorganik serta komposting Pupuk Diversoil.",
+  "industri-kelapa": "Hilirisasi sabut kelapa: Coconet, Cocopeat, Cocopot, & Sapu.",
+};
+
+export default function Sectors({ sectors = [] }: SectorsProps) {
+  const displaySectors = sectors.length > 0
+    ? sectors.map((s) => ({
+        id: s.id,
+        title: s.name.toUpperCase(),
+        subtitle: s.programs && s.programs[0]?.title ? s.programs[0].title : (DEFAULT_SECTOR_SUBTITLES[s.slug] || "Inisiatif Berkelanjutan"),
+        desc: s.programs && s.programs[0]?.description ? s.programs[0].description : (DEFAULT_SECTOR_DESCS[s.slug] || "Program kemitraan dan pemberdayaan masyarakat berkelanjutan."),
+        icon: SECTOR_ICONS[s.slug] || <Sprout size={20} />,
+        href: `/bidang/${s.slug}`,
+      }))
+    : [
+        {
+          id: "pertanian",
+          title: "PERTANIAN",
+          subtitle: "Agro Edu Wisata",
+          desc: "Pertanian ramah lingkungan dan integrasi pariwisata edukatif.",
+          icon: <Sprout size={20} />,
+          href: "/bidang/pertanian",
+        },
+        {
+          id: "peternakan",
+          title: "PETERNAKAN",
+          subtitle: "Inkubator Bisnis",
+          desc: "Inkubasi usaha ternak komunal dan formulasi pakan silase mandiri.",
+          icon: <Footprints size={20} />,
+          href: "/bidang/peternakan",
+        },
+        {
+          id: "lingkungan",
+          title: "LINGKUNGAN",
+          subtitle: "Daur Ulang & Pupuk Diversoil",
+          desc: "Pengolahan limbah anorganik serta komposting Pupuk Diversoil.",
+          icon: <Recycle size={20} />,
+          href: "/bidang/lingkungan",
+        },
+        {
+          id: "industri-kelapa",
+          title: "INDUSTRI KELAPA",
+          subtitle: "Industri Kelapa Terpadu",
+          desc: "Hilirisasi sabut kelapa: Coconet, Cocopeat, Cocopot, & Sapu.",
+          icon: <Palmtree size={20} />,
+          href: "/bidang/industri-kelapa",
+        },
+      ];
 
   return (
     <section id="csr" className="py-24 bg-white text-[#172121]">
@@ -99,7 +140,7 @@ export default function Sectors() {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sectors.map((sector, index) => (
+          {displaySectors.map((sector, index) => (
             <motion.div
               key={sector.id}
               initial={{ opacity: 0, y: 20 }}

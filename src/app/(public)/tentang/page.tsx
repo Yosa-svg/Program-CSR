@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { Users, Sprout, Target, BarChart3, TrendingUp, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { createMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "Tentang Kawasan Ekonomi Berkelanjutan",
+  description:
+    "Mengenal visi, misi, pilar keberlanjutan, dan komitmen penyelarasan kemajuan ekonomi masyarakat lokal dengan kelestarian alam bersama CSR ANTAM.",
+  canonical: "/tentang",
+});
 
 export default function TentangPage() {
   return (

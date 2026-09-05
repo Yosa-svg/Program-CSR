@@ -53,9 +53,31 @@ function validateMagicBytes(buffer: Buffer): { isValid: boolean; extension: stri
 
 export async function uploadImage(file: File, folder: string): Promise<{ url?: string; error?: string }> {
   try {
-    // 1. Validasi awal
-    if (!file) {
-      return { error: "File tidak ditemukan." };
+    if (!file || typeof file.name !== "string") {
+      return { error: "File tidak ditemukan atau format tidak valid." };
+    }
+
+    // 2. Cegah path traversal dan karakter berbahaya pada nama file asli
+    const originalName = file.name.toLowerCase().trim();
+    if (originalName.includes("\0") || originalName.includes("..") || originalName.includes("/") || originalName.includes("\\")) {
+      return { error: "Nama file mengandung karakter tidak aman." };
+    }
+
+    // 3. Validasi ekstensi file asli dan tolak file berisiko tinggi (termasuk SVG yang membawa risiko XSS)
+    const DANGEROUS_EXTENSIONS = [
+      ".php", ".phtml", ".phar", ".exe", ".sh", ".bat", ".cmd", ".svg",
+      ".html", ".htm", ".xhtml", ".js", ".mjs", ".jsp", ".asp", ".aspx", ".cgi", ".pl"
+    ];
+    for (const ext of DANGEROUS_EXTENSIONS) {
+      if (originalName.endsWith(ext) || originalName.includes(ext + ".")) {
+        return { error: "Tipe file berbahaya atau berpotensi script tidak diizinkan." };
+      }
+    }
+
+    const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+    const hasAllowedExtension = ALLOWED_FILE_EXTENSIONS.some((ext) => originalName.endsWith(ext));
+    if (!hasAllowedExtension) {
+      return { error: "Ekstensi file tidak didukung. Gunakan .jpg, .jpeg, .png, atau .webp." };
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -66,17 +88,30 @@ export async function uploadImage(file: File, folder: string): Promise<{ url?: s
       return { error: "Ukuran file terlalu besar. Maksimal 5MB." };
     }
 
-    // 2. Konversi ke Buffer & Validasi Magic Bytes (Server-Side File Signature)
+    if (file.size === 0) {
+      return { error: "File kosong tidak dapat diunggah." };
+    }
+
+    // 4. Konversi ke Buffer & Validasi Magic Bytes (Server-Side File Signature)
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // Pastikan tidak ada konten XML / SVG terselubung di dalam buffer gambar
+    const bufferPrefix = buffer.slice(0, 100).toString("ascii").toLowerCase();
+    if (bufferPrefix.includes("<svg") || bufferPrefix.includes("<?xml") || bufferPrefix.includes("<html") || bufferPrefix.includes("<!doctype")) {
+      return { error: "Konten file terindikasi skrip berbahaya atau SVG yang tidak diizinkan." };
+    }
 
     const { isValid, extension } = validateMagicBytes(buffer);
     if (!isValid) {
       return { error: "File tidak valid atau terindikasi rusak/tidak sesuai format gambar resmi." };
     }
 
-    // 3. Sanitasi folder dan nama file
+    // 5. Sanitasi folder dan nama file (selalu buat nama acak baru berbasis UUID)
     const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, "");
+    if (!safeFolder || safeFolder.length === 0) {
+      return { error: "Folder penyimpanan tidak valid." };
+    }
     const fileName = `${crypto.randomUUID()}.${extension}`;
     const pathname = `uploads/${safeFolder}/${fileName}`;
 

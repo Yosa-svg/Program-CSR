@@ -6,50 +6,49 @@ import { cookies, headers } from "next/headers";
 import bcrypt from "bcryptjs";
 import { createAdminSession, endAdminSession, touchAdminSession, parseDeviceType } from "@/lib/adminSession";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
+import { validateEmail, validateId } from "@/lib/validation";
 
 
-// Sederhana In-Memory Rate Limiting untuk proteksi brute force
-type RateLimitRecord = {
-  attempts: number;
-  lockedUntil: number;
-};
-
-const loginAttempts = new Map<string, RateLimitRecord>();
+// Persistent Database-Backed Rate Limiting untuk proteksi brute force
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME_MS = 15 * 60 * 1000; // 15 menit
 
-function checkRateLimit(key: string): { isLocked: boolean; remainingMinutes: number } {
-  const record = loginAttempts.get(key);
-  if (!record) return { isLocked: false, remainingMinutes: 0 };
+async function checkRateLimit(
+  email: string,
+  ipAddress: string | null
+): Promise<{ isLocked: boolean; remainingMinutes: number }> {
+  try {
+    const fifteenMinutesAgo = new Date(Date.now() - LOCKOUT_TIME_MS);
 
-  const now = Date.now();
-  if (record.lockedUntil > now) {
-    const remainingMinutes = Math.ceil((record.lockedUntil - now) / 60000);
-    return { isLocked: true, remainingMinutes };
+    // Hitung berapa kali percobaan login gagal untuk email atau IP ini dalam 15 menit terakhir
+    const failedLogs = await prisma.activityLog.findMany({
+      where: {
+        action: ActivityAction.LOGIN_FAILED,
+        createdAt: { gte: fifteenMinutesAgo },
+        OR: [
+          { entityTitle: email },
+          ...(ipAddress ? [{ ipAddress }] : []),
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      take: MAX_ATTEMPTS,
+      select: { createdAt: true },
+    });
+
+    if (failedLogs.length >= MAX_ATTEMPTS) {
+      const mostRecentTime = failedLogs[0].createdAt.getTime();
+      const elapsed = Date.now() - mostRecentTime;
+      if (elapsed < LOCKOUT_TIME_MS) {
+        const remainingMinutes = Math.max(1, Math.ceil((LOCKOUT_TIME_MS - elapsed) / 60000));
+        return { isLocked: true, remainingMinutes };1
+      }
+    }
+
+    return { isLocked: false, remainingMinutes: 0 };
+  } catch {
+    // Fail safe: jangan hentikan flow jika ada kendala pembacaan audit log
+    return { isLocked: false, remainingMinutes: 0 };
   }
-
-  // Jika waktu lockout telah berlalu, hapus record
-  if (record.lockedUntil > 0 && record.lockedUntil <= now) {
-    loginAttempts.delete(key);
-  }
-
-  return { isLocked: false, remainingMinutes: 0 };
-}
-
-function recordFailedAttempt(key: string) {
-  const now = Date.now();
-  const record = loginAttempts.get(key) || { attempts: 0, lockedUntil: 0 };
-  record.attempts += 1;
-
-  if (record.attempts >= MAX_ATTEMPTS) {
-    record.lockedUntil = now + LOCKOUT_TIME_MS;
-  }
-
-  loginAttempts.set(key, record);
-}
-
-function clearRateLimit(key: string) {
-  loginAttempts.delete(key);
 }
 
 async function extractClientInfo() {
@@ -70,20 +69,32 @@ export async function loginAction(formData: FormData) {
   const { ipAddress, userAgent } = await extractClientInfo();
 
   try {
-    const email = formData.get("email")?.toString()?.trim().toLowerCase();
-    const password = formData.get("password")?.toString();
+    const rawEmail = formData.get("email")?.toString();
+    const rawPassword = formData.get("password")?.toString();
 
-    if (!email || !password) {
+    if (!rawEmail || !rawPassword) {
       return { error: "Email dan password wajib diisi." };
     }
 
-    // Rate Limiting Check
-    const rateLimitStatus = checkRateLimit(email);
+    const emailValidation = validateEmail(rawEmail);
+    if (!emailValidation.valid) {
+      return { error: emailValidation.error };
+    }
+    const email = emailValidation.value;
+
+    if (rawPassword.length > 128) {
+      return { error: "Password melebihi batas panjang yang diizinkan." };
+    }
+    const password = rawPassword;
+
+    // Persistent Rate Limiting Check
+    const rateLimitStatus = await checkRateLimit(email, ipAddress);
     if (rateLimitStatus.isLocked) {
       await logActivity({
         userId: null,
         action: ActivityAction.LOGIN_FAILED,
         entityType: "AUTH",
+        entityTitle: email,
         description: "Percobaan login admin gagal: Akun sementara terkunci (rate limited)",
         metadata: {
           reason: "rate_limited",
@@ -103,12 +114,11 @@ export async function loginAction(formData: FormData) {
     });
 
     if (!user) {
-      recordFailedAttempt(email);
-
       await logActivity({
         userId: null,
         action: ActivityAction.LOGIN_FAILED,
         entityType: "AUTH",
+        entityTitle: email,
         description: "Percobaan login admin gagal: Kredensial tidak valid",
         metadata: {
           reason: "invalid_credentials",
@@ -123,12 +133,11 @@ export async function loginAction(formData: FormData) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     
     if (!isPasswordValid) {
-      recordFailedAttempt(email);
-
       await logActivity({
         userId: user.id,
         action: ActivityAction.LOGIN_FAILED,
         entityType: "AUTH",
+        entityTitle: email,
         description: "Percobaan login admin gagal: Kredensial tidak valid",
         metadata: {
           reason: "invalid_credentials",
@@ -141,12 +150,11 @@ export async function loginAction(formData: FormData) {
     }
 
     if (user.role !== "ADMIN_CSR") {
-      recordFailedAttempt(email);
-
       await logActivity({
         userId: user.id,
         action: ActivityAction.LOGIN_FAILED,
         entityType: "AUTH",
+        entityTitle: email,
         description: "Percobaan login admin gagal: Role bukan ADMIN_CSR",
         metadata: {
           reason: "unauthorized_role",
@@ -157,9 +165,6 @@ export async function loginAction(formData: FormData) {
 
       return { error: "Email atau password yang Anda masukkan salah." };
     }
-
-    // Bersihkan catatan percobaan jika login berhasil
-    clearRateLimit(email);
 
     // 1. Buat token JWT
     const session = await encrypt({
@@ -291,14 +296,32 @@ export async function switchActiveSectorAction(sectorId: string) {
 
   if (sectorId === "ALL") {
     cookieStore.delete("active_sector");
-  } else {
-    cookieStore.set("active_sector", sectorId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 1 hari
-      path: "/",
-    });
+    return { success: true };
   }
+
+  const idValidation = validateId(sectorId, "Sektor");
+  if (!idValidation.valid) {
+    return { error: "ID Sektor tidak valid" };
+  }
+
+  // Verifikasi keberadaan sektor di DB
+  const sectorExists = await prisma.sector.findUnique({
+    where: { id: idValidation.value },
+    select: { id: true },
+  });
+
+  if (!sectorExists) {
+    return { error: "Sektor tidak ditemukan" };
+  }
+
+  cookieStore.set("active_sector", sectorExists.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24, // 1 hari
+    path: "/",
+  });
+
+  return { success: true };
 }
 

@@ -2,30 +2,35 @@ import { prisma } from "@/lib/prisma";
 
 export async function getPublishedPrograms(sectorId: string) {
   return prisma.program.findMany({
-    where: { 
+    where: {
       sectorId,
-      isPublished: true 
+      isPublished: true
     },
     include: { sector: true },
-    orderBy: { title: "asc" }
+    orderBy: { title: "asc" },
+    take: 50,
   });
 }
 
 export async function getAllPublishedPrograms() {
   return prisma.program.findMany({
-    where: { 
-      isPublished: true 
+    where: {
+      isPublished: true
     },
     include: {
       sector: true
     },
-    orderBy: { title: "asc" }
+    orderBy: { title: "asc" },
+    take: 100,
   });
 }
 
 export async function getPublishedProgramBySlug(slug: string) {
-  return prisma.program.findUnique({
-    where: { slug },
+  return prisma.program.findFirst({
+    where: {
+      slug,
+      isPublished: true,
+    },
     include: {
       sector: true,
       activities: {

@@ -110,6 +110,30 @@ export async function getAdminSession(rawOrHashedToken: string, isRaw: boolean =
       return null;
     }
 
+    // SEC-06 | Idle Session Timeout Enforcement
+    // Sesi ditolak jika tidak aktif selama lebih dari 120 menit (2 jam) atau total umur sesi melebihi 24 jam
+    const MAX_IDLE_MINUTES = 120;
+    const MAX_LIFETIME_HOURS = 24;
+    const now = Date.now();
+    const idleMinutes = (now - new Date(session.lastActiveAt).getTime()) / (1000 * 60);
+    const lifetimeHours = (now - new Date(session.createdAt).getTime()) / (1000 * 60 * 60);
+
+    if (idleMinutes > MAX_IDLE_MINUTES || lifetimeHours > MAX_LIFETIME_HOURS) {
+      void prisma.adminSession.update({
+        where: { id: session.id },
+        data: {
+          isActive: false,
+          endedAt: new Date(),
+          revokedReason:
+            idleMinutes > MAX_IDLE_MINUTES
+              ? "Idle Timeout Exceeded (Inactivity)"
+              : "Maximum Lifetime Exceeded",
+        },
+      }).catch(() => {});
+
+      return null;
+    }
+
     return session;
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {

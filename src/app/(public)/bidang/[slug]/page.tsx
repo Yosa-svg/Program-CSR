@@ -24,6 +24,8 @@ const SECTOR_ICONS: Record<string, LucideIcon> = {
   pariwisata: Palmtree,
 };
 
+import { createMetadata } from "@/lib/seo";
+
 interface SectorPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -31,11 +33,17 @@ interface SectorPageProps {
 export async function generateMetadata({ params }: SectorPageProps) {
   const { slug } = await params;
   const sector = await getSectorBySlug(slug);
-  if (!sector) return { title: "Sektor Tidak Ditemukan" };
-  return {
-    title: `${sector.name} | Bidang CSR`,
-    description: `Program, kegiatan, dan inisiatif keberlanjutan sektor ${sector.name} dalam Kawasan Ekonomi Berkelanjutan.`,
-  };
+  if (!sector) {
+    return createMetadata({
+      title: "Sektor Tidak Ditemukan",
+      noIndex: true,
+    });
+  }
+  return createMetadata({
+    title: `${sector.name} | Sektor CSR`,
+    description: `Program, kegiatan, produk binaan, dan inisiatif keberlanjutan sektor ${sector.name} dalam Kawasan Ekonomi Berkelanjutan.`,
+    canonical: `/bidang/${sector.slug}`,
+  });
 }
 
 export default async function DynamicSectorPage({ params }: SectorPageProps) {

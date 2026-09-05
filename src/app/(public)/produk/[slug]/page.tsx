@@ -1,18 +1,47 @@
+import type { Metadata } from "next";
 import { getPublishedProductBySlug } from "@/lib/queries/products";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, Package, Box, Info, Image as ImageIcon, CheckCircle, FileText, Globe, Tag } from "lucide-react";
 import Link from "next/link";
+import { createMetadata } from "@/lib/seo";
 
-export default async function ProductDetailPage({
-  params,
-}: {
+interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
-}) {
+}
+
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const product = await getPublishedProductBySlug(resolvedParams.slug);
 
-  if (!product) {
+  if (!product || !product.isPublished) {
+    return createMetadata({
+      title: "Produk Tidak Ditemukan",
+      noIndex: true,
+    });
+  }
+
+  const cleanDescription = product.description
+    ? product.description.length > 160
+      ? `${product.description.slice(0, 157)}...`
+      : product.description
+    : `Katalog produk unggulan mitra binaan CSR ${product.name} pada sektor ${product.sector?.name || "Lokal"}.`;
+
+  return createMetadata({
+    title: `${product.name} | Produk Unggulan CSR`,
+    description: cleanDescription,
+    canonical: `/produk/${product.slug}`,
+    imageUrl: product.imageUrl,
+  });
+}
+
+export default async function ProductDetailPage({
+  params,
+}: ProductDetailPageProps) {
+  const resolvedParams = await params;
+  const product = await getPublishedProductBySlug(resolvedParams.slug);
+
+  if (!product || !product.isPublished) {
     notFound();
   }
 
@@ -149,7 +178,7 @@ export default async function ProductDetailPage({
           {/* Sidebar */}
           <div className="space-y-8">
             
-            {product.program && (
+            {product.program && product.program.isPublished && (
               <div className="bg-white border border-[#E2E8E6] rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-[#172121] mb-4 flex items-center gap-2">
                   <Info size={20} className="text-[#0D726D]" /> Program Pembina

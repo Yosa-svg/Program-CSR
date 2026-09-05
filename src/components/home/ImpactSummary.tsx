@@ -4,7 +4,35 @@ import { motion } from "framer-motion";
 import { Activity, Award } from "lucide-react";
 import Link from "next/link";
 
-export default function ImpactSummary() {
+export interface ImpactMetricItem {
+  id: string;
+  name: string;
+  category: string;
+  realization: number | null;
+  unit: string | null;
+  sector?: {
+    name: string;
+  } | null;
+}
+
+interface ImpactSummaryProps {
+  metrics?: ImpactMetricItem[];
+}
+
+export default function ImpactSummary({ metrics = [] }: ImpactSummaryProps) {
+  const metric1 = metrics[0];
+  const metric2 = metrics[1];
+
+  const val1 = metric1 && metric1.realization !== null
+    ? `${metric1.realization.toLocaleString("id-ID")}${metric1.unit ? ' ' + metric1.unit : ''}`
+    : "+45%";
+  const label1 = metric1?.name ?? "Peningkatan Pendapatan Mitra Binaan";
+
+  const val2 = metric2 && metric2.realization !== null
+    ? `${metric2.realization.toLocaleString("id-ID")}${metric2.unit ? ' ' + metric2.unit : ''}`
+    : "3.200";
+  const label2 = metric2?.name ?? "Pohon Ditanam & Terawat";
+
   return (
     <section className="py-24 bg-[#F7FAF9] text-[#172121] relative overflow-hidden border-t border-[#E2E8E6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -70,8 +98,8 @@ export default function ImpactSummary() {
                 <div className="w-10 h-10 bg-[#0D726D]/10 text-[#0D726D] rounded-xl flex items-center justify-center mb-4">
                   <Activity size={20} />
                 </div>
-                <h4 className="text-4xl font-bold text-[#0D726D] mb-2">+45%</h4>
-                <p className="text-[#172121]/70 font-medium text-sm">Peningkatan Pendapatan Mitra Binaan</p>
+                <h4 className="text-3xl md:text-4xl font-bold text-[#0D726D] mb-2">{val1}</h4>
+                <p className="text-[#172121]/70 font-medium text-sm">{label1}</p>
               </motion.div>
 
               {/* Highlight Card with Teal ANTAM & Orange Badge */}
@@ -85,8 +113,8 @@ export default function ImpactSummary() {
                 <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 text-[#F6A236]">
                   <Award size={20} />
                 </div>
-                <h4 className="text-4xl font-bold text-white mb-2">3.200</h4>
-                <p className="text-white/90 font-medium text-sm">Pohon Ditanam & Terawat</p>
+                <h4 className="text-3xl md:text-4xl font-bold text-white mb-2">{val2}</h4>
+                <p className="text-white/90 font-medium text-sm">{label2}</p>
               </motion.div>
 
               <motion.div 

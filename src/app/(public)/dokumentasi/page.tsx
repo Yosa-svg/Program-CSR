@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { getAllPublishedDocumentation } from "@/lib/queries/documentation";
 import { getAllSectors } from "@/lib/queries/sectors";
+import { createMetadata } from "@/lib/seo";
 import DokumentasiCatalog from "./DokumentasiCatalog";
 
-export const metadata = {
-  title: "Galeri CSR | Kawasan Ekonomi Berkelanjutan",
-  description: "Dokumentasi visual dari berbagai program dan kegiatan pemberdayaan masyarakat.",
-};
+export const metadata: Metadata = createMetadata({
+  title: "Galeri Dokumentasi CSR",
+  description:
+    "Dokumentasi visual foto dan arsip kegiatan dari berbagai inisiatif pemberdayaan masyarakat dan pelestarian lingkungan CSR ANTAM.",
+  canonical: "/dokumentasi",
+});
 
 export const revalidate = 0;
 

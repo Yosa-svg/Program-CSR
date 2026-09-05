@@ -4,23 +4,53 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Users } from "lucide-react";
 import Link from "next/link";
 
-export default function ProgramPreview() {
-  const programs = [
-    {
-      id: "agro-edu",
-      title: "Agro Edu Wisata",
-      desc: "Program edukasi dan wisata berbasis pertanian terpadu untuk masyarakat umum dan pelajar.",
-      icon: <BookOpen size={22} className="text-white" />,
-      category: "Pendidikan & Lingkungan",
-    },
-    {
-      id: "petani-milenial",
-      title: "Inkubator Petani & Peternak",
-      desc: "Pelatihan dan pendampingan generasi muda untuk menjadi wirausaha agribisnis dan peternakan modern.",
-      icon: <Users size={22} className="text-white" />,
-      category: "Pemberdayaan",
-    },
-  ];
+export interface ProgramPreviewItem {
+  id: string;
+  title: string;
+  description: string;
+  slug: string;
+  sector?: {
+    id?: string;
+    name: string;
+    slug: string;
+  } | null;
+}
+
+interface ProgramPreviewProps {
+  programs?: ProgramPreviewItem[];
+}
+
+export default function ProgramPreview({ programs = [] }: ProgramPreviewProps) {
+  const displayPrograms = programs.length > 0
+    ? programs.map((p, i) => ({
+        id: p.id,
+        title: p.title,
+        desc: p.description,
+        slug: p.slug,
+        category: p.sector?.name ? `Sektor ${p.sector.name}` : "Program Unggulan",
+        icon: i % 2 === 0 ? <BookOpen size={22} className="text-white" /> : <Users size={22} className="text-white" />,
+        href: p.slug ? `/program/${p.slug}` : "/program",
+      }))
+    : [
+        {
+          id: "agro-edu",
+          title: "Agro Edu Wisata",
+          desc: "Program edukasi dan wisata berbasis pertanian terpadu untuk masyarakat umum dan pelajar.",
+          slug: "agro-edu-wisata",
+          icon: <BookOpen size={22} className="text-white" />,
+          category: "Pendidikan & Lingkungan",
+          href: "/program",
+        },
+        {
+          id: "petani-milenial",
+          title: "Inkubator Petani & Peternak",
+          desc: "Pelatihan dan pendampingan generasi muda untuk menjadi wirausaha agribisnis dan peternakan modern.",
+          slug: "inkubator-bisnis-peternakan-sapi-komunal",
+          icon: <Users size={22} className="text-white" />,
+          category: "Pemberdayaan",
+          href: "/program",
+        },
+      ];
 
   return (
     <section className="py-24 bg-[#F7FAF9] text-[#172121] border-t border-[#E2E8E6]">
@@ -47,7 +77,7 @@ export default function ProgramPreview() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {programs.map((prog, i) => (
+          {displayPrograms.map((prog, i) => (
             <motion.div
               key={prog.id}
               initial={{ opacity: 0, y: 20 }}
@@ -65,9 +95,9 @@ export default function ProgramPreview() {
               <p className="text-xs font-bold text-[#F6A236] uppercase tracking-wider mb-2">{prog.category}</p>
               <h3 className="text-2xl font-bold text-[#172121] mb-4">{prog.title}</h3>
               <p className="text-[#172121]/70 mb-8 flex-1 leading-relaxed font-normal">{prog.desc}</p>
-              
-              <Link 
-                href="/program" 
+
+              <Link
+                href={prog.href}
                 className="inline-flex items-center gap-2 font-bold text-[#0D726D] hover:text-[#0B5C58] transition-colors mt-auto group"
               >
                 Pelajari Program <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-[#F6A236]" />
@@ -83,8 +113,8 @@ export default function ProgramPreview() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="text-center"
         >
-          <Link 
-            href="/program" 
+          <Link
+            href="/program"
             className="btn btn-outline-dark px-8 py-3 text-sm font-semibold shadow-sm"
           >
             Lihat Semua Program

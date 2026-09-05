@@ -6,7 +6,8 @@ export async function getPublishedProducts(sectorId: string) {
       sectorId,
       isPublished: true 
     },
-    orderBy: { name: "asc" }
+    orderBy: { name: "asc" },
+    take: 50,
   });
 }
 
@@ -25,7 +26,8 @@ export async function getAllPublishedProducts(sectorSlug?: string) {
     include: {
       sector: true
     },
-    orderBy: { name: "asc" }
+    orderBy: { name: "asc" },
+    take: 100,
   });
 }
 
@@ -34,14 +36,22 @@ export async function getPublishedProductBySlug(slug: string) {
     where: {
       slug,
       isPublished: true,
-      // Sector is published as well? For now just check if program is published (if it has one) or just product itself
     },
     include: {
       sector: true,
-      program: true,
+      program: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          isPublished: true,
+        },
+      },
       documentations: {
         where: { isPublished: true },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        take: 8,
       }
     }
   });

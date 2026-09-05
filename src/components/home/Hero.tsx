@@ -4,7 +4,17 @@ import { motion } from "framer-motion";
 import { ArrowRight, Leaf } from "lucide-react";
 import Link from "next/link";
 
-export default function Hero() {
+interface HeroProps {
+  sectorsCount?: number;
+  beneficiariesCount?: string;
+  villagesCount?: string;
+}
+
+export default function Hero({
+  sectorsCount = 4,
+  beneficiariesCount = "1.840+",
+  villagesCount = "12",
+}: HeroProps = {}) {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-20 overflow-hidden bg-[#0A3D3A]">
       {/* Background Image with subtle overlay */}
@@ -97,7 +107,7 @@ export default function Hero() {
           >
             <div>
               <p className="text-3xl md:text-4xl font-bold text-white mb-1 drop-shadow-sm">
-                1.840+
+                {beneficiariesCount}
               </p>
               <p className="text-sm text-white/80 font-medium">
                 Penerima Manfaat
@@ -105,7 +115,7 @@ export default function Hero() {
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-white mb-1 drop-shadow-sm">
-                12
+                {villagesCount}
               </p>
               <p className="text-sm text-white/80 font-medium">
                 Desa Terhubung
@@ -113,7 +123,7 @@ export default function Hero() {
             </div>
             <div className="col-span-2 sm:col-span-1">
               <p className="text-3xl md:text-4xl font-bold text-white mb-1 drop-shadow-sm">
-                4
+                {sectorsCount}
               </p>
               <p className="text-sm text-white/80 font-medium">Sektor Aktif</p>
             </div>

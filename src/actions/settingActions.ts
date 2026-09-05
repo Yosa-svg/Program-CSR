@@ -6,6 +6,11 @@ import bcrypt from "bcryptjs";
 import { requireAuth } from "@/lib/auth";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
 import { headers } from "next/headers";
+import {
+  validateRequiredString,
+  validateId,
+  toSafeErrorMessage,
+} from "@/lib/validation";
 
 // Helper: extract client IP & User-Agent
 async function getRequestMeta() {
@@ -30,10 +35,11 @@ export async function updateProfile(formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const name = formData.get("name") as string;
-    if (!name || name.trim().length < 3) {
-      return { success: false, error: "Nama minimal 3 karakter." };
+    const nameResult = validateRequiredString(formData.get("name"), "Nama", 3, 100);
+    if (!nameResult.success) {
+      return { success: false, error: nameResult.error };
     }
+    const name = nameResult.data!;
 
     const oldUser = await prisma.user.findUnique({
       where: { id: session.userId },
@@ -64,9 +70,9 @@ export async function updateProfile(formData: FormData) {
     revalidatePath("/admin/pengaturan");
     revalidatePath("/admin", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to update profile:", error);
-    return { success: false, error: "Gagal memperbarui profil." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui profil.") };
   }
 }
 
@@ -75,16 +81,38 @@ export async function updatePassword(formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const currentPassword = formData.get("currentPassword") as string;
-    const newPassword = formData.get("newPassword") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    const currentPasswordRaw = formData.get("currentPassword");
+    const newPasswordRaw = formData.get("newPassword");
+    const confirmPasswordRaw = formData.get("confirmPassword");
+
+    if (
+      typeof currentPasswordRaw !== "string" ||
+      typeof newPasswordRaw !== "string" ||
+      typeof confirmPasswordRaw !== "string"
+    ) {
+      return { success: false, error: "Semua kolom kata sandi wajib diisi." };
+    }
+
+    const currentPassword = currentPasswordRaw;
+    const newPassword = newPasswordRaw;
+    const confirmPassword = confirmPasswordRaw;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return { success: false, error: "Semua kolom kata sandi wajib diisi." };
     }
 
-    if (newPassword.length < 6) {
-      return { success: false, error: "Kata sandi baru minimal 6 karakter." };
+    if (currentPassword.length > 128 || newPassword.length > 128 || confirmPassword.length > 128) {
+      return { success: false, error: "Kata sandi melebihi batas maksimal 128 karakter." };
+    }
+
+    if (newPassword.length < 8) {
+      return { success: false, error: "Kata sandi baru minimal 8 karakter." };
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    if (!hasLetter || !hasNumber) {
+      return { success: false, error: "Kata sandi baru harus mengandung kombinasi huruf dan angka." };
     }
 
     if (newPassword !== confirmPassword) {
@@ -123,9 +151,9 @@ export async function updatePassword(formData: FormData) {
 
     revalidatePath("/admin/pengaturan");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to update password:", error);
-    return { success: false, error: "Gagal memperbarui kata sandi." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui kata sandi.") };
   }
 }
 
@@ -148,6 +176,7 @@ export async function getUsersList() {
       orderBy: [
         { name: "asc" },
       ],
+      take: 50,
     });
   } catch (error) {
     console.error("Failed to get users list:", error);
@@ -155,21 +184,21 @@ export async function getUsersList() {
   }
 }
 
-export async function createUser(formData: FormData) {
+export async function createUser(_formData: FormData) {
   return { 
     success: false, 
     error: "Penambahan akun admin secara dinamis dinonaktifkan pada model dua akun ADMIN_CSR." 
   };
 }
 
-export async function updateUser(id: string, formData: FormData) {
+export async function updateUser(_id: string, _formData: FormData) {
   return { 
     success: false, 
     error: "Perubahan akun admin lain dinonaktifkan pada model dua akun ADMIN_CSR. Silakan perbarui profil Anda sendiri di tab Profil." 
   };
 }
 
-export async function deleteUser(id: string) {
+export async function deleteUser(_id: string) {
   return { 
     success: false, 
     error: "Penghapusan akun admin dinonaktifkan pada model dua akun ADMIN_CSR." 
@@ -194,10 +223,11 @@ export async function createSector(formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const name = formData.get("name") as string;
-    if (!name || name.trim().length < 3) {
-      return { success: false, error: "Nama sektor minimal 3 karakter." };
+    const nameResult = validateRequiredString(formData.get("name"), "Nama sektor", 3, 100);
+    if (!nameResult.success) {
+      return { success: false, error: nameResult.error };
     }
+    const name = nameResult.data!;
 
     const trimmedName = name.trim();
     const slug = generateSlug(trimmedName);
@@ -243,9 +273,9 @@ export async function createSector(formData: FormData) {
     revalidatePath("/bidang");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to create sector:", error);
-    return { success: false, error: "Gagal menambahkan sektor baru." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menambahkan sektor baru.") };
   }
 }
 
@@ -254,10 +284,16 @@ export async function updateSector(id: string, formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const name = formData.get("name") as string;
-    if (!name || name.trim().length < 3) {
-      return { success: false, error: "Nama sektor minimal 3 karakter." };
+    const idResult = validateId(id, "ID Sektor");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
     }
+
+    const nameResult = validateRequiredString(formData.get("name"), "Nama sektor", 3, 100);
+    if (!nameResult.success) {
+      return { success: false, error: nameResult.error };
+    }
+    const name = nameResult.data!;
 
     const trimmedName = name.trim();
     const slug = generateSlug(trimmedName);
@@ -265,7 +301,7 @@ export async function updateSector(id: string, formData: FormData) {
     // Check duplicate with another sector
     const existing = await prisma.sector.findFirst({
       where: {
-        id: { not: id },
+        id: { not: idResult.data! },
         OR: [
           { name: { equals: trimmedName } },
           { slug: { equals: slug } }
@@ -277,10 +313,13 @@ export async function updateSector(id: string, formData: FormData) {
       return { success: false, error: "Sektor lain dengan nama atau slug ini sudah ada." };
     }
 
-    const oldSector = await prisma.sector.findUnique({ where: { id } });
+    const oldSector = await prisma.sector.findUnique({ where: { id: idResult.data! } });
+    if (!oldSector) {
+      return { success: false, error: "Sektor tidak ditemukan." };
+    }
 
     await prisma.sector.update({
-      where: { id },
+      where: { id: oldSector.id },
       data: {
         name: trimmedName,
         slug: slug,
@@ -296,7 +335,7 @@ export async function updateSector(id: string, formData: FormData) {
       userId: session.userId,
       action: ActivityAction.UPDATE,
       entityType: "SECTOR",
-      entityId: id,
+      entityId: oldSector.id,
       entityTitle: trimmedName,
       description: `Admin memperbarui sektor: ${trimmedName}`,
       metadata: {
@@ -312,9 +351,9 @@ export async function updateSector(id: string, formData: FormData) {
     revalidatePath("/bidang");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to update sector:", error);
-    return { success: false, error: "Gagal memperbarui sektor." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui sektor.") };
   }
 }
 
@@ -323,9 +362,14 @@ export async function deleteSector(id: string) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
+    const idResult = validateId(id, "ID Sektor");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+
     // Check if sector has related items
     const sector = await prisma.sector.findUnique({
-      where: { id },
+      where: { id: idResult.data! },
       include: {
         _count: {
           select: {
@@ -358,7 +402,7 @@ export async function deleteSector(id: string) {
     }
 
     await prisma.sector.delete({
-      where: { id }
+      where: { id: sector.id }
     });
 
     // ActivityLog — non-blocking
@@ -366,7 +410,7 @@ export async function deleteSector(id: string) {
       userId: session.userId,
       action: ActivityAction.DELETE,
       entityType: "SECTOR",
-      entityId: id,
+      entityId: sector.id,
       entityTitle: sector.name,
       description: `Admin menghapus sektor: ${sector.name}`,
       metadata: {
@@ -381,8 +425,8 @@ export async function deleteSector(id: string) {
     revalidatePath("/bidang");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to delete sector:", error);
-    return { success: false, error: "Gagal menghapus sektor." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menghapus sektor.") };
   }
 }

@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, PawPrint, Recycle, Factory, Store, GraduationCap, HeartPulse, HardHat, Zap, Palmtree, Leaf, Sprout, type LucideIcon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { createMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = createMetadata({
+  title: "Sektor & Bidang CSR",
+  description:
+    "Daftar seluruh sektor pemberdayaan masyarakat dan pelestarian lingkungan dalam program CSR Kawasan Ekonomi Berkelanjutan.",
+  canonical: "/bidang",
+});
 
 const SECTOR_ICONS: Record<string, LucideIcon> = {
   pertanian: Sprout,
@@ -15,11 +24,6 @@ const SECTOR_ICONS: Record<string, LucideIcon> = {
   infrastruktur: HardHat,
   energi: Zap,
   pariwisata: Palmtree,
-};
-
-export const metadata = {
-  title: "Sektor & Bidang CSR | Kawasan Ekonomi Keberkelanjutan",
-  description: "Daftar seluruh sektor pemberdayaan masyarakat dan pelestarian lingkungan dalam program CSR.",
 };
 
 export default async function BidangCSRPage() {

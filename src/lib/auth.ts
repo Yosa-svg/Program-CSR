@@ -34,7 +34,22 @@ export async function decrypt(input: string): Promise<SessionPayload | null> {
     const { payload } = await jwtVerify(input, key, {
       algorithms: ["HS256"],
     });
-    return payload as SessionPayload;
+
+    // Validasi struktur claims token
+    if (
+      !payload ||
+      typeof payload.userId !== "string" ||
+      typeof payload.role !== "string" ||
+      payload.role !== "ADMIN_CSR"
+    ) {
+      return null;
+    }
+
+    return {
+      userId: payload.userId,
+      role: payload.role,
+      name: typeof payload.name === "string" ? payload.name : "Admin",
+    };
   } catch (error) {
     return null;
   }

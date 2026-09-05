@@ -5,6 +5,7 @@ import { requireAdministratorAuth, getCurrentAdminSession } from "@/lib/auth";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { validateId, validateOptionalString, toSafeErrorMessage } from "@/lib/validation";
 
 async function extractClientInfo() {
   try {
@@ -30,20 +31,27 @@ export async function revokeAdminSessionAction(sessionId: string, reason?: strin
   const currentAdmin = await requireAdministratorAuth();
   const { ipAddress, userAgent } = await extractClientInfo();
 
-  if (!sessionId || typeof sessionId !== "string") {
-    return { error: "Session ID wajib disertakan dan valid" };
+  const idResult = validateId(sessionId, "Session ID");
+  if (!idResult.success) {
+    return { error: idResult.error };
+  }
+  const validSessionId = idResult.data!;
+
+  const reasonResult = validateOptionalString(reason, "Alasan pencabutan", 255);
+  if (!reasonResult.success) {
+    return { error: reasonResult.error };
   }
 
   try {
     // 2. Proteksi Self-Revocation (Mencegah admin mengunci diri sendiri dari konsol)
     const currentSession = await getCurrentAdminSession();
-    if (currentSession && currentSession.id === sessionId) {
+    if (currentSession && currentSession.id === validSessionId) {
       return { error: "Current session cannot be revoked from this console." };
     }
 
     // 3. Cari target session di database
     const targetSession = await prisma.adminSession.findUnique({
-      where: { id: sessionId },
+      where: { id: validSessionId },
       select: {
         id: true,
         userId: true,
@@ -71,12 +79,12 @@ export async function revokeAdminSessionAction(sessionId: string, reason?: strin
       };
     }
 
-    const revokeReason = (reason && reason.trim()) ? reason.trim().slice(0, 255) : "Administrator revoked session";
+    const revokeReason = reasonResult.data || "Administrator revoked session";
     const now = new Date();
 
     // 5. Update status sesi di database
     await prisma.adminSession.update({
-      where: { id: sessionId },
+      where: { id: validSessionId },
       data: {
         isRevoked: true,
         isActive: false,
@@ -97,7 +105,7 @@ export async function revokeAdminSessionAction(sessionId: string, reason?: strin
         description: `Sesi admin ${targetSession.user?.name || targetSession.userId} dicabut oleh ${currentAdmin.name}: ${revokeReason}`,
         metadata: {
           event: "SESSION_REVOKED",
-          sessionId: sessionId,
+          sessionId: validSessionId,
           targetUserId: targetSession.userId,
           reason: revokeReason,
         },
@@ -117,10 +125,10 @@ export async function revokeAdminSessionAction(sessionId: string, reason?: strin
     revalidatePath("/administrator/security");
 
     return { success: true, message: "Session berhasil dicabut." };
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (process.env.NODE_ENV !== "production") {
       console.error("[SessionRevocation] Gagal mencabut sesi admin:", error);
     }
-    return { error: error?.message || "Terjadi kesalahan saat mencabut sesi admin" };
+    return { error: toSafeErrorMessage(error, "Terjadi kesalahan saat mencabut sesi admin.") };
   }
 }

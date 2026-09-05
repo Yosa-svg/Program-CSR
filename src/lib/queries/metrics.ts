@@ -41,6 +41,7 @@ export async function getAllPublishedMetrics(sectorId?: string) {
         { year: "desc" },
         { createdAt: "desc" },
       ],
+      take: 100,
     });
   } catch (error) {
     console.error("Failed to fetch published metrics:", error);

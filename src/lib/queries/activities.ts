@@ -6,7 +6,8 @@ export async function getPublishedActivities(sectorId: string) {
       sectorId,
       isPublished: true 
     },
-    orderBy: { date: "desc" }
+    orderBy: { date: "desc" },
+    take: 50,
   });
 }
 
@@ -18,6 +19,7 @@ export async function getAllPublishedActivities() {
     include: {
       sector: true
     },
-    orderBy: { date: "desc" }
+    orderBy: { date: "desc" },
+    take: 100,
   });
 }

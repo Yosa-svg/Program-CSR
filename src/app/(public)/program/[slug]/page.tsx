@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getPublishedProgramBySlug } from "@/lib/queries/programs";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -5,16 +6,44 @@ import { MapPin, Users, Target, Activity, CheckCircle, Package, ArrowLeft, Light
 import Link from "next/link";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { createMetadata } from "@/lib/seo";
 
-export default async function ProgramDetailPage({
-  params,
-}: {
+interface ProgramDetailPageProps {
   params: Promise<{ slug: string }>;
-}) {
+}
+
+export async function generateMetadata({ params }: ProgramDetailPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const program = await getPublishedProgramBySlug(resolvedParams.slug);
 
-  if (!program) {
+  if (!program || !program.isPublished) {
+    return createMetadata({
+      title: "Program Tidak Ditemukan",
+      noIndex: true,
+    });
+  }
+
+  const cleanDescription = program.description
+    ? program.description.length > 160
+      ? `${program.description.slice(0, 157)}...`
+      : program.description
+    : `Inisiatif program CSR ${program.title} pada sektor ${program.sector?.name || "Keberlanjutan"}.`;
+
+  return createMetadata({
+    title: `${program.title} | Program CSR`,
+    description: cleanDescription,
+    canonical: `/program/${program.slug}`,
+    imageUrl: program.imageUrl,
+  });
+}
+
+export default async function ProgramDetailPage({
+  params,
+}: ProgramDetailPageProps) {
+  const resolvedParams = await params;
+  const program = await getPublishedProgramBySlug(resolvedParams.slug);
+
+  if (!program || !program.isPublished) {
     notFound();
   }
 

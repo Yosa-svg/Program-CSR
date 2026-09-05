@@ -6,7 +6,8 @@ export async function getPublishedDocumentation(sectorId: string) {
       sectorId,
       isPublished: true 
     },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
+    take: 50,
   });
 }
 
@@ -51,6 +52,7 @@ export async function getAllPublishedDocumentation() {
         }
       }
     },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
+    take: 100,
   });
 }

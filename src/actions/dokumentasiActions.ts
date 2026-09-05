@@ -6,6 +6,16 @@ import { uploadImage, deleteImage } from "@/lib/mediaService";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
 import { headers } from "next/headers";
+import {
+  validateRequiredString,
+  validateOptionalString,
+  validateSafeUrl,
+  validateEnum,
+  validateId,
+  validateOptionalId,
+  validateOptionalDate,
+  toSafeErrorMessage,
+} from "@/lib/validation";
 
 // Helper: extract client IP & User-Agent
 async function getRequestMeta() {
@@ -33,12 +43,33 @@ export async function getDocumentations() {
     return await prisma.documentation.findMany({
       where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
-        sector: true,
-        program: true,
-        activity: true,
-        product: true,
+        sector: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        activity: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
   } catch (error) {
     console.error("Failed to fetch documentations:", error);
@@ -52,25 +83,90 @@ export async function createDocumentation(formData: FormData) {
     const { ipAddress, userAgent } = await getRequestMeta();
 
     const activeSectorId = await getActiveSectorId();
-    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+    const rawSectorId = (formData.get("sectorId") as string) || activeSectorId;
 
-    if (!sectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data dokumentasi." };
+    const sectorIdResult = validateId(rawSectorId, "Sektor");
+    if (!sectorIdResult.success) {
+      return { success: false, error: sectorIdResult.error };
+    }
+    const sectorId = sectorIdResult.data!;
+
+    // SBAC: Validasi keberadaan sektor di database
+    const sector = await prisma.sector.findUnique({ where: { id: sectorId } });
+    if (!sector) {
+      return { success: false, error: "Sektor yang dipilih tidak valid atau tidak ditemukan." };
     }
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const dateStr = formData.get("date") as string;
-    const status = formData.get("status") as string;
-    const isPublished = formData.get("isPublished") === "true";
-    const programId = formData.get("programId") as string;
-    const activityId = formData.get("activityId") as string;
-    const productId = formData.get("productId") as string;
+    // Validate title
+    const titleResult = validateRequiredString(formData.get("title"), "Judul dokumentasi", 3, 255);
+    if (!titleResult.success) {
+      return { success: false, error: titleResult.error };
+    }
+    const title = titleResult.data!;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    // Validate description
+    const descResult = validateOptionalString(formData.get("description"), "Deskripsi dokumentasi", 10000);
+    if (!descResult.success) {
+      return { success: false, error: descResult.error };
+    }
+    const description = descResult.data || null;
+
+    // Validate date
+    const dateResult = validateOptionalDate(formData.get("date"), "Tanggal dokumentasi");
+    if (!dateResult.success) {
+      return { success: false, error: dateResult.error };
+    }
+    const date = dateResult.data || null;
+
+    // Validate status
+    const statusResult = validateEnum(
+      formData.get("status"),
+      ["PUBLISHED", "Active", "Draft", "ARCHIVED"],
+      "Status",
+      "Active"
+    );
+    if (!statusResult.success) {
+      return { success: false, error: statusResult.error };
+    }
+    const status = statusResult.data!;
+
+    const isPublished = formData.get("isPublished") === "true";
+    const isFeatured = formData.get("isFeatured") === "true";
+
+    // Validate relational IDs
+    const programIdResult = validateOptionalId(formData.get("programId"), "Program Induk");
+    if (!programIdResult.success) return { success: false, error: programIdResult.error };
+    const programId = programIdResult.data || null;
+
+    const activityIdResult = validateOptionalId(formData.get("activityId"), "Kegiatan");
+    if (!activityIdResult.success) return { success: false, error: activityIdResult.error };
+    const activityId = activityIdResult.data || null;
+
+    const productIdResult = validateOptionalId(formData.get("productId"), "Produk");
+    if (!productIdResult.success) return { success: false, error: productIdResult.error };
+    const productId = productIdResult.data || null;
+
+    // Validate optional strings
+    const srcResult = validateOptionalString(formData.get("source"), "Sumber data", 255);
+    if (!srcResult.success) return { success: false, error: srcResult.error };
+    const source = srcResult.data || null;
+
+    const srcTypeResult = validateOptionalString(formData.get("sourceType"), "Jenis sumber", 100);
+    if (!srcTypeResult.success) return { success: false, error: srcTypeResult.error };
+    const sourceType = srcTypeResult.data || null;
+
+    const srcUrlResult = validateSafeUrl(formData.get("sourceUrl"), "URL Sumber");
+    if (!srcUrlResult.success) return { success: false, error: srcUrlResult.error };
+    const sourceUrl = srcUrlResult.data || null;
+
+    const verResult = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "Status verifikasi",
+      "BELUM_TERVERIFIKASI"
+    );
+    if (!verResult.success) return { success: false, error: verResult.error };
+    const verificationStatus = verResult.data!;
 
     // Server-Side Relational Consistency Checks
     if (programId) {
@@ -110,8 +206,6 @@ export async function createDocumentation(formData: FormData) {
       }
     }
 
-    const isFeatured = formData.get("isFeatured") === "true";
-
     // Upload file
     const uploadResult = await uploadImage(file, "documentation");
     if (uploadResult.error || !uploadResult.url) {
@@ -121,17 +215,17 @@ export async function createDocumentation(formData: FormData) {
     const created = await prisma.documentation.create({
       data: {
         title,
-        description: description || null,
-        date: dateStr ? new Date(dateStr) : null,
-        status: status || "Active",
+        description,
+        date,
+        status,
         isPublished,
         isFeatured,
-        programId: programId || null,
-        activityId: activityId || null,
-        productId: productId || null,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        programId,
+        activityId,
+        productId,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
         sectorId,
         imageUrl: uploadResult.url,
@@ -162,9 +256,9 @@ export async function createDocumentation(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to create documentation:", error);
-    return { success: false, error: error?.message || "Gagal menyimpan data dokumentasi" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menyimpan data dokumentasi.") };
   }
 }
 
@@ -173,23 +267,84 @@ export async function updateDocumentation(id: string, formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const oldDoc = await prisma.documentation.findUnique({ where: { id } });
+    const idResult = validateId(id, "ID Dokumentasi");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+
+    const oldDoc = await prisma.documentation.findUnique({ where: { id: idResult.data! } });
     if (!oldDoc) return { success: false, error: "Dokumentasi tidak ditemukan." };
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const dateStr = formData.get("date") as string;
-    const status = formData.get("status") as string;
+    // Validate title
+    const titleResult = validateRequiredString(formData.get("title"), "Judul dokumentasi", 3, 255);
+    if (!titleResult.success) {
+      return { success: false, error: titleResult.error };
+    }
+    const title = titleResult.data!;
+
+    // Validate description
+    const descResult = validateOptionalString(formData.get("description"), "Deskripsi dokumentasi", 10000);
+    if (!descResult.success) {
+      return { success: false, error: descResult.error };
+    }
+    const description = descResult.data || null;
+
+    // Validate date
+    const dateResult = validateOptionalDate(formData.get("date"), "Tanggal dokumentasi");
+    if (!dateResult.success) {
+      return { success: false, error: dateResult.error };
+    }
+    const date = dateResult.data || null;
+
+    // Validate status
+    const statusResult = validateEnum(
+      formData.get("status"),
+      ["PUBLISHED", "Active", "Draft", "ARCHIVED"],
+      "Status",
+      "Active"
+    );
+    if (!statusResult.success) {
+      return { success: false, error: statusResult.error };
+    }
+    const status = statusResult.data!;
+
     const isPublished = formData.get("isPublished") === "true";
     const isFeatured = formData.get("isFeatured") === "true";
-    const programId = formData.get("programId") as string;
-    const activityId = formData.get("activityId") as string;
-    const productId = formData.get("productId") as string;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    // Validate relational IDs
+    const programIdResult = validateOptionalId(formData.get("programId"), "Program Induk");
+    if (!programIdResult.success) return { success: false, error: programIdResult.error };
+    const programId = programIdResult.data || null;
+
+    const activityIdResult = validateOptionalId(formData.get("activityId"), "Kegiatan");
+    if (!activityIdResult.success) return { success: false, error: activityIdResult.error };
+    const activityId = activityIdResult.data || null;
+
+    const productIdResult = validateOptionalId(formData.get("productId"), "Produk");
+    if (!productIdResult.success) return { success: false, error: productIdResult.error };
+    const productId = productIdResult.data || null;
+
+    // Validate optional strings
+    const srcResult = validateOptionalString(formData.get("source"), "Sumber data", 255);
+    if (!srcResult.success) return { success: false, error: srcResult.error };
+    const source = srcResult.data || null;
+
+    const srcTypeResult = validateOptionalString(formData.get("sourceType"), "Jenis sumber", 100);
+    if (!srcTypeResult.success) return { success: false, error: srcTypeResult.error };
+    const sourceType = srcTypeResult.data || null;
+
+    const srcUrlResult = validateSafeUrl(formData.get("sourceUrl"), "URL Sumber");
+    if (!srcUrlResult.success) return { success: false, error: srcUrlResult.error };
+    const sourceUrl = srcUrlResult.data || null;
+
+    const verResult = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "Status verifikasi",
+      "BELUM_TERVERIFIKASI"
+    );
+    if (!verResult.success) return { success: false, error: verResult.error };
+    const verificationStatus = verResult.data!;
 
     // Server-Side Relational Consistency Checks
     if (programId) {
@@ -248,20 +403,20 @@ export async function updateDocumentation(id: string, formData: FormData) {
     if (imageChanged) changedFields.push("imageUrl");
 
     await prisma.documentation.update({
-      where: { id },
+      where: { id: oldDoc.id },
       data: {
         title,
-        description: description || null,
-        date: dateStr ? new Date(dateStr) : null,
-        status: status || "Active",
+        description,
+        date,
+        status,
         isPublished,
         isFeatured,
-        programId: programId || null,
-        activityId: activityId || null,
-        productId: productId || null,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        programId,
+        activityId,
+        productId,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
         imageUrl: finalImageUrl,
       },
@@ -272,7 +427,7 @@ export async function updateDocumentation(id: string, formData: FormData) {
       userId: session.userId,
       action: ActivityAction.UPDATE,
       entityType: "DOCUMENTATION",
-      entityId: id,
+      entityId: oldDoc.id,
       entityTitle: title,
       description: `Admin memperbarui dokumentasi: ${title}`,
       metadata: {
@@ -290,9 +445,9 @@ export async function updateDocumentation(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update documentation:", error);
-    return { success: false, error: error?.message || "Gagal memperbarui data dokumentasi" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui data dokumentasi.") };
   }
 }
 
@@ -301,11 +456,16 @@ export async function toggleFeaturedDocumentation(id: string) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const doc = await prisma.documentation.findUnique({ where: { id } });
+    const idResult = validateId(id, "ID Dokumentasi");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+
+    const doc = await prisma.documentation.findUnique({ where: { id: idResult.data! } });
     if (!doc) return { success: false, error: "Dokumentasi tidak ditemukan." };
 
     const updated = await prisma.documentation.update({
-      where: { id },
+      where: { id: doc.id },
       data: { isFeatured: !doc.isFeatured },
     });
 
@@ -314,7 +474,7 @@ export async function toggleFeaturedDocumentation(id: string) {
       userId: session.userId,
       action: ActivityAction.UPDATE,
       entityType: "DOCUMENTATION",
-      entityId: id,
+      entityId: doc.id,
       entityTitle: doc.title,
       description: `Admin ${updated.isFeatured ? "menambahkan" : "menghapus"} dokumentasi dari slider beranda: ${doc.title}`,
       metadata: {
@@ -329,9 +489,9 @@ export async function toggleFeaturedDocumentation(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true, isFeatured: updated.isFeatured };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to toggle featured status:", error);
-    return { success: false, error: error?.message || "Gagal mengubah status slider beranda." };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal mengubah status slider beranda.") };
   }
 }
 
@@ -340,38 +500,44 @@ export async function deleteDocumentation(id: string) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const doc = await prisma.documentation.findUnique({ where: { id } });
-
-    if (doc) {
-      await prisma.documentation.delete({
-        where: { id },
-      });
-      await deleteImage(doc.imageUrl);
-
-      // ActivityLog — non-blocking, setelah delete berhasil
-      void logActivity({
-        userId: session.userId,
-        action: ActivityAction.DELETE,
-        entityType: "DOCUMENTATION",
-        entityId: id,
-        entityTitle: doc.title,
-        description: `Admin menghapus dokumentasi: ${doc.title}`,
-        metadata: {
-          sectorId: doc.sectorId,
-          status: doc.status,
-          isFeatured: doc.isFeatured,
-        },
-        ipAddress,
-        userAgent,
-      });
+    const idResult = validateId(id, "ID Dokumentasi");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
     }
+
+    const doc = await prisma.documentation.findUnique({ where: { id: idResult.data! } });
+    if (!doc) {
+      return { success: false, error: "Dokumentasi tidak ditemukan atau telah dihapus." };
+    }
+
+    await prisma.documentation.delete({
+      where: { id: doc.id },
+    });
+    await deleteImage(doc.imageUrl);
+
+    // ActivityLog — non-blocking, setelah delete berhasil
+    void logActivity({
+      userId: session.userId,
+      action: ActivityAction.DELETE,
+      entityType: "DOCUMENTATION",
+      entityId: doc.id,
+      entityTitle: doc.title,
+      description: `Admin menghapus dokumentasi: ${doc.title}`,
+      metadata: {
+        sectorId: doc.sectorId,
+        status: doc.status,
+        isFeatured: doc.isFeatured,
+      },
+      ipAddress,
+      userAgent,
+    });
 
     revalidatePath("/admin/dokumentasi");
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to delete documentation:", error);
-    return { success: false, error: error?.message || "Gagal menghapus data dokumentasi" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menghapus data dokumentasi.") };
   }
 }

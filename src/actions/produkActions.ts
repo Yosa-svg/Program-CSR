@@ -5,6 +5,15 @@ import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
 import { headers } from "next/headers";
+import {
+  validateRequiredString,
+  validateOptionalString,
+  validateSafeUrl,
+  validateEnum,
+  validateId,
+  validateOptionalId,
+  toSafeErrorMessage,
+} from "@/lib/validation";
 
 // Helper: extract client IP & User-Agent
 async function getRequestMeta() {
@@ -29,7 +38,7 @@ async function generateUniqueProductSlug(name: string, sectorId: string): Promis
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
-  let slug = baseSlug;
+  let slug = baseSlug || "produk";
   let counter = 1;
 
   let existing = await prisma.product.findUnique({ where: { slug } });
@@ -56,10 +65,21 @@ export async function getProducts() {
     return await prisma.product.findMany({
       where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
-        program: true,
-        sector: true,
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        sector: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: { name: "asc" },
+      take: 100,
     });
   } catch (error) {
     console.error("Failed to fetch products:", error);
@@ -73,28 +93,99 @@ export async function createProduct(formData: FormData) {
     const { ipAddress, userAgent } = await getRequestMeta();
 
     const activeSectorId = await getActiveSectorId();
-    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+    const rawSectorId = (formData.get("sectorId") as string) || activeSectorId;
 
-    if (!sectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data produk." };
+    const sectorIdResult = validateId(rawSectorId, "Sektor");
+    if (!sectorIdResult.success) {
+      return { success: false, error: sectorIdResult.error };
+    }
+    const sectorId = sectorIdResult.data!;
+
+    // SBAC: Validasi keberadaan sektor di database
+    const sector = await prisma.sector.findUnique({ where: { id: sectorId } });
+    if (!sector) {
+      return { success: false, error: "Sektor yang dipilih tidak valid atau tidak ditemukan." };
     }
 
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const category = formData.get("category") as string;
-    const status = formData.get("status") as string;
+    // Validate name
+    const nameResult = validateRequiredString(formData.get("name"), "Nama produk", 3, 255);
+    if (!nameResult.success) {
+      return { success: false, error: nameResult.error };
+    }
+    const name = nameResult.data!;
+
+    // Validate description
+    const descResult = validateOptionalString(formData.get("description"), "Deskripsi produk", 10000);
+    if (!descResult.success) {
+      return { success: false, error: descResult.error };
+    }
+    const description = descResult.data || "";
+
+    // Validate category
+    const catResult = validateRequiredString(formData.get("category"), "Kategori produk", 1, 100);
+    if (!catResult.success) {
+      return { success: false, error: catResult.error };
+    }
+    const category = catResult.data!;
+
+    // Validate status
+    const statusResult = validateEnum(
+      formData.get("status"),
+      ["AVAILABLE", "OUT_OF_STOCK", "Tersedia", "Habis"],
+      "Status produk",
+      "AVAILABLE"
+    );
+    if (!statusResult.success) {
+      return { success: false, error: statusResult.error };
+    }
+    const status = statusResult.data!;
+
     const isPublished = formData.get("isPublished") === "true";
-    const programId = formData.get("programId") as string; // Optional
 
-    const capacity = formData.get("capacity") as string;
-    const unit = formData.get("unit") as string;
-    const marketing = formData.get("marketing") as string;
-    const certification = formData.get("certification") as string;
+    // Validate programId
+    const programIdResult = validateOptionalId(formData.get("programId"), "Program Induk");
+    if (!programIdResult.success) {
+      return { success: false, error: programIdResult.error };
+    }
+    const programId = programIdResult.data || null;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    // Validate optional strings
+    const capResult = validateOptionalString(formData.get("capacity"), "Kapasitas", 100);
+    if (!capResult.success) return { success: false, error: capResult.error };
+    const capacity = capResult.data || null;
+
+    const unitResult = validateOptionalString(formData.get("unit"), "Satuan", 50);
+    if (!unitResult.success) return { success: false, error: unitResult.error };
+    const unit = unitResult.data || null;
+
+    const mktResult = validateOptionalString(formData.get("marketing"), "Pemasaran", 255);
+    if (!mktResult.success) return { success: false, error: mktResult.error };
+    const marketing = mktResult.data || null;
+
+    const certResult = validateOptionalString(formData.get("certification"), "Sertifikasi", 255);
+    if (!certResult.success) return { success: false, error: certResult.error };
+    const certification = certResult.data || null;
+
+    const srcResult = validateOptionalString(formData.get("source"), "Sumber data", 255);
+    if (!srcResult.success) return { success: false, error: srcResult.error };
+    const source = srcResult.data || null;
+
+    const srcTypeResult = validateOptionalString(formData.get("sourceType"), "Jenis sumber", 100);
+    if (!srcTypeResult.success) return { success: false, error: srcTypeResult.error };
+    const sourceType = srcTypeResult.data || null;
+
+    const srcUrlResult = validateSafeUrl(formData.get("sourceUrl"), "URL Sumber");
+    if (!srcUrlResult.success) return { success: false, error: srcUrlResult.error };
+    const sourceUrl = srcUrlResult.data || null;
+
+    const verResult = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "Status verifikasi",
+      "BELUM_TERVERIFIKASI"
+    );
+    if (!verResult.success) return { success: false, error: verResult.error };
+    const verificationStatus = verResult.data!;
 
     // Server-Side Relational Consistency Check
     if (programId) {
@@ -127,15 +218,15 @@ export async function createProduct(formData: FormData) {
         category,
         status,
         isPublished,
-        capacity: capacity || null,
-        unit: unit || null,
-        marketing: marketing || null,
-        certification: certification || null,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        capacity,
+        unit,
+        marketing,
+        certification,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
-        programId: programId || null,
+        programId,
         sectorId,
         imageUrl: "/images/placeholder.jpg",
       },
@@ -164,9 +255,9 @@ export async function createProduct(formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to create product:", error);
-    return { success: false, error: error?.message || "Gagal menyimpan data produk" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menyimpan data produk.") };
   }
 }
 
@@ -175,25 +266,95 @@ export async function updateProduct(id: string, formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const product = await prisma.product.findUnique({ where: { id } });
-    if (!product) throw new Error("Product not found");
+    const idResult = validateId(id, "ID Produk");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
 
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const category = formData.get("category") as string;
-    const status = formData.get("status") as string;
+    const product = await prisma.product.findUnique({ where: { id: idResult.data! } });
+    if (!product) {
+      return { success: false, error: "Produk tidak ditemukan atau telah dihapus." };
+    }
+
+    // Validate name
+    const nameResult = validateRequiredString(formData.get("name"), "Nama produk", 3, 255);
+    if (!nameResult.success) {
+      return { success: false, error: nameResult.error };
+    }
+    const name = nameResult.data!;
+
+    // Validate description
+    const descResult = validateOptionalString(formData.get("description"), "Deskripsi produk", 10000);
+    if (!descResult.success) {
+      return { success: false, error: descResult.error };
+    }
+    const description = descResult.data || "";
+
+    // Validate category
+    const catResult = validateRequiredString(formData.get("category"), "Kategori produk", 1, 100);
+    if (!catResult.success) {
+      return { success: false, error: catResult.error };
+    }
+    const category = catResult.data!;
+
+    // Validate status
+    const statusResult = validateEnum(
+      formData.get("status"),
+      ["AVAILABLE", "OUT_OF_STOCK", "Tersedia", "Habis"],
+      "Status produk",
+      "AVAILABLE"
+    );
+    if (!statusResult.success) {
+      return { success: false, error: statusResult.error };
+    }
+    const status = statusResult.data!;
+
     const isPublished = formData.get("isPublished") === "true";
-    const programId = formData.get("programId") as string;
 
-    const capacity = formData.get("capacity") as string;
-    const unit = formData.get("unit") as string;
-    const marketing = formData.get("marketing") as string;
-    const certification = formData.get("certification") as string;
+    // Validate programId
+    const programIdResult = validateOptionalId(formData.get("programId"), "Program Induk");
+    if (!programIdResult.success) {
+      return { success: false, error: programIdResult.error };
+    }
+    const programId = programIdResult.data || null;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    // Validate optional strings
+    const capResult = validateOptionalString(formData.get("capacity"), "Kapasitas", 100);
+    if (!capResult.success) return { success: false, error: capResult.error };
+    const capacity = capResult.data || null;
+
+    const unitResult = validateOptionalString(formData.get("unit"), "Satuan", 50);
+    if (!unitResult.success) return { success: false, error: unitResult.error };
+    const unit = unitResult.data || null;
+
+    const mktResult = validateOptionalString(formData.get("marketing"), "Pemasaran", 255);
+    if (!mktResult.success) return { success: false, error: mktResult.error };
+    const marketing = mktResult.data || null;
+
+    const certResult = validateOptionalString(formData.get("certification"), "Sertifikasi", 255);
+    if (!certResult.success) return { success: false, error: certResult.error };
+    const certification = certResult.data || null;
+
+    const srcResult = validateOptionalString(formData.get("source"), "Sumber data", 255);
+    if (!srcResult.success) return { success: false, error: srcResult.error };
+    const source = srcResult.data || null;
+
+    const srcTypeResult = validateOptionalString(formData.get("sourceType"), "Jenis sumber", 100);
+    if (!srcTypeResult.success) return { success: false, error: srcTypeResult.error };
+    const sourceType = srcTypeResult.data || null;
+
+    const srcUrlResult = validateSafeUrl(formData.get("sourceUrl"), "URL Sumber");
+    if (!srcUrlResult.success) return { success: false, error: srcUrlResult.error };
+    const sourceUrl = srcUrlResult.data || null;
+
+    const verResult = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "Status verifikasi",
+      "BELUM_TERVERIFIKASI"
+    );
+    if (!verResult.success) return { success: false, error: verResult.error };
+    const verificationStatus = verResult.data!;
 
     // Server-Side Relational Consistency Check
     if (programId) {
@@ -225,22 +386,22 @@ export async function updateProduct(id: string, formData: FormData) {
     if (verificationStatus !== product.verificationStatus) changedFields.push("verificationStatus");
 
     await prisma.product.update({
-      where: { id },
+      where: { id: product.id },
       data: {
         name,
         description,
         category,
         status,
         isPublished,
-        capacity: capacity || null,
-        unit: unit || null,
-        marketing: marketing || null,
-        certification: certification || null,
-        source: source || null,
-        sourceType: sourceType || null,
-        sourceUrl: sourceUrl || null,
+        capacity,
+        unit,
+        marketing,
+        certification,
+        source,
+        sourceType,
+        sourceUrl,
         verificationStatus,
-        programId: programId || null,
+        programId,
       },
     });
 
@@ -249,7 +410,7 @@ export async function updateProduct(id: string, formData: FormData) {
       userId: session.userId,
       action: ActivityAction.UPDATE,
       entityType: "PRODUCT",
-      entityId: id,
+      entityId: product.id,
       entityTitle: name,
       description: `Admin memperbarui produk: ${name}`,
       metadata: {
@@ -267,9 +428,9 @@ export async function updateProduct(id: string, formData: FormData) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update product:", error);
-    return { success: false, error: error?.message || "Gagal memperbarui data produk" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui data produk.") };
   }
 }
 
@@ -278,11 +439,34 @@ export async function deleteProduct(id: string) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const product = await prisma.product.findUnique({ where: { id } });
-    if (!product) throw new Error("Product tidak ditemukan");
+    const idResult = validateId(id, "ID Produk");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: idResult.data! },
+      include: {
+        _count: {
+          select: {
+            documentations: true,
+          },
+        },
+      },
+    });
+    if (!product) {
+      return { success: false, error: "Produk tidak ditemukan atau telah dihapus." };
+    }
+
+    if (product._count.documentations > 0) {
+      return {
+        success: false,
+        error: `Produk tidak dapat dihapus karena masih memiliki ${product._count.documentations} dokumentasi terkait. Hapus atau alihkan dokumentasi terkait terlebih dahulu.`,
+      };
+    }
 
     await prisma.product.delete({
-      where: { id },
+      where: { id: product.id },
     });
 
     // ActivityLog — non-blocking
@@ -290,7 +474,7 @@ export async function deleteProduct(id: string) {
       userId: session.userId,
       action: ActivityAction.DELETE,
       entityType: "PRODUCT",
-      entityId: id,
+      entityId: product.id,
       entityTitle: product.name,
       description: `Admin menghapus produk: ${product.name}`,
       metadata: {
@@ -306,8 +490,8 @@ export async function deleteProduct(id: string) {
     revalidatePath("/admin");
     revalidatePath("/", "layout");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to delete product:", error);
-    return { success: false, error: error?.message || "Gagal menghapus data produk" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menghapus data produk.") };
   }
 }

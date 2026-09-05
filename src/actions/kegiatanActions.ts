@@ -5,6 +5,15 @@ import { revalidatePath } from "next/cache";
 import { getActiveSectorId, requireAuth } from "@/lib/auth";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
 import { headers } from "next/headers";
+import {
+  validateRequiredString,
+  validateOptionalString,
+  validateEnum,
+  validateSafeUrl,
+  validateOptionalDate,
+  validateId,
+  toSafeErrorMessage,
+} from "@/lib/validation";
 
 // Helper: extract client IP & User-Agent
 async function getRequestMeta() {
@@ -32,10 +41,21 @@ export async function getActivities() {
     return await prisma.activity.findMany({
       where: activeSectorId ? { sectorId: activeSectorId } : {},
       include: {
-        program: true,
-        sector: true,
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        sector: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: { date: "desc" },
+      take: 100,
     });
   } catch (error) {
     console.error("Failed to fetch activities:", error);
@@ -49,42 +69,89 @@ export async function createActivity(formData: FormData) {
     const { ipAddress, userAgent } = await getRequestMeta();
 
     const activeSectorId = await getActiveSectorId();
-    const sectorId = (formData.get("sectorId") as string) || activeSectorId;
+    const rawSectorId = (formData.get("sectorId") as string) || activeSectorId;
 
-    if (!sectorId) {
-      return { success: false, error: "Harap pilih sektor terlebih dahulu untuk menambahkan data kegiatan." };
+    const sectorIdVal = validateId(rawSectorId, "Sektor");
+    if (!sectorIdVal.valid) {
+      return { success: false, error: "Harap pilih sektor yang valid terlebih dahulu." };
+    }
+    const sectorId = sectorIdVal.value;
+
+    // SBAC: Validasi keberadaan sektor di database
+    const sector = await prisma.sector.findUnique({ where: { id: sectorId } });
+    if (!sector) {
+      return { success: false, error: "Sektor yang dipilih tidak valid atau tidak ditemukan." };
     }
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const location = formData.get("location") as string;
-    const dateStr = formData.get("date") as string;
-    const status = formData.get("status") as string;
+    const titleVal = validateRequiredString(formData.get("title"), "Judul kegiatan", 3, 255);
+    if (!titleVal.valid) return { success: false, error: titleVal.error };
+    const title = titleVal.value;
+
+    const descVal = validateOptionalString(formData.get("description"), 10000);
+    if (!descVal.valid) return { success: false, error: descVal.error };
+    const description = descVal.value || "";
+
+    const locVal = validateOptionalString(formData.get("location"), 255);
+    if (!locVal.valid) return { success: false, error: locVal.error };
+    const location = locVal.value;
+
+    const dateVal = validateOptionalDate(formData.get("date"), "Tanggal kegiatan");
+    if (!dateVal.valid) return { success: false, error: dateVal.error };
+    const date = dateVal.value;
+
+    const statusVal = validateEnum(formData.get("status"), ["UPCOMING", "ONGOING", "COMPLETED"], "UPCOMING", "Status kegiatan");
+    if (!statusVal.valid) return { success: false, error: statusVal.error };
+    const status = statusVal.value;
+
     const isPublished = formData.get("isPublished") === "true";
-    const programId = formData.get("programId") as string;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    const rawProgramId = formData.get("programId") as string;
+    let programId: string | null = null;
+    if (rawProgramId && rawProgramId.trim() !== "") {
+      const progIdVal = validateId(rawProgramId, "Program Induk");
+      if (!progIdVal.valid) return { success: false, error: progIdVal.error };
+      programId = progIdVal.value;
 
-    // Server-Side Relational Consistency Check
-    if (programId) {
-      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      // Server-Side Relational Consistency Check
+      const parentProgram = await prisma.program.findUnique({ where: { id: progIdVal.value } });
       if (!parentProgram || parentProgram.sectorId !== sectorId) {
         return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari kegiatan ini." };
       }
     }
 
+    const srcVal = validateOptionalString(formData.get("source"), 255);
+    if (!srcVal.valid) return { success: false, error: srcVal.error };
+    const source = srcVal.value;
+
+    const srcTypeRaw = formData.get("sourceType");
+    const srcTypeVal = srcTypeRaw && String(srcTypeRaw).trim() !== ""
+      ? validateEnum(srcTypeRaw, ["RESMI_ANTAM", "PEMERINTAH", "JURNAL_AKADEMIK", "MEDIA_MASSA", "DOKUMEN_LAPORAN"], undefined, "Tipe sumber")
+      : { valid: true as const, value: null };
+    if (!srcTypeVal.valid) return { success: false, error: srcTypeVal.error };
+    const sourceType = srcTypeVal.value;
+
+    const srcUrlVal = validateSafeUrl(formData.get("sourceUrl"), { allowRelative: false, maxLen: 1000, fieldName: "URL Sumber" });
+    if (!srcUrlVal.valid) return { success: false, error: srcUrlVal.error };
+    const sourceUrl = srcUrlVal.value;
+
+    const verifVal = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "BELUM_TERVERIFIKASI",
+      "Status verifikasi"
+    );
+    if (!verifVal.valid) return { success: false, error: verifVal.error };
+    const verificationStatus = verifVal.value;
+
     // Entity-Specific Publication Readiness Guard
     if (isPublished) {
-      if (!title || title.trim().length < 3) {
+      if (title.length < 3) {
         return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
       }
-      if (!programId || programId.trim().length === 0) {
+      if (!programId || programId.length === 0) {
         return { success: false, error: "Kegiatan wajib dikaitkan dengan Program Induk sebelum dipublikasikan." };
       }
-      if (!source || source.trim().length === 0) {
+      if (!source || source.length === 0) {
         return { success: false, error: "Sumber data wajib diisi sebelum kegiatan dipublikasikan." };
       }
       if (verificationStatus === "BELUM_TERVERIFIKASI") {
@@ -96,8 +163,8 @@ export async function createActivity(formData: FormData) {
       data: {
         title,
         description,
-        location,
-        date: dateStr ? new Date(dateStr) : null,
+        location: location || null,
+        date,
         status,
         isPublished,
         programId: programId || null,
@@ -134,7 +201,7 @@ export async function createActivity(formData: FormData) {
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create activity:", error);
-    return { success: false, error: error?.message || "Gagal menyimpan data kegiatan" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menyimpan data kegiatan.") };
   }
 }
 
@@ -143,39 +210,83 @@ export async function updateActivity(id: string, formData: FormData) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
+    const idVal = validateId(id, "ID Kegiatan");
+    if (!idVal.valid) return { success: false, error: idVal.error };
+
     const activity = await prisma.activity.findUnique({ where: { id } });
-    if (!activity) throw new Error("Activity tidak ditemukan");
+    if (!activity) {
+      return { success: false, error: "Kegiatan tidak ditemukan atau telah dihapus." };
+    }
 
-    const title = (formData.get("title") as string)?.trim();
-    const description = (formData.get("description") as string)?.trim();
-    const location = (formData.get("location") as string)?.trim();
-    const dateStr = formData.get("date") as string;
-    const status = formData.get("status") as string;
+    const titleVal = validateRequiredString(formData.get("title"), "Judul kegiatan", 3, 255);
+    if (!titleVal.valid) return { success: false, error: titleVal.error };
+    const title = titleVal.value;
+
+    const descVal = validateOptionalString(formData.get("description"), 10000);
+    if (!descVal.valid) return { success: false, error: descVal.error };
+    const description = descVal.value || "";
+
+    const locVal = validateOptionalString(formData.get("location"), 255);
+    if (!locVal.valid) return { success: false, error: locVal.error };
+    const location = locVal.value;
+
+    const dateVal = validateOptionalDate(formData.get("date"), "Tanggal kegiatan");
+    if (!dateVal.valid) return { success: false, error: dateVal.error };
+    const date = dateVal.value;
+
+    const statusVal = validateEnum(formData.get("status"), ["UPCOMING", "ONGOING", "COMPLETED"], "UPCOMING", "Status kegiatan");
+    if (!statusVal.valid) return { success: false, error: statusVal.error };
+    const status = statusVal.value;
+
     const isPublished = formData.get("isPublished") === "true";
-    const programId = formData.get("programId") as string;
 
-    const source = formData.get("source") as string;
-    const sourceType = formData.get("sourceType") as string;
-    const sourceUrl = formData.get("sourceUrl") as string;
-    const verificationStatus = (formData.get("verificationStatus") as string) || "BELUM_TERVERIFIKASI";
+    const rawProgramId = formData.get("programId") as string;
+    let programId: string | null = null;
+    if (rawProgramId && rawProgramId.trim() !== "") {
+      const progIdVal = validateId(rawProgramId, "Program Induk");
+      if (!progIdVal.valid) return { success: false, error: progIdVal.error };
+      programId = progIdVal.value;
 
-    // Server-Side Relational Consistency Check
-    if (programId) {
-      const parentProgram = await prisma.program.findUnique({ where: { id: programId } });
+      // Server-Side Relational Consistency Check
+      const parentProgram = await prisma.program.findUnique({ where: { id: progIdVal.value } });
       if (!parentProgram || parentProgram.sectorId !== activity.sectorId) {
         return { success: false, error: "Program Induk yang dipilih berada di luar Sektor dari kegiatan ini." };
       }
     }
 
+    const srcVal = validateOptionalString(formData.get("source"), 255);
+    if (!srcVal.valid) return { success: false, error: srcVal.error };
+    const source = srcVal.value;
+
+    const srcTypeRaw = formData.get("sourceType");
+    const srcTypeVal = srcTypeRaw && String(srcTypeRaw).trim() !== ""
+      ? validateEnum(srcTypeRaw, ["RESMI_ANTAM", "PEMERINTAH", "JURNAL_AKADEMIK", "MEDIA_MASSA", "DOKUMEN_LAPORAN"], undefined, "Tipe sumber")
+      : { valid: true as const, value: null };
+    if (!srcTypeVal.valid) return { success: false, error: srcTypeVal.error };
+    const sourceType = srcTypeVal.value;
+
+    const srcUrlVal = validateSafeUrl(formData.get("sourceUrl"), { allowRelative: false, maxLen: 1000, fieldName: "URL Sumber" });
+    if (!srcUrlVal.valid) return { success: false, error: srcUrlVal.error };
+    const sourceUrl = srcUrlVal.value;
+
+    const verifVal = validateEnum(
+      formData.get("verificationStatus"),
+      ["BELUM_TERVERIFIKASI", "MENUNGGU_VERIFIKASI", "TERVERIFIKASI"],
+      "BELUM_TERVERIFIKASI",
+      "Status verifikasi"
+    );
+    if (!verifVal.valid) return { success: false, error: verifVal.error };
+    const verificationStatus = verifVal.value;
+
     // Entity-Specific Publication Readiness Guard
     if (isPublished) {
-      if (!title || title.trim().length < 3) {
+      if (title.length < 3) {
         return { success: false, error: "Judul kegiatan terlalu pendek untuk dipublikasikan." };
       }
-      if (!programId || programId.trim().length === 0) {
+      if (!programId || programId.length === 0) {
         return { success: false, error: "Kegiatan wajib dikaitkan dengan Program Induk sebelum dipublikasikan." };
       }
-      if (!source || source.trim().length === 0) {
+      if (!source || source.length === 0) {
         return { success: false, error: "Sumber data wajib diisi sebelum kegiatan dipublikasikan." };
       }
       if (verificationStatus === "BELUM_TERVERIFIKASI") {
@@ -197,8 +308,8 @@ export async function updateActivity(id: string, formData: FormData) {
       data: {
         title,
         description,
-        location,
-        date: dateStr ? new Date(dateStr) : null,
+        location: location || null,
+        date,
         status,
         isPublished,
         programId: programId || null,
@@ -233,7 +344,7 @@ export async function updateActivity(id: string, formData: FormData) {
     return { success: true };
   } catch (error: any) {
     console.error("Failed to update activity:", error);
-    return { success: false, error: error?.message || "Gagal memperbarui data kegiatan" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui data kegiatan.") };
   }
 }
 
@@ -242,8 +353,29 @@ export async function deleteActivity(id: string) {
     const session = await requireAuth();
     const { ipAddress, userAgent } = await getRequestMeta();
 
-    const activity = await prisma.activity.findUnique({ where: { id } });
-    if (!activity) throw new Error("Activity tidak ditemukan");
+    const idVal = validateId(id, "ID Kegiatan");
+    if (!idVal.valid) return { success: false, error: idVal.error };
+
+    const activity = await prisma.activity.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            documentations: true,
+          },
+        },
+      },
+    });
+    if (!activity) {
+      return { success: false, error: "Kegiatan tidak ditemukan atau telah dihapus." };
+    }
+
+    if (activity._count.documentations > 0) {
+      return {
+        success: false,
+        error: `Kegiatan tidak dapat dihapus karena masih memiliki ${activity._count.documentations} dokumentasi terkait. Hapus atau alihkan dokumentasi terkait terlebih dahulu.`,
+      };
+    }
 
     await prisma.activity.delete({
       where: { id },
@@ -272,6 +404,6 @@ export async function deleteActivity(id: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Failed to delete activity:", error);
-    return { success: false, error: error?.message || "Gagal menghapus data kegiatan" };
+    return { success: false, error: toSafeErrorMessage(error, "Gagal menghapus data kegiatan.") };
   }
 }

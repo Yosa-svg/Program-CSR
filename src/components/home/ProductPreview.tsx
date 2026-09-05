@@ -4,30 +4,64 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
-export default function ProductPreview() {
-  const products = [
-    {
-      id: "beras-organik",
-      name: "Beras Organik Premium",
-      desc: "Beras sehat bebas pestisida hasil panen petani binaan Agro Edu Wisata.",
-      price: "Rp 85.000 / 5kg",
-      image: "/images/products/beras.jpg",
-    },
-    {
-      id: "pupuk-diversoil",
-      name: "Pupuk Diversoil Kompos",
-      desc: "Pupuk organik kaya hara hasil komposting sirkular limbah kawasan.",
-      price: "Rp 35.000 / 10kg",
-      image: "/images/products/kopi.jpg",
-    },
-    {
-      id: "coconet-kelapa",
-      name: "Coconet & Sabut Kelapa",
-      desc: "Produk ramah lingkungan karya pengrajin industri kelapa terpadu.",
-      price: "Mulai Rp 25.000",
-      image: "/images/products/anyaman.jpg",
-    }
-  ];
+export interface ProductPreviewItem {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  category?: string;
+  capacity?: string | null;
+  unit?: string | null;
+  imageUrl?: string | null;
+  sector?: {
+    name: string;
+    slug: string;
+  } | null;
+}
+
+interface ProductPreviewProps {
+  products?: ProductPreviewItem[];
+}
+
+export default function ProductPreview({ products = [] }: ProductPreviewProps) {
+  const displayProducts = products.length > 0
+    ? products.map((prod) => ({
+        id: prod.id,
+        name: prod.name,
+        desc: prod.description,
+        slug: prod.slug,
+        price: prod.capacity
+          ? `${prod.capacity} ${prod.unit || ""}`.trim()
+          : (prod.category || "Produk Binaan"),
+        image: prod.imageUrl && !prod.imageUrl.includes("placeholder") ? prod.imageUrl : "",
+        href: `/produk/${prod.slug}`,
+      }))
+    : [
+        {
+          id: "beras-organik",
+          name: "Beras Organik Premium",
+          desc: "Beras sehat bebas pestisida hasil panen petani binaan Agro Edu Wisata.",
+          price: "Rp 85.000 / 5kg",
+          image: "/images/products/beras.jpg",
+          href: "/produk",
+        },
+        {
+          id: "pupuk-diversoil",
+          name: "Pupuk Diversoil Kompos",
+          desc: "Pupuk organik kaya hara hasil komposting sirkular limbah kawasan.",
+          price: "Rp 35.000 / 10kg",
+          image: "/images/products/kopi.jpg",
+          href: "/produk",
+        },
+        {
+          id: "coconet-kelapa",
+          name: "Coconet & Sabut Kelapa",
+          desc: "Produk ramah lingkungan karya pengrajin industri kelapa terpadu.",
+          price: "Mulai Rp 25.000",
+          image: "/images/products/anyaman.jpg",
+          href: "/produk",
+        },
+      ];
 
   return (
     <section className="py-24 bg-white text-[#172121]">
@@ -53,7 +87,7 @@ export default function ProductPreview() {
               Dari kawasan<br/> untuk semua.
             </motion.h2>
           </div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -67,7 +101,7 @@ export default function ProductPreview() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {products.map((product, i) => (
+          {displayProducts.map((product, i) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -77,10 +111,12 @@ export default function ProductPreview() {
               className="group bg-white border border-[#E2E8E6] shadow-sm rounded-2xl overflow-hidden hover:border-[#0D726D]/50 hover:shadow-xl transition-all"
             >
               <div className="aspect-[4/3] bg-[#F7FAF9] relative overflow-hidden flex items-center justify-center border-b border-[#E2E8E6]">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url('${product.image}')` }}
-                ></div>
+                {product.image ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                    style={{ backgroundImage: `url('${product.image}')` }}
+                  ></div>
+                ) : null}
                 <ShoppingBag size={44} className="text-[#0D726D]/20 z-10 relative" />
               </div>
               <div className="p-6">
@@ -88,7 +124,7 @@ export default function ProductPreview() {
                 <p className="text-[#172121]/70 mb-6 text-sm font-normal leading-relaxed">{product.desc}</p>
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#E2E8E6]/60">
                   <span className="font-bold text-base text-[#0D726D]">{product.price}</span>
-                  <Link href="/produk" className="text-[#F6A236] hover:text-[#E59124] transition-colors p-1">
+                  <Link href={product.href} className="text-[#F6A236] hover:text-[#E59124] transition-colors p-1">
                     <ArrowRight size={20} />
                   </Link>
                 </div>
