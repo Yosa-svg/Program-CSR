@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://csr.antam.com";
+/**
+ * Public canonical site URL.
+ * Defaults to "https://csr.antam.com" in production as the official placeholder domain,
+ * or "http://localhost:3000" in development/test.
+ * Can be overridden in any environment via NEXT_PUBLIC_SITE_URL.
+ */
+const isProduction = process.env.NODE_ENV === "production";
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (isProduction ? "https://csr.antam.com" : "http://localhost:3000");
+
 export const SITE_NAME = "CSR ANTAM - Kawasan Ekonomi Berkelanjutan";
 export const DEFAULT_DESCRIPTION =
   "Platform transparansi, dampak, dan publikasi program Corporate Social Responsibility (CSR) Kawasan Ekonomi Berkelanjutan ANTAM.";

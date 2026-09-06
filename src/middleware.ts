@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { getValidatedJwtSecret } from '@/lib/env';
 
 function getJwtKey() {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error(
-      "JWT_SECRET environment variable is not set. " +
-      "Configure it in your .env file (development) or Vercel environment variables (production)."
-    );
-  }
+  const jwtSecret = getValidatedJwtSecret();
   return new TextEncoder().encode(jwtSecret);
 }
 
