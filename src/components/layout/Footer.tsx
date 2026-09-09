@@ -22,7 +22,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-base sm:text-lg leading-tight text-white group-hover:text-[#F6A236] transition-colors">
-                  CSR ANTAM
+                  CSR UBPN Maluku Utara
                 </span>
                 <span className="text-xs text-white/70 font-medium">Kawasan Ekonomi Keberlanjutan</span>
               </div>
