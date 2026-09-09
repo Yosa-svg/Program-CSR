@@ -37,27 +37,28 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 sm:h-18">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group">
-            <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 bg-white rounded-xl p-1.5 flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group py-1">
+            <div className="relative shrink-0 flex items-center">
               <Image
-                src="/images/logo-antam.webp"
+                src="/images/antam-logo.png"
                 alt="Logo ANTAM"
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
+                width={130}
+                height={40}
+                className="h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 priority
               />
             </div>
+            <div className="h-7 sm:h-8 w-px bg-[#E2E8E6] hidden sm:block" />
             <div className="flex flex-col">
-              <span className="font-bold text-base leading-tight text-[#172121] tracking-tight">
+              <span className="font-bold text-sm sm:text-base leading-tight text-[#172121] tracking-tight">
                 CSR ANTAM
               </span>
-              <span className="text-xs text-[#172121]/60 font-medium hidden sm:inline">
+              <span className="text-[11px] sm:text-xs text-[#172121]/70 font-medium hidden sm:inline">
                 Kawasan Ekonomi Keberlanjutan
               </span>
-              <span className="text-[11px] text-[#172121]/60 font-medium sm:hidden">
+              <span className="text-[10px] text-[#172121]/70 font-medium sm:hidden">
                 Keberlanjutan
               </span>
             </div>

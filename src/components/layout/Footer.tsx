@@ -10,21 +10,21 @@ export default function Footer() {
           
           {/* Brand Col */}
           <div className="lg:col-span-1">
-          <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-16 h-16 bg-white rounded-xl p-1.5 shrink-0 flex items-center justify-center">
+          <Link href="/" className="flex flex-col gap-3.5 mb-6 group">
+              <div className="bg-white rounded-xl px-4 py-2.5 shrink-0 inline-flex items-center justify-center shadow-sm w-fit group-hover:shadow-md transition-all">
                 <Image
-                  src="/images/logo-antam.webp"
+                  src="/images/antam-logo.png"
                   alt="Logo ANTAM"
-                  width={64}
-                  height={64}
-                  className="w-full h-full object-contain"
+                  width={130}
+                  height={40}
+                  className="h-9 sm:h-10 w-auto object-contain"
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-base leading-tight text-white">
+                <span className="font-bold text-base sm:text-lg leading-tight text-white group-hover:text-[#F6A236] transition-colors">
                   CSR ANTAM
                 </span>
-                <span className="text-xs text-white/60 font-medium">Kawasan Ekonomi Keberlanjutan</span>
+                <span className="text-xs text-white/70 font-medium">Kawasan Ekonomi Keberlanjutan</span>
               </div>
             </Link>
             <p className="text-white/65 text-sm leading-relaxed mb-6 font-normal">

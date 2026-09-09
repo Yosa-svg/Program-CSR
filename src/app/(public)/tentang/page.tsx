@@ -58,13 +58,13 @@ export default function TentangPage() {
             </p>
           </div>
           <div className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl border border-[#E2E8E6] bg-[#F7FAF9] flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-24 h-24 bg-white rounded-2xl shadow-sm border border-[#E2E8E6] p-3 flex items-center justify-center mb-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8E6] px-6 py-4 flex items-center justify-center mb-6 max-w-xs">
               <Image
-                src="/images/logo-antam.webp"
+                src="/images/antam-logo.png"
                 alt="Logo ANTAM"
-                width={80}
-                height={80}
-                className="w-full h-full object-contain"
+                width={160}
+                height={50}
+                className="h-10 sm:h-12 w-auto object-contain"
               />
             </div>
             <h3 className="font-bold text-xl text-[#172121] mb-2">CSR PT ANTAM Tbk</h3>

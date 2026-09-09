@@ -14,13 +14,13 @@ export default async function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 admin-theme">
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-8 text-foreground">
         <div className="text-center mb-8">
-          <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 p-3">
+          <div className="bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 px-6 py-3.5 shadow-sm border border-border w-fit">
             <Image
-              src="/images/logo-antam.webp"
+              src="/images/antam-logo.png"
               alt="Logo ANTAM"
-              width={128}
-              height={128}
-              className="w-full h-full object-contain"
+              width={160}
+              height={50}
+              className="h-10 sm:h-12 w-auto object-contain"
               priority
             />
           </div>

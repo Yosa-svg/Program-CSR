@@ -33,22 +33,23 @@ export default async function AdminLayout({
 
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-admin-sidebar border-r border-admin-sidebar-border flex flex-col text-white">
-        <div className="p-6 border-b border-admin-sidebar-border">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-lg p-1.5 shrink-0 flex items-center justify-center">
+        <div className="p-5 border-b border-admin-sidebar-border">
+          <Link href="/admin" className="flex flex-col gap-3 group">
+            <div className="bg-white rounded-xl px-3.5 py-2.5 flex items-center justify-center shadow-sm w-full group-hover:shadow-md transition-all">
               <Image
-                src="/images/logo-antam.webp"
+                src="/images/antam-logo.png"
                 alt="Logo ANTAM"
-                width={48}
-                height={48}
-                className="w-full h-full object-contain"
+                width={130}
+                height={40}
+                className="h-8 sm:h-9 w-auto object-contain"
+                priority
               />
             </div>
-            <div>
+            <div className="px-1">
               <span className="font-bold text-sm text-white uppercase tracking-wider block">
                 Dashboard CSR
               </span>
-              <span className="text-[10px] text-white/50 block font-normal">
+              <span className="text-xs text-white/60 block font-normal mt-0.5">
                 ANTAM UBPN Malut
               </span>
             </div>

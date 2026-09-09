@@ -44,15 +44,15 @@ export default function Hero({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-md mb-8 text-xs font-bold tracking-wider text-white uppercase shadow-sm"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md mb-8 text-xs sm:text-sm font-bold tracking-wider text-white uppercase shadow-sm"
           >
-            <div className="w-5 h-5 bg-white rounded-full p-0.5 flex items-center justify-center shrink-0">
+            <div className="bg-white rounded-full px-2.5 py-1 flex items-center justify-center shrink-0">
               <Image
-                src="/images/logo-antam.webp"
+                src="/images/antam-logo.png"
                 alt="Logo ANTAM"
-                width={18}
-                height={18}
-                className="w-full h-full object-contain"
+                width={80}
+                height={25}
+                className="h-4 sm:h-5 w-auto object-contain"
               />
             </div>
             <span>CSR ANTAM — Kawasan Ekonomi Keberlanjutan</span>
