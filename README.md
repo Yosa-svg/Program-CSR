@@ -1,6 +1,20 @@
-﻿# Program CSR — Kawasan Ekonomi Keberkelanjutan
+# Program CSR — PT ANTAM Tbk UBPN Maluku Utara
 
-Sistem informasi manajemen CSR berbasis web untuk PT ANTAM Tbk UBPN Malut. Dibangun di atas Next.js App Router dengan dua sisi: portal publik yang mempresentasikan program kepada masyarakat umum, dan dasbor admin untuk tim pengelola.
+Sistem informasi manajemen **Corporate Social Responsibility (CSR)** berbasis web untuk PT ANTAM Tbk Unit Bisnis Pertambangan Nikel (UBPN) Maluku Utara. Dibangun di atas Next.js App Router dengan dua sisi utama: portal publik yang mempresentasikan dampak program CSR kepada masyarakat, dan dasbor manajemen untuk tim pengelola.
+
+---
+
+## Konsep
+
+Program CSR ANTAM UBPN Malut berfokus pada pemberdayaan masyarakat di sekitar wilayah operasi tambang melalui program-program lintas sektor — pertanian, peternakan, lingkungan, industri, kesehatan, dan pendidikan. Sistem ini menjadi alat dokumentasi, monitoring, dan transparansi publik atas seluruh program tersebut.
+
+Aplikasi dibagi menjadi dua lapisan akses:
+
+| Lapisan | Audiens | Path |
+|---|---|---|
+| **Portal Publik** | Masyarakat umum, pemangku kepentingan | `/` s/d `/kinerja` |
+| **Dasbor Admin** | Tim CSR lapangan (`ADMIN_CSR`) | `/admin/*` |
+| **Dasbor Administrator** | Sistem administrator (`ADMINISTRATOR`) | `/administrator/*` |
 
 ---
 
