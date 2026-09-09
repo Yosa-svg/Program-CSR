@@ -3,9 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, getSession } from "@/lib/auth";
+import { revokeAllUserSessions } from "@/lib/adminSession";
 import { logActivity, ActivityAction } from "@/lib/activityLog";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import {
   validateRequiredString,
   validateId,
@@ -78,7 +79,10 @@ export async function updateProfile(formData: FormData) {
 
 export async function updatePassword(formData: FormData) {
   try {
-    const session = await requireAuth();
+    const session = await getSession();
+    if (!session || (session.role !== "ADMIN_CSR" && session.role !== "ADMINISTRATOR")) {
+      return { success: false, error: "Unauthorized: Sesi autentikasi tidak valid atau telah berakhir." };
+    }
     const { ipAddress, userAgent } = await getRequestMeta();
 
     const currentPasswordRaw = formData.get("currentPassword");
@@ -129,33 +133,52 @@ export async function updatePassword(formData: FormData) {
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
+    // 1. Update hash password di database
     await prisma.user.update({
       where: { id: session.userId },
       data: { password: newPasswordHash },
     });
 
-    // ActivityLog — non-blocking, TIDAK menyimpan password lama/baru/hash
+    // 2. Cabut seluruh sesi aktif milik user ini di database (invalidation)
+    await revokeAllUserSessions(session.userId, "PASSWORD_CHANGED");
+
+    // 3. Hapus cookie sesi dari browser saat ini agar user harus login kembali
+    try {
+      const cookieStore = await cookies();
+      cookieStore.delete("session");
+    } catch {
+      // Abaikan jika dipanggil dalam konteks yang tidak mengizinkan modifikasi cookie langsung
+    }
+
+    // 4. Catat ActivityLog — non-blocking, TIDAK menyimpan password lama/baru/hash
     void logActivity({
       userId: session.userId,
       action: ActivityAction.UPDATE,
       entityType: "AUTH",
       entityId: session.userId,
       entityTitle: user.name,
-      description: `Admin mengubah kata sandi akun`,
+      description: `Pengguna ${user.name} (${user.role}) berhasil mengubah kata sandi akun sendiri`,
       metadata: {
         event: "PASSWORD_CHANGED",
+        role: user.role,
       },
       ipAddress,
       userAgent,
     });
 
     revalidatePath("/admin/pengaturan");
-    return { success: true };
+    revalidatePath("/administrator/accounts");
+    return { 
+      success: true, 
+      message: "Kata sandi berhasil diperbarui. Seluruh sesi aktif telah diakhiri. Silakan login kembali." 
+    };
   } catch (error: unknown) {
     console.error("Failed to update password:", error);
     return { success: false, error: toSafeErrorMessage(error, "Gagal memperbarui kata sandi.") };
   }
 }
+
+export const changePasswordAction = updatePassword;
 
 // ==========================================
 // 2. USER DIRECTORY (ADMIN_CSR)

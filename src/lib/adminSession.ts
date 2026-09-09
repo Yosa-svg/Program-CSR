@@ -201,6 +201,36 @@ export async function revokeAdminSession(
 }
 
 /**
+ * Mencabut seluruh sesi aktif milik user tertentu (misalnya saat ganti atau reset password).
+ * Seluruh sesi ditandai isActive = false, isRevoked = true, endedAt = now().
+ */
+export async function revokeAllUserSessions(
+  userId: string,
+  reason: string = "Password changed or reset"
+) {
+  try {
+    return await prisma.adminSession.updateMany({
+      where: {
+        userId: userId,
+        isActive: true,
+      },
+      data: {
+        isActive: false,
+        isRevoked: true,
+        revokedAt: new Date(),
+        revokedReason: reason.slice(0, 255),
+        endedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[AdminSession] Gagal mencabut semua session user:", error);
+    }
+    return null;
+  }
+}
+
+/**
  * Memperbarui timestamp lastActiveAt untuk pemantauan online/idle.
  */
 export async function touchAdminSession(rawOrHashedToken: string, isRaw: boolean = false) {

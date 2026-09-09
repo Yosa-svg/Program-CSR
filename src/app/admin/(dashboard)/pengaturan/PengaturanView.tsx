@@ -183,8 +183,14 @@ export default function PengaturanView({
 
     setIsSubmittingPassword(false);
     if (result.success) {
-      setPasswordMsg({ type: "success", text: "Kata sandi berhasil diperbarui." });
+      setPasswordMsg({ 
+        type: "success", 
+        text: "Kata sandi berhasil diperbarui. Seluruh sesi aktif telah diakhiri untuk keamanan. Mengalihkan ke halaman login..." 
+      });
       form.reset();
+      setTimeout(() => {
+        window.location.href = "/admin/login";
+      }, 1500);
     } else {
       setPasswordMsg({ type: "error", text: result.error || "Gagal memperbarui kata sandi." });
     }
@@ -254,7 +260,7 @@ export default function PengaturanView({
           Profil & Keamanan
         </button>
 
-        {(sessionRole === "ADMIN_CSR" || sessionRole === "SUPER_ADMIN" || sessionRole === "ADMIN_PUSAT") && (
+        {(sessionRole === "SUPER_ADMIN") && (
           <button
             onClick={() => setActiveTab("users")}
             className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
@@ -405,13 +411,13 @@ export default function PengaturanView({
 
               <div>
                 <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                  Kata Sandi Baru (Min. 6 Karakter) <span className="text-red-400">*</span>
+                  Kata Sandi Baru (Min. 8 Karakter, Huruf & Angka) <span className="text-red-400">*</span>
                 </label>
                 <input
                   name="newPassword"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   placeholder="••••••••"
                   className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
                 />
@@ -425,7 +431,7 @@ export default function PengaturanView({
                   name="confirmPassword"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   placeholder="••••••••"
                   className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
                 />

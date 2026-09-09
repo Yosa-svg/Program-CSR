@@ -64,5 +64,6 @@ cypress/downloads/
 
 #script sql
 *.sql
+!prisma/migrations/**/*.sql
 scripts/
         

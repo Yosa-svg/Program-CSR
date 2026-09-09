@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { encrypt, decrypt, requireAuth } from "@/lib/auth";
+import { encrypt, decrypt, requireAuth, getSession } from "@/lib/auth";
 import { cookies, headers } from "next/headers";
 import bcrypt from "bcryptjs";
 import { createAdminSession, endAdminSession, touchAdminSession, parseDeviceType } from "@/lib/adminSession";
@@ -149,13 +149,13 @@ export async function loginAction(formData: FormData) {
       return { error: "Email atau password yang Anda masukkan salah." };
     }
 
-    if (user.role !== "ADMIN_CSR") {
+    if (user.role !== "ADMIN_CSR" && user.role !== "ADMINISTRATOR") {
       await logActivity({
         userId: user.id,
         action: ActivityAction.LOGIN_FAILED,
         entityType: "AUTH",
         entityTitle: email,
-        description: "Percobaan login admin gagal: Role bukan ADMIN_CSR",
+        description: "Percobaan login admin gagal: Role tidak diizinkan",
         metadata: {
           reason: "unauthorized_role",
         },
@@ -196,8 +196,9 @@ export async function loginAction(formData: FormData) {
       entityType: "AUTH",
       entityId: user.id,
       entityTitle: user.name,
-      description: `Admin ${user.name} berhasil login`,
+      description: `Admin ${user.name} (${user.role}) berhasil login`,
       metadata: {
+        role: user.role,
         deviceType,
         loginMethod: "email_password",
       },
@@ -215,7 +216,9 @@ export async function loginAction(formData: FormData) {
       path: "/",
     });
 
-    return { success: true };
+    const redirectTo = user.role === "ADMINISTRATOR" ? "/administrator" : "/admin";
+
+    return { success: true, redirectTo };
   } catch (error: any) {
     console.error("LOGIN_ACTION_ERROR:", error);
     return { error: "Terjadi kesalahan saat memproses login. Silakan coba lagi." };
@@ -269,8 +272,11 @@ export async function logoutAction() {
  */
 export async function heartbeatAction() {
   try {
-    // 1. Wajib memiliki sesi ADMIN_CSR yang valid dan aktif di DB
-    await requireAuth();
+    // 1. Wajib memiliki sesi yang valid dan aktif di DB (ADMIN_CSR atau ADMINISTRATOR)
+    const session = await getSession();
+    if (!session) {
+      return { error: "Sesi tidak ditemukan atau tidak aktif" };
+    }
 
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;

@@ -76,12 +76,6 @@ export default function Navbar() {
           {/* Right Actions */}
           <div className="hidden md:flex items-center space-x-5">
             <Link
-              href="/admin/login"
-              className="text-sm font-semibold text-[#0D726D] hover:text-[#0B5C58] transition-colors px-3 py-1.5 rounded-lg hover:bg-[#0D726D]/5"
-            >
-              Masuk
-            </Link>
-            <Link
               href="/bidang"
               className="btn btn-primary rounded-full px-5 py-2 text-sm flex items-center gap-2 font-semibold shadow-sm"
             >
@@ -130,13 +124,6 @@ export default function Navbar() {
                 );
               })}
               <div className="px-3 pt-4 border-t border-[#E2E8E6] flex flex-col gap-2.5">
-                <Link
-                  href="/admin/login"
-                  onClick={() => setIsOpen(false)}
-                  className="text-center font-semibold py-2 text-[#0D726D] text-sm"
-                >
-                  Masuk ke Portal Admin
-                </Link>
                 <Link
                   href="/bidang"
                   onClick={() => setIsOpen(false)}

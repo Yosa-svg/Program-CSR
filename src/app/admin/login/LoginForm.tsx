@@ -19,7 +19,7 @@ export default function LoginForm() {
       if (res?.error) {
         setError(res.error);
       } else {
-        router.push("/admin");
+        router.push(res.redirectTo || "/admin");
         router.refresh();
       }
     } catch (err: any) {

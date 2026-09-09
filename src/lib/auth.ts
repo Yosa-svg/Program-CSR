@@ -8,9 +8,11 @@ function getJwtKey() {
   return new TextEncoder().encode(jwtSecret);
 }
 
+export type SessionRole = "ADMIN_CSR" | "ADMINISTRATOR";
+
 export type SessionPayload = {
   userId: string;
-  role: string;
+  role: SessionRole;
   name: string;
 };
 
@@ -35,14 +37,14 @@ export async function decrypt(input: string): Promise<SessionPayload | null> {
       !payload ||
       typeof payload.userId !== "string" ||
       typeof payload.role !== "string" ||
-      payload.role !== "ADMIN_CSR"
+      (payload.role !== "ADMIN_CSR" && payload.role !== "ADMINISTRATOR")
     ) {
       return null;
     }
 
     return {
       userId: payload.userId,
-      role: payload.role,
+      role: payload.role as SessionRole,
       name: typeof payload.name === "string" ? payload.name : "Admin",
     };
   } catch (error) {
@@ -63,7 +65,7 @@ export async function getSession(): Promise<SessionPayload | null> {
 
     // Lapis 1: JWT Signature & Expiration Check
     const payload = await decrypt(sessionToken);
-    if (!payload || payload.role !== "ADMIN_CSR") {
+    if (!payload || (payload.role !== "ADMIN_CSR" && payload.role !== "ADMINISTRATOR")) {
       return null;
     }
 
@@ -120,16 +122,23 @@ export async function requireAuth(): Promise<SessionPayload> {
   return session;
 }
 
+export const requireAdminCsrAuth = requireAuth;
+
 /**
  * Server-side guard khusus untuk route Administrator.
- * Memastikan sesi valid, role ADMIN_CSR terverifikasi, dan akun aktif.
+ * Memastikan sesi valid, role ADMINISTRATOR terverifikasi, dan akun aktif.
  */
 export async function requireAdministratorAuth(): Promise<SessionPayload> {
-  const session = await requireAuth();
-  
-  // Evaluasi Administrator:
-  // Pada Fase 5A Foundation, karena role database tunggal (ADMIN_CSR),
-  // autentikasi dilakukan dengan validasi sesi database yang ketat.
+  const session = await getSession();
+  if (!session || session.role !== "ADMINISTRATOR") {
+    try {
+      const cookieStore = await cookies();
+      cookieStore.delete("session");
+    } catch {
+      // Abaikan jika dipanggil dalam read-only component context
+    }
+    throw new Error("Unauthorized: Akses dibatasi hanya untuk ADMINISTRATOR dengan sesi aktif");
+  }
   return session;
 }
 

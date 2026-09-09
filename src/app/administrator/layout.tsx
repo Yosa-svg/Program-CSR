@@ -4,8 +4,8 @@ import {
   LayoutDashboard, 
   Users2, 
   FileText, 
-  ShieldCheck, 
-  ArrowLeft 
+  ShieldCheck,
+  Users
 } from "lucide-react";
 import { requireAdministratorAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -77,15 +77,15 @@ export default async function AdministratorLayout({
             Security
           </Link>
 
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-6 px-3">
-            Navigasi Cepat
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4 px-3">
+            Tata Kelola
           </div>
           <Link
-            href="/admin"
+            href="/administrator/accounts"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"
           >
-            <ArrowLeft size={18} className="text-slate-400" />
-            Dashboard CSR
+            <Users size={18} className="text-cyan-400" />
+            Manajemen Akun
           </Link>
         </nav>
 
