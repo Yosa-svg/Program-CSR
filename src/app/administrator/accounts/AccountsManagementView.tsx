@@ -18,8 +18,9 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  User,
 } from "lucide-react";
-import { changePasswordAction } from "@/actions/settingActions";
+import { changePasswordAction, updateProfile } from "@/actions/settingActions";
 import { adminResetPasswordAction } from "@/actions/accountActions";
 
 type AdminAccount = {
@@ -48,6 +49,13 @@ export default function AccountsManagementView({
 }) {
   const router = useRouter();
 
+  // State Profil (Ubah Nama)
+  const [profileMsg, setProfileMsg] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
+
   // State Self-Service Password
   const [selfPasswordMsg, setSelfPasswordMsg] = useState<{
     type: "success" | "error";
@@ -71,7 +79,31 @@ export default function AccountsManagementView({
   const [showPasswordText, setShowPasswordText] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
 
-  // 1. Handler Self-Service Password Change
+  // 1. Handler Self-Service Profile Update (Nama Lengkap)
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingProfile(true);
+    setProfileMsg(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await updateProfile(formData);
+
+    setIsSubmittingProfile(false);
+    if (result.success) {
+      setProfileMsg({
+        type: "success",
+        text: "Nama profil Administrator berhasil diperbarui.",
+      });
+      router.refresh();
+    } else {
+      setProfileMsg({
+        type: "error",
+        text: result.error || "Gagal memperbarui nama profil.",
+      });
+    }
+  };
+
+  // 2. Handler Self-Service Password Change
   const handleSelfPasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmittingSelfPassword(true);
@@ -209,95 +241,183 @@ export default function AccountsManagementView({
         </div>
       )}
 
-      {/* SECTION 1: SELF-SERVICE CHANGE PASSWORD FOR CURRENT ADMINISTRATOR */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-border">
-          <div className="p-2.5 rounded-xl bg-red-600/10 text-red-400">
-            <KeyRound size={22} />
+      {/* SECTION 1: PROFIL & SELF-SERVICE PASSWORD FOR CURRENT ADMINISTRATOR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* CARD PROFIL: UBAH NAMA ADMINISTRATOR */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6 flex flex-col justify-between">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                <User size={22} />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-lg">
+                  Profil Administrator
+                </h3>
+                <p className="text-xs text-foreground/60">
+                  Ubah nama lengkap dan identitas akun Administrator Anda.
+                </p>
+              </div>
+            </div>
+
+            {profileMsg && (
+              <div
+                className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
+                  profileMsg.type === "success"
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                }`}
+              >
+                {profileMsg.type === "success" ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
+                <span>{profileMsg.text}</span>
+              </div>
+            )}
+
+            <form id="profileForm" onSubmit={handleProfileSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Nama Lengkap Administrator <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  defaultValue={currentUser.name}
+                  placeholder="Nama Lengkap Administrator"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Email Akun (Terkunci)
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={currentUser.email}
+                  className="w-full px-3.5 py-2.5 bg-background/50 border border-border rounded-xl text-foreground/50 text-sm cursor-not-allowed font-mono"
+                />
+              </div>
+
+              <div>
+                <span className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Peran / Role
+                </span>
+                <span className="inline-block px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  {currentUser.role}
+                </span>
+              </div>
+            </form>
           </div>
-          <div>
-            <h3 className="font-bold text-foreground text-lg">
-              Keamanan Akun Saya (Ganti Kata Sandi)
-            </h3>
-            <p className="text-xs text-foreground/60">
-              Perbarui kata sandi akun Administrator Anda saat ini. Seluruh sesi aktif Anda akan
-              dicabut setelah kata sandi berhasil diubah.
-            </p>
+
+          <div className="pt-4 border-t border-border flex justify-end">
+            <button
+              type="submit"
+              form="profileForm"
+              disabled={isSubmittingProfile}
+              className="px-5 py-2.5 bg-primary text-primary-foreground font-semibold text-sm rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+            >
+              {isSubmittingProfile && <Loader2 size={16} className="animate-spin" />}
+              Simpan Perubahan Nama
+            </button>
           </div>
         </div>
 
-        {selfPasswordMsg && (
-          <div
-            className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
-              selfPasswordMsg.type === "success"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "bg-red-500/10 text-red-400 border border-red-500/20"
-            }`}
-          >
-            {selfPasswordMsg.type === "success" ? (
-              <CheckCircle2 size={18} />
-            ) : (
-              <AlertCircle size={18} />
+        {/* CARD KEAMANAN: GANTI KATA SANDI */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6 flex flex-col justify-between">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border">
+              <div className="p-2.5 rounded-xl bg-red-600/10 text-red-400">
+                <KeyRound size={22} />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-lg">
+                  Keamanan Kata Sandi
+                </h3>
+                <p className="text-xs text-foreground/60">
+                  Perbarui kata sandi Anda. Seluruh sesi aktif akan dicabut setelah berhasil.
+                </p>
+              </div>
+            </div>
+
+            {selfPasswordMsg && (
+              <div
+                className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
+                  selfPasswordMsg.type === "success"
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                }`}
+              >
+                {selfPasswordMsg.type === "success" ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
+                <span>{selfPasswordMsg.text}</span>
+              </div>
             )}
-            <span>{selfPasswordMsg.text}</span>
-          </div>
-        )}
 
-        <form onSubmit={handleSelfPasswordSubmit} className="max-w-2xl space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-              Kata Sandi Saat Ini <span className="text-red-400">*</span>
-            </label>
-            <input
-              name="currentPassword"
-              type="password"
-              required
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
-            />
-          </div>
+            <form id="passwordForm" onSubmit={handleSelfPasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Kata Sandi Saat Ini <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="currentPassword"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
+                />
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                Kata Sandi Baru (Min. 8 Karakter, Huruf & Angka) <span className="text-red-400">*</span>
-              </label>
-              <input
-                name="newPassword"
-                type="password"
-                required
-                minLength={8}
-                placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Kata Sandi Baru (Min. 8 Karakter, Huruf & Angka) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="newPassword"
+                  type="password"
+                  required
+                  minLength={8}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                Konfirmasi Kata Sandi Baru <span className="text-red-400">*</span>
-              </label>
-              <input
-                name="confirmPassword"
-                type="password"
-                required
-                minLength={8}
-                placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Konfirmasi Kata Sandi Baru <span className="text-red-400">*</span>
+                </label>
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  minLength={8}
+                  placeholder="••••••••"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-red-500"
+                />
+              </div>
+            </form>
           </div>
 
-          <div className="pt-2 flex justify-end">
+          <div className="pt-4 border-t border-border flex justify-end">
             <button
               type="submit"
+              form="passwordForm"
               disabled={isSubmittingSelfPassword}
               className="px-5 py-2.5 bg-red-600 text-white font-semibold text-sm rounded-xl hover:bg-red-500 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
             >
               {isSubmittingSelfPassword && <Loader2 size={16} className="animate-spin" />}
-              Perbarui Kata Sandi Saya
+              Perbarui Kata Sandi
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* SECTION 2: ACCOUNTS LIST & RESET PASSWORD FOR ADMIN_CSR */}

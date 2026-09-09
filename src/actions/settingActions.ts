@@ -33,7 +33,10 @@ async function getRequestMeta() {
 
 export async function updateProfile(formData: FormData) {
   try {
-    const session = await requireAuth();
+    const session = await getSession();
+    if (!session || (session.role !== "ADMIN_CSR" && session.role !== "ADMINISTRATOR")) {
+      return { success: false, error: "Unauthorized: Sesi autentikasi tidak valid atau telah berakhir." };
+    }
     const { ipAddress, userAgent } = await getRequestMeta();
 
     const nameResult = validateRequiredString(formData.get("name"), "Nama", 3, 100);
@@ -59,7 +62,7 @@ export async function updateProfile(formData: FormData) {
       entityType: "SETTINGS",
       entityId: session.userId,
       entityTitle: name.trim(),
-      description: `Admin memperbarui profil: nama diubah`,
+      description: `Pengguna ${name.trim()} (${session.role}) memperbarui nama profil`,
       metadata: {
         event: "PROFILE_UPDATED",
         changedFields: oldUser?.name !== name.trim() ? ["name"] : [],
@@ -70,6 +73,8 @@ export async function updateProfile(formData: FormData) {
 
     revalidatePath("/admin/pengaturan");
     revalidatePath("/admin", "layout");
+    revalidatePath("/administrator/accounts");
+    revalidatePath("/administrator", "layout");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to update profile:", error);
