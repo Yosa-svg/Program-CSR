@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="lg:col-span-1">
           <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-16 h-16 shrink-0 flex items-center justify-center">
+              <div className="w-16 h-16 bg-white rounded-xl p-1.5 shrink-0 flex items-center justify-center">
                 <Image
                   src="/images/logo-antam.webp"
                   alt="Logo ANTAM"
@@ -24,7 +24,7 @@ export default function Footer() {
                 <span className="font-bold text-base leading-tight text-white">
                   CSR ANTAM
                 </span>
-                <span className="text-xs text-white/60 font-medium">UBPN Maluku Utara</span>
+                <span className="text-xs text-white/60 font-medium">Kawasan Ekonomi Keberlanjutan</span>
               </div>
             </Link>
             <p className="text-white/65 text-sm leading-relaxed mb-6 font-normal">
@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/45">
-          <p>© {new Date().getFullYear()} Kawasan Ekonomi Berkelanjutan. Hak cipta dilindungi.</p>
+          <p>© {new Date().getFullYear()} Kawasan Ekonomi Keberlanjutan. Hak cipta dilindungi.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Syarat & Ketentuan</a>
             <a href="#" className="hover:text-white transition-colors">Kebijakan Privasi</a>

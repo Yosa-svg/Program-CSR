@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Tentang Kawasan Ekonomi Berkelanjutan",
+  title: "Tentang Kawasan Ekonomi Keberlanjutan",
   description:
     "Mengenal visi, misi, pilar keberlanjutan, dan komitmen penyelarasan kemajuan ekonomi masyarakat lokal dengan kelestarian alam bersama CSR ANTAM.",
   canonical: "/tentang",
@@ -34,7 +34,7 @@ export default function TentangPage() {
             Mengenal Kami
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-sm">
-            Tentang Kawasan Ekonomi Berkelanjutan
+            Tentang Kawasan Ekonomi Keberlanjutan
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-normal leading-relaxed drop-shadow-sm">
             Menyelaraskan kemajuan ekonomi masyarakat lokal dengan kelestarian alam demi masa depan yang lebih baik.
@@ -51,7 +51,7 @@ export default function TentangPage() {
             </h2>
             <div className="w-20 h-1.5 bg-[#0D726D] rounded-full mb-8" />
             <p className="text-lg text-[#172121]/80 leading-relaxed mb-6 font-normal">
-              Kawasan Ekonomi Berkelanjutan merupakan perwujudan nyata dari komitmen CSR perusahaan untuk tidak sekadar memberikan bantuan, tetapi membangun kemandirian. Program ini dirancang untuk menjawab tantangan kesenjangan ekonomi sekaligus menjaga keseimbangan ekologis di wilayah operasi kami.
+              Kawasan Ekonomi Keberlanjutan merupakan perwujudan nyata dari komitmen CSR perusahaan untuk tidak sekadar memberikan bantuan, tetapi membangun kemandirian. Program ini dirancang untuk menjawab tantangan kesenjangan ekonomi sekaligus menjaga keseimbangan ekologis di wilayah operasi kami.
             </p>
             <p className="text-lg text-[#172121]/80 leading-relaxed font-normal">
               Kami percaya bahwa pemanfaatan potensi lokal yang tepat—jika diiringi dengan pembinaan dan integrasi teknologi—mampu menciptakan siklus ekonomi sirkular yang bermanfaat bagi seluruh lapisan masyarakat tanpa mengorbankan kelestarian alam untuk generasi mendatang.
@@ -69,7 +69,7 @@ export default function TentangPage() {
             </div>
             <h3 className="font-bold text-xl text-[#172121] mb-2">CSR PT ANTAM Tbk</h3>
             <p className="text-sm text-[#172121]/70 max-w-sm">
-              Unit Bisnis Pertambangan Nikel Maluku Utara — Kawasan Ekonomi Berkelanjutan
+              Unit Bisnis Pertambangan Nikel Maluku Utara — Kawasan Ekonomi Keberlanjutan
             </p>
           </div>
         </div>

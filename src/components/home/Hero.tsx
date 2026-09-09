@@ -55,7 +55,7 @@ export default function Hero({
                 className="w-full h-full object-contain"
               />
             </div>
-            <span>CSR ANTAM — Kawasan Ekonomi Berkelanjutan</span>
+            <span>CSR ANTAM — Kawasan Ekonomi Keberlanjutan</span>
           </motion.div>
 
           <motion.h1

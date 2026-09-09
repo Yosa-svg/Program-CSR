@@ -594,7 +594,7 @@ export default function PengaturanView({
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground text-lg">Sektor Terdaftar</h3>
-                  <p className="text-xs text-foreground/60">Struktur sektor aktif dalam Kawasan Ekonomi Berkelanjutan</p>
+                  <p className="text-xs text-foreground/60">Struktur sektor aktif dalam Kawasan Ekonomi Keberlanjutan</p>
                 </div>
               </div>
               <button

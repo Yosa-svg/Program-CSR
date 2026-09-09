@@ -16,7 +16,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "CSR ANTAM - Kawasan Ekonomi Berkelanjutan",
+    default: "CSR ANTAM - Kawasan Ekonomi Keberlanjutan",
     template: "%s | CSR ANTAM",
   },
   description: DEFAULT_DESCRIPTION,

@@ -14,7 +14,7 @@ export default async function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 admin-theme">
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-8 text-foreground">
         <div className="text-center mb-8">
-          <div className="w-32 h-32 flex items-center justify-center mx-auto mb-4">
+          <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 p-3">
             <Image
               src="/images/logo-antam.webp"
               alt="Logo ANTAM"
@@ -26,7 +26,7 @@ export default async function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold">Portal Login</h1>
           <p className="text-foreground/60 text-sm mt-2">
-            CSR ANTAM — Kawasan Ekonomi Berkelanjutan
+            CSR ANTAM — Kawasan Ekonomi Keberlanjutan
           </p>
         </div>
 

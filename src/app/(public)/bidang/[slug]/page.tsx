@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: SectorPageProps) {
   }
   return createMetadata({
     title: `${sector.name} | Sektor CSR`,
-    description: `Program, kegiatan, produk binaan, dan inisiatif keberlanjutan sektor ${sector.name} dalam Kawasan Ekonomi Berkelanjutan.`,
+    description: `Program, kegiatan, produk binaan, dan inisiatif keberlanjutan sektor ${sector.name} dalam Kawasan Ekonomi Keberlanjutan.`,
     canonical: `/bidang/${sector.slug}`,
   });
 }
@@ -372,7 +372,7 @@ export default async function DynamicSectorPage({ params }: SectorPageProps) {
             Ingin mengetahui lebih lanjut tentang program {sector.name}?
           </h3>
           <p className="text-[#172121]/70 text-base max-w-xl mx-auto">
-            Jelajahi seluruh inisiatif terintegrasi dalam Kawasan Ekonomi Berkelanjutan.
+            Jelajahi seluruh inisiatif terintegrasi dalam Kawasan Ekonomi Keberlanjutan.
           </p>
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
             <Link 

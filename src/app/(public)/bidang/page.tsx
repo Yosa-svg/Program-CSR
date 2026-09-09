@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "Sektor & Bidang CSR",
   description:
-    "Daftar seluruh sektor pemberdayaan masyarakat dan pelestarian lingkungan dalam program CSR Kawasan Ekonomi Berkelanjutan.",
+    "Daftar seluruh sektor pemberdayaan masyarakat dan pelestarian lingkungan dalam program CSR Kawasan Ekonomi Keberlanjutan.",
   canonical: "/bidang",
 });
 
@@ -49,7 +49,7 @@ export default async function BidangCSRPage() {
             Sektor / Bidang CSR
           </h1>
           <p className="text-xl text-foreground/70 font-normal max-w-2xl">
-            Sektor pemberdayaan masyarakat, kemitraan ekonomi, dan pelestarian lingkungan dalam Kawasan Ekonomi Berkelanjutan.
+            Sektor pemberdayaan masyarakat, kemitraan ekonomi, dan pelestarian lingkungan dalam Kawasan Ekonomi Keberlanjutan.
           </p>
         </div>
       </section>

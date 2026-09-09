@@ -52,7 +52,7 @@ export default function About() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg md:text-xl text-[#172121]/80 leading-relaxed mb-8 font-normal"
             >
-              Kawasan Ekonomi Berkelanjutan hadir untuk menyatukan potensi masyarakat,
+              Kawasan Ekonomi Keberlanjutan hadir untuk menyatukan potensi masyarakat,
               sumber daya, dan inovasi lokal yang berorientasi pada kemandirian jangka panjang.
             </motion.p>
             

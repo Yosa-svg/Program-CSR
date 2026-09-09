@@ -11,9 +11,9 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (isProduction ? "https://csr.antam.com" : "http://localhost:3000");
 
-export const SITE_NAME = "CSR ANTAM - Kawasan Ekonomi Berkelanjutan";
+export const SITE_NAME = "CSR ANTAM - Kawasan Ekonomi Keberlanjutan";
 export const DEFAULT_DESCRIPTION =
-  "Platform transparansi, dampak, dan publikasi program Corporate Social Responsibility (CSR) Kawasan Ekonomi Berkelanjutan ANTAM.";
+  "Platform transparansi, dampak, dan publikasi program Corporate Social Responsibility (CSR) Kawasan Ekonomi Keberlanjutan ANTAM.";
 
 export interface CreateMetadataOptions {
   title: string;

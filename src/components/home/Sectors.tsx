@@ -119,7 +119,7 @@ export default function Sectors({ sectors = [] }: SectorsProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-[#172121]/75 leading-relaxed font-normal"
             >
-              Empat sektor utama pemberdayaan masyarakat dan pelestarian lingkungan dalam Kawasan Ekonomi Berkelanjutan.
+              Empat sektor utama pemberdayaan masyarakat dan pelestarian lingkungan dalam Kawasan Ekonomi Keberlanjutan.
             </motion.p>
           </div>
           

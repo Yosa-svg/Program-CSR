@@ -40,7 +40,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group">
-            <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 flex items-center justify-center">
+            <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 bg-white rounded-xl p-1.5 flex items-center justify-center">
               <Image
                 src="/images/logo-antam.webp"
                 alt="Logo ANTAM"
@@ -55,10 +55,10 @@ export default function Navbar() {
                 CSR ANTAM
               </span>
               <span className="text-xs text-[#172121]/60 font-medium hidden sm:inline">
-                UBPN Maluku Utara
+                Kawasan Ekonomi Keberlanjutan
               </span>
               <span className="text-[11px] text-[#172121]/60 font-medium sm:hidden">
-                UBPN Malut
+                Keberlanjutan
               </span>
             </div>
           </Link>
