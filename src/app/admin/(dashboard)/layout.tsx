@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { 
   Sprout, Settings,
   Layers, Box, ImageIcon, BarChart3, LayoutDashboard
@@ -34,13 +35,23 @@ export default async function AdminLayout({
       <aside className="w-full md:w-64 bg-admin-sidebar border-r border-admin-sidebar-border flex flex-col text-white">
         <div className="p-6 border-b border-admin-sidebar-border">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xs tracking-widest shadow-sm relative overflow-hidden">
-              <span>KEB</span>
-              <div className="absolute top-0 right-0 w-2 h-2 bg-secondary rounded-bl-md"></div>
+            <div className="w-9 h-9 bg-white rounded-lg p-1 flex items-center justify-center shadow-sm shrink-0">
+              <Image
+                src="/images/logo-antam.webp"
+                alt="Logo ANTAM"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className="font-bold text-sm text-white uppercase tracking-wider">
-              Dashboard CSR
-            </span>
+            <div>
+              <span className="font-bold text-sm text-white uppercase tracking-wider block">
+                Dashboard CSR
+              </span>
+              <span className="text-[10px] text-white/50 block font-normal">
+                ANTAM UBPN Malut
+              </span>
+            </div>
           </Link>
         </div>
         

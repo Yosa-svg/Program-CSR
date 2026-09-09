@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
@@ -10,15 +11,20 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-10 h-10 bg-[#0D726D] rounded-xl flex items-center justify-center text-white font-bold text-sm tracking-widest shadow-md relative overflow-hidden">
-                <span>KEB</span>
-                <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#F6A236] rounded-bl-md"></div>
+              <div className="w-11 h-11 bg-white rounded-xl p-1 flex items-center justify-center shadow-md shrink-0">
+                <Image
+                  src="/images/logo-antam.webp"
+                  alt="Logo ANTAM"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm leading-tight text-white">
-                  Kawasan Ekonomi
+                  CSR ANTAM
                 </span>
-                <span className="text-xs text-white/60 font-medium">Berkelanjutan</span>
+                <span className="text-xs text-white/60 font-medium">Kawasan Ekonomi Berkelanjutan</span>
               </div>
             </Link>
             <p className="text-white/65 text-sm leading-relaxed mb-6 font-normal">

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function About() {
   return (
@@ -16,9 +17,18 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-8 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
+              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-8 text-xs font-bold tracking-wider text-[#0D726D] uppercase"
             >
-              TENTANG KAMI
+              <div className="w-5 h-5 relative flex items-center justify-center shrink-0">
+                <Image
+                  src="/images/logo-antam.webp"
+                  alt="Logo ANTAM"
+                  width={20}
+                  height={20}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <span>CSR ANTAM — TENTANG KAMI</span>
             </motion.div>
             
             <motion.h2

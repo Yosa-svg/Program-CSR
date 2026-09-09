@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Leaf } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface HeroProps {
   sectorsCount?: number;
@@ -43,10 +44,18 @@ export default function Hero({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-md mb-8 text-xs font-bold tracking-wider text-white uppercase shadow-sm"
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-md mb-8 text-xs font-bold tracking-wider text-white uppercase shadow-sm"
           >
-            <Leaf size={13} className="text-[#F6A236]" />
-            Kawasan Ekonomi Keberkelanjutan
+            <div className="w-5 h-5 bg-white rounded-full p-0.5 flex items-center justify-center shrink-0">
+              <Image
+                src="/images/logo-antam.webp"
+                alt="Logo ANTAM"
+                width={18}
+                height={18}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span>CSR ANTAM — Kawasan Ekonomi Berkelanjutan</span>
           </motion.div>
 
           <motion.h1

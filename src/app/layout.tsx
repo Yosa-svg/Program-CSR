@@ -21,7 +21,12 @@ export const metadata: Metadata = {
   },
   description: DEFAULT_DESCRIPTION,
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/images/asset-logo.webp", type: "image/webp" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/images/asset-logo.webp",
+    apple: "/images/asset-logo.webp",
   },
   openGraph: {
     title: SITE_NAME,

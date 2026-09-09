@@ -57,10 +57,20 @@ export default function TentangPage() {
               Kami percaya bahwa pemanfaatan potensi lokal yang tepat—jika diiringi dengan pembinaan dan integrasi teknologi—mampu menciptakan siklus ekonomi sirkular yang bermanfaat bagi seluruh lapisan masyarakat tanpa mengorbankan kelestarian alam untuk generasi mendatang.
             </p>
           </div>
-          <div className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl border border-[#E2E8E6] bg-[#F7FAF9] flex flex-col items-center justify-center text-gray-400">
-            <Sparkles size={48} className="mb-4 text-[#F6A236]" />
-            <p className="font-bold text-[#172121]">Kawasan Ekonomi Berkelanjutan</p>
-            <p className="text-sm text-[#172121]/60">Pemberdayaan Masyarakat & Pelestarian Alam</p>
+          <div className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl border border-[#E2E8E6] bg-[#F7FAF9] flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-24 h-24 bg-white rounded-2xl shadow-sm border border-[#E2E8E6] p-3 flex items-center justify-center mb-6">
+              <Image
+                src="/images/logo-antam.webp"
+                alt="Logo ANTAM"
+                width={80}
+                height={80}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h3 className="font-bold text-xl text-[#172121] mb-2">CSR PT ANTAM Tbk</h3>
+            <p className="text-sm text-[#172121]/70 max-w-sm">
+              Unit Bisnis Pertambangan Nikel Maluku Utara — Kawasan Ekonomi Berkelanjutan
+            </p>
           </div>
         </div>
       </section>
