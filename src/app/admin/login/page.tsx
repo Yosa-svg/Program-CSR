@@ -14,12 +14,12 @@ export default async function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 admin-theme">
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-8 text-foreground">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-white rounded-2xl border border-border/40 shadow-sm flex items-center justify-center mx-auto mb-4 p-2">
+          <div className="w-32 h-32 flex items-center justify-center mx-auto mb-4">
             <Image
               src="/images/logo-antam.webp"
               alt="Logo ANTAM"
-              width={72}
-              height={72}
+              width={128}
+              height={128}
               className="w-full h-full object-contain"
               priority
             />

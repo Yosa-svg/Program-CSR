@@ -35,12 +35,12 @@ export default async function AdminLayout({
       <aside className="w-full md:w-64 bg-admin-sidebar border-r border-admin-sidebar-border flex flex-col text-white">
         <div className="p-6 border-b border-admin-sidebar-border">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white rounded-lg p-1 flex items-center justify-center shadow-sm shrink-0">
+            <div className="w-12 h-12 shrink-0 flex items-center justify-center">
               <Image
                 src="/images/logo-antam.webp"
                 alt="Logo ANTAM"
-                width={32}
-                height={32}
+                width={48}
+                height={48}
                 className="w-full h-full object-contain"
               />
             </div>

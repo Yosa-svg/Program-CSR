@@ -10,21 +10,21 @@ export default function Footer() {
           
           {/* Brand Col */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-11 h-11 bg-white rounded-xl p-1 flex items-center justify-center shadow-md shrink-0">
+          <Link href="/" className="flex items-center gap-3 mb-6 group">
+              <div className="w-16 h-16 shrink-0 flex items-center justify-center">
                 <Image
                   src="/images/logo-antam.webp"
                   alt="Logo ANTAM"
-                  width={40}
-                  height={40}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-sm leading-tight text-white">
+                <span className="font-bold text-base leading-tight text-white">
                   CSR ANTAM
                 </span>
-                <span className="text-xs text-white/60 font-medium">Kawasan Ekonomi Berkelanjutan</span>
+                <span className="text-xs text-white/60 font-medium">UBPN Maluku Utara</span>
               </div>
             </Link>
             <p className="text-white/65 text-sm leading-relaxed mb-6 font-normal">
