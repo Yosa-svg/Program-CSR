@@ -104,12 +104,12 @@ export async function createDocumentation(formData: FormData) {
     }
     const title = titleResult.data!;
 
-    // Validate description
-    const descResult = validateOptionalString(formData.get("description"), "Deskripsi dokumentasi", 10000);
+    // Validate description (wajib diisi)
+    const descResult = validateRequiredString(formData.get("description"), "Deskripsi dokumentasi", 3, 10000);
     if (!descResult.success) {
       return { success: false, error: descResult.error };
     }
-    const description = descResult.data || null;
+    const description = descResult.data!;
 
     // Validate date
     const dateResult = validateOptionalDate(formData.get("date"), "Tanggal dokumentasi");
@@ -282,12 +282,12 @@ export async function updateDocumentation(id: string, formData: FormData) {
     }
     const title = titleResult.data!;
 
-    // Validate description
-    const descResult = validateOptionalString(formData.get("description"), "Deskripsi dokumentasi", 10000);
+    // Validate description (wajib diisi)
+    const descResult = validateRequiredString(formData.get("description"), "Deskripsi dokumentasi", 3, 10000);
     if (!descResult.success) {
       return { success: false, error: descResult.error };
     }
-    const description = descResult.data || null;
+    const description = descResult.data!;
 
     // Validate date
     const dateResult = validateOptionalDate(formData.get("date"), "Tanggal dokumentasi");

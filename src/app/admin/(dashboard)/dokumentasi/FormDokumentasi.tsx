@@ -203,13 +203,14 @@ export default function FormDokumentasi({
 
           <div>
             <label className="block text-xs font-medium text-foreground/50 mb-1.5 uppercase tracking-wider">
-              Deskripsi Singkat (Opsional)
+              Deskripsi Singkat <span className="text-red-400">*</span>
             </label>
             <textarea 
               name="description" 
+              required
               defaultValue={initialData?.description || ""}
-              rows={2}
-              placeholder="Keterangan tambahan terkait dokumentasi kegiatan ini..."
+              rows={3}
+              placeholder="Tuliskan keterangan lengkap terkait kegiatan dokumentasi ini..."
               className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-primary resize-none"
             />
           </div>
