@@ -20,9 +20,16 @@ import {
   Sparkles,
   User,
   UserPlus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { changePasswordAction, updateProfile } from "@/actions/settingActions";
-import { adminResetPasswordAction, createAdminAccountAction } from "@/actions/accountActions";
+import {
+  adminResetPasswordAction,
+  createAdminAccountAction,
+  updateAdminAccountAction,
+  deleteAdminAccountAction,
+} from "@/actions/accountActions";
 
 type AdminAccount = {
   id: string;
@@ -94,6 +101,27 @@ export default function AccountsManagementView({
   const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [copiedCreatePassword, setCopiedCreatePassword] = useState(false);
 
+  // State Edit Akun Admin
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<AdminAccount | null>(null);
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [editMsg, setEditMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    role: "ADMIN_CSR" as "ADMIN_CSR" | "ADMINISTRATOR",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [copiedEditPassword, setCopiedEditPassword] = useState(false);
+
+  // State Hapus Akun Admin
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState<AdminAccount | null>(null);
+  const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
+  const [deleteMsg, setDeleteMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   // 1. Handler Self-Service Profile Update (Nama Lengkap)
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -146,8 +174,8 @@ export default function AccountsManagementView({
     }
   };
 
-  // 2. Client-Side Ephemeral Random Password Generator
-  const generateEphemeralRandomPassword = () => {
+  // Helper: Client-Side Ephemeral Random Password Generator
+  const makeRandomPassword = () => {
     const uppercase = "ABCDEFGHJKLMNPQRSTUVWXYZ";
     const lowercase = "abcdefghjkmnpqrstuvwxyz";
     const numbers = "23456789";
@@ -166,12 +194,15 @@ export default function AccountsManagementView({
       generated += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
 
-    // Shuffle karakter
-    const shuffled = generated
+    return generated
       .split("")
       .sort(() => 0.5 - Math.random())
       .join("");
+  };
 
+  // 2. Client-Side Ephemeral Random Password Generator untuk Modal Reset
+  const generateEphemeralRandomPassword = () => {
+    const shuffled = makeRandomPassword();
     setModalNewPassword(shuffled);
     setModalConfirmPassword(shuffled);
     setShowPasswordText(true);
@@ -188,27 +219,7 @@ export default function AccountsManagementView({
 
   // Helper Generator Password Akun Baru
   const generateCreateRandomPassword = () => {
-    const uppercase = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const lowercase = "abcdefghjkmnpqrstuvwxyz";
-    const numbers = "23456789";
-    const symbols = "!@#$%^&*";
-
-    const allChars = uppercase + lowercase + numbers + symbols;
-    let generated = "";
-    generated += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-    generated += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-    generated += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    generated += symbols.charAt(Math.floor(Math.random() * symbols.length));
-
-    for (let i = 0; i < 8; i++) {
-      generated += allChars.charAt(Math.floor(Math.random() * allChars.length));
-    }
-
-    const shuffled = generated
-      .split("")
-      .sort(() => 0.5 - Math.random())
-      .join("");
-
+    const shuffled = makeRandomPassword();
     setCreateForm((prev) => ({ ...prev, password: shuffled, confirmPassword: shuffled }));
     setShowCreatePassword(true);
   };
@@ -298,6 +309,109 @@ export default function AccountsManagementView({
       router.refresh();
     } else {
       setResetModalMsg(result.error || "Gagal memproses reset kata sandi.");
+    }
+  };
+
+  // 4. Handler Edit Akun Admin
+  const generateEditRandomPassword = () => {
+    const shuffled = makeRandomPassword();
+    setEditForm((prev) => ({
+      ...prev,
+      newPassword: shuffled,
+      confirmPassword: shuffled,
+    }));
+    setShowEditPassword(true);
+    setCopiedEditPassword(false);
+  };
+
+  const handleCopyEditPassword = async () => {
+    if (!editForm.newPassword) return;
+    try {
+      await navigator.clipboard.writeText(editForm.newPassword);
+      setCopiedEditPassword(true);
+      setTimeout(() => setCopiedEditPassword(false), 2500);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleOpenEditModal = (account: AdminAccount) => {
+    setEditingAccount(account);
+    setEditForm({
+      name: account.name,
+      email: account.email,
+      role: (account.role === "ADMINISTRATOR" ? "ADMINISTRATOR" : "ADMIN_CSR") as "ADMIN_CSR" | "ADMINISTRATOR",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setEditMsg(null);
+    setShowEditPassword(false);
+    setCopiedEditPassword(false);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingAccount) return;
+
+    setIsSubmittingEdit(true);
+    setEditMsg(null);
+
+    const res = await updateAdminAccountAction({
+      targetUserId: editingAccount.id,
+      name: editForm.name,
+      email: editForm.email,
+      role: editForm.role,
+      newPassword: editForm.newPassword || undefined,
+      confirmPassword: editForm.confirmPassword || undefined,
+    });
+
+    setIsSubmittingEdit(false);
+    if (res.success) {
+      setIsEditModalOpen(false);
+      setEditingAccount(null);
+      setGlobalFeedbackMsg({
+        type: "success",
+        text: res.message || "Data akun admin berhasil diperbarui.",
+      });
+      router.refresh();
+    } else {
+      setEditMsg({
+        type: "error",
+        text: res.error || "Gagal memperbarui akun admin.",
+      });
+    }
+  };
+
+  // 5. Handler Hapus Akun Admin
+  const handleOpenDeleteModal = (account: AdminAccount) => {
+    setDeletingAccount(account);
+    setDeleteMsg(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteSubmit = async () => {
+    if (!deletingAccount) return;
+
+    setIsSubmittingDelete(true);
+    setDeleteMsg(null);
+
+    const res = await deleteAdminAccountAction(deletingAccount.id);
+
+    setIsSubmittingDelete(false);
+    if (res.success) {
+      setIsDeleteModalOpen(false);
+      setDeletingAccount(null);
+      setGlobalFeedbackMsg({
+        type: "success",
+        text: res.message || "Akun admin berhasil dihapus.",
+      });
+      router.refresh();
+    } else {
+      setDeleteMsg({
+        type: "error",
+        text: res.error || "Gagal menghapus akun admin.",
+      });
     }
   };
 
@@ -546,7 +660,7 @@ export default function AccountsManagementView({
                 <th className="pb-3 px-3">Peran / Role</th>
                 <th className="pb-3 px-3">Sesi Aktif</th>
                 <th className="pb-3 px-3">Terdaftar</th>
-                <th className="pb-3 px-3 text-right">Aksi Kredensial</th>
+                <th className="pb-3 px-3 text-right">Aksi Akun</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
@@ -602,23 +716,56 @@ export default function AccountsManagementView({
                       })}
                     </td>
                     <td className="py-4 px-3 text-right">
-                      {isCsrAdmin ? (
+                      <div className="inline-flex items-center justify-end gap-1.5 flex-wrap">
+                        {isCsrAdmin ? (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenResetModal(user)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-cyan-600/10 hover:bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            title="Reset Kata Sandi"
+                          >
+                            <RefreshCw size={13} />
+                            <span className="hidden sm:inline">Reset Sandi</span>
+                          </button>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800/60 text-slate-400 rounded-lg text-xs border border-slate-700/50"
+                            title="Kredensial administrator hanya dapat diubah melalui self-service untuk mencegah account takeover."
+                          >
+                            <Lock size={12} className="text-slate-500" />
+                            <span className="hidden sm:inline">Dilindungi</span>
+                          </span>
+                        )}
+
                         <button
-                          onClick={() => handleOpenResetModal(user)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600/10 hover:bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                          type="button"
+                          onClick={() => handleOpenEditModal(user)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-foreground/80 hover:text-foreground border border-border rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                          title="Edit Akun"
                         >
-                          <RefreshCw size={13} />
-                          Reset Password
+                          <Pencil size={13} />
+                          <span className="hidden sm:inline">Edit</span>
                         </button>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800/60 text-slate-400 rounded-lg text-[11px] border border-slate-700/50"
-                          title="Kredensial administrator hanya dapat diubah melalui self-service untuk mencegah account takeover."
-                        >
-                          <Lock size={12} className="text-slate-500" />
-                          Kredensial Dilindungi
-                        </span>
-                      )}
+
+                        {isSelf ? (
+                          <span
+                            className="inline-flex items-center px-2.5 py-1.5 bg-slate-800/30 text-slate-500 rounded-lg text-xs border border-slate-800/40 cursor-not-allowed opacity-50"
+                            title="Akun Anda sendiri tidak dapat dihapus saat sedang digunakan."
+                          >
+                            <Trash2 size={13} />
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDeleteModal(user)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            title="Hapus Akun"
+                          >
+                            <Trash2 size={13} />
+                            <span className="hidden sm:inline">Hapus</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -971,6 +1118,316 @@ export default function AccountsManagementView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDIT DATA AKUN ADMIN */}
+      {isEditModalOpen && editingAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-background/50 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Pencil size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm">
+                    Edit Data Akun Admin
+                  </h3>
+                  <p className="text-[11px] text-foreground/60">
+                    Perbarui profil, hak akses peran, atau setel ulang kata sandi
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setEditingAccount(null);
+                  setEditMsg(null);
+                }}
+                className="p-1 text-foreground/40 hover:text-foreground rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4 overflow-y-auto">
+              {editMsg && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs flex items-center gap-2.5 ${
+                    editMsg.type === "success"
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : "bg-red-500/10 text-red-400 border border-red-500/20"
+                  }`}
+                >
+                  {editMsg.type === "success" ? (
+                    <CheckCircle2 size={16} />
+                  ) : (
+                    <AlertCircle size={16} />
+                  )}
+                  <span>{editMsg.text}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Nama Lengkap <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  placeholder="Nama lengkap admin"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Alamat Email <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  placeholder="admin@csr-ubpnmalut.com"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Peran Akun (Hak Akses) <span className="text-red-400">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditForm({ ...editForm, role: "ADMIN_CSR" })}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      editForm.role === "ADMIN_CSR"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-bold text-xs block mb-0.5">Admin CSR</span>
+                    <span className="text-[11px] opacity-70 block">
+                      Kelola program, kegiatan, sektor, & produk
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditForm({ ...editForm, role: "ADMINISTRATOR" })}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      editForm.role === "ADMINISTRATOR"
+                        ? "border-red-500/50 bg-red-500/10 text-red-400"
+                        : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-bold text-xs block mb-0.5">Administrator</span>
+                    <span className="text-[11px] opacity-70 block">
+                      Akses penuh keamanan, sesi, log, & akun
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Section (Optional on Edit) */}
+              <div className="pt-3 border-t border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider">
+                      Ubah Kata Sandi Baru (Opsional)
+                    </label>
+                    <span className="text-[11px] text-foreground/50 block">
+                      Kosongkan bila tidak ingin mengganti kata sandi akun ini
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={generateEditRandomPassword}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg border border-primary/30 transition-colors cursor-pointer shrink-0"
+                  >
+                    <Sparkles size={13} />
+                    Buat Sandi Acak
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showEditPassword ? "text" : "password"}
+                    minLength={8}
+                    value={editForm.newPassword}
+                    onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })}
+                    placeholder="Kosongkan jika tidak ingin diubah"
+                    className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary pr-20 font-mono"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {editForm.newPassword && (
+                      <button
+                        type="button"
+                        onClick={handleCopyEditPassword}
+                        title="Salin kata sandi"
+                        className="p-1.5 text-foreground/50 hover:text-primary rounded-md transition-colors cursor-pointer"
+                      >
+                        {copiedEditPassword ? (
+                          <Check size={15} className="text-emerald-400" />
+                        ) : (
+                          <Copy size={15} />
+                        )}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowEditPassword(!showEditPassword)}
+                      className="p-1.5 text-foreground/50 hover:text-foreground rounded-md transition-colors cursor-pointer"
+                    >
+                      {showEditPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+                {copiedEditPassword && (
+                  <span className="text-[11px] text-emerald-400 block">
+                    Kata sandi disalin ke clipboard.
+                  </span>
+                )}
+
+                {editForm.newPassword.trim().length > 0 && (
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                      Konfirmasi Kata Sandi Baru <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type={showEditPassword ? "text" : "password"}
+                      required
+                      minLength={8}
+                      value={editForm.confirmPassword}
+                      onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })}
+                      placeholder="Ulangi kata sandi baru"
+                      className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary font-mono"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="p-3 bg-muted/20 border border-border/60 rounded-xl text-[11px] text-foreground/60 flex items-start gap-2">
+                <ShieldAlert size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                <span>
+                  Bila email, peran, atau kata sandi diubah, seluruh sesi aktif akun ini akan seketika dicabut demi keamanan.
+                </span>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-2.5 border-t border-border mt-5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditModalOpen(false);
+                    setEditingAccount(null);
+                    setEditMsg(null);
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEdit || !editForm.name || !editForm.email}
+                  className="px-5 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+                >
+                  {isSubmittingEdit && <Loader2 size={14} className="animate-spin" />}
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL KONFIRMASI HAPUS AKUN ADMIN */}
+      {isDeleteModalOpen && deletingAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-red-500/5">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-red-500/10 text-red-400">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm">
+                    Konfirmasi Hapus Akun Admin
+                  </h3>
+                  <p className="text-[11px] text-foreground/60">
+                    Tindakan permanen dan tidak dapat dibatalkan
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeletingAccount(null);
+                  setDeleteMsg(null);
+                }}
+                className="p-1 text-foreground/40 hover:text-foreground rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {deleteMsg && (
+                <div className="p-3.5 rounded-xl text-xs flex items-center gap-2.5 bg-red-500/10 text-red-400 border border-red-500/20">
+                  <AlertCircle size={16} />
+                  <span>{deleteMsg.text}</span>
+                </div>
+              )}
+
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                Apakah Anda yakin ingin menghapus akun admin{" "}
+                <span className="font-bold text-foreground underline decoration-red-500/50">
+                  {deletingAccount.name}
+                </span>{" "}
+                (<span className="font-mono text-xs">{deletingAccount.email}</span>) dengan peran{" "}
+                <span className="font-semibold text-primary">{deletingAccount.role}</span>?
+              </p>
+
+              <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 space-y-1.5">
+                <div className="font-semibold flex items-center gap-1.5">
+                  <ShieldAlert size={14} /> Perhatian Keamanan:
+                </div>
+                <ul className="list-disc list-inside space-y-1 text-[11px] text-red-300/80">
+                  <li>Seluruh sesi aktif akun ini akan seketika dicabut.</li>
+                  <li>Pengguna tidak akan dapat mengakses sistem kembali.</li>
+                  <li>Riwayat audit log yang pernah dilakukan tetap disimpan untuk audit jejak digital.</li>
+                </ul>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-2.5 border-t border-border mt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeletingAccount(null);
+                    setDeleteMsg(null);
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteSubmit}
+                  disabled={isSubmittingDelete}
+                  className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+                >
+                  {isSubmittingDelete && <Loader2 size={14} className="animate-spin" />}
+                  Ya, Hapus Akun Sekarang
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

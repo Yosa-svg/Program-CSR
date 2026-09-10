@@ -349,3 +349,292 @@ export async function createAdminAccountAction(params: CreateAdminAccountParams)
     };
   }
 }
+
+export type UpdateAdminAccountParams = {
+  targetUserId: string;
+  name: string;
+  email: string;
+  role: "ADMIN_CSR" | "ADMINISTRATOR";
+  newPassword?: string;
+  confirmPassword?: string;
+};
+
+/**
+ * Server Action untuk memperbarui profil dan peran akun admin oleh ADMINISTRATOR.
+ * 
+ * Aturan Otorisasi & Keamanan:
+ * 1. Hanya role ADMINISTRATOR yang berwenang mengeksekusi.
+ * 2. Validasi ID target & data eksisting di database.
+ * 3. Validasi nama (2 - 100 karakter) & email unik format valid.
+ * 4. Anti-Lockout: DILARANG menurunkan role akun Administrator terakhir menjadi ADMIN_CSR.
+ * 5. Pengubahan kata sandi opsional dengan validasi ketat (min 8 karakter kombinasi huruf & angka).
+ * 6. Jika email, role, atau kata sandi diubah, seluruh sesi aktif akun target seketika dicabut.
+ * 7. Dicatat lengkap di ActivityLog tanpa kredensial sensitif.
+ */
+export async function updateAdminAccountAction(params: UpdateAdminAccountParams): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
+  try {
+    const currentAdmin = await requireAdministratorAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
+    const idResult = validateId(params.targetUserId, "ID Pengguna Target");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+    const cleanId = idResult.data!;
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: cleanId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!targetUser) {
+      return { success: false, error: "Pengguna target tidak ditemukan." };
+    }
+
+    const name = params.name?.trim();
+    if (!name || name.length < 2 || name.length > 100) {
+      return { success: false, error: "Nama lengkap harus antara 2 hingga 100 karakter." };
+    }
+
+    const email = params.email?.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return { success: false, error: "Format email tidak valid." };
+    }
+
+    if (email !== targetUser.email.toLowerCase()) {
+      const existingEmail = await prisma.user.findFirst({
+        where: {
+          email,
+          id: { not: cleanId },
+        },
+        select: { id: true },
+      });
+      if (existingEmail) {
+        return { success: false, error: "Alamat email ini sudah digunakan oleh akun lain." };
+      }
+    }
+
+    const role = params.role;
+    if (role !== "ADMIN_CSR" && role !== "ADMINISTRATOR") {
+      return { success: false, error: "Role pengguna tidak valid. Pilih Admin CSR atau Administrator." };
+    }
+
+    // Anti-lockout: Cegah menurunkan role Administrator terakhir ke ADMIN_CSR
+    if (targetUser.role === "ADMINISTRATOR" && role === "ADMIN_CSR") {
+      const adminCount = await prisma.user.count({
+        where: { role: "ADMINISTRATOR" },
+      });
+      if (adminCount <= 1) {
+        return {
+          success: false,
+          error: "Tidak dapat menurunkan role Administrator terakhir. Sistem harus memiliki minimal satu Administrator.",
+        };
+      }
+    }
+
+    // Validasi kata sandi baru opsional
+    let newPasswordHash: string | undefined;
+    if (params.newPassword && params.newPassword.trim().length > 0) {
+      const newPassword = params.newPassword;
+      if (newPassword.length < 8) {
+        return { success: false, error: "Kata sandi baru minimal 8 karakter." };
+      }
+      if (newPassword.length > 128) {
+        return { success: false, error: "Kata sandi baru melebihi batas 128 karakter." };
+      }
+      const hasLetter = /[a-zA-Z]/.test(newPassword);
+      const hasNumber = /[0-9]/.test(newPassword);
+      if (!hasLetter || !hasNumber) {
+        return {
+          success: false,
+          error: "Kata sandi baru harus mengandung kombinasi huruf dan angka.",
+        };
+      }
+      if (params.confirmPassword !== undefined && params.confirmPassword !== newPassword) {
+        return { success: false, error: "Konfirmasi kata sandi baru tidak cocok." };
+      }
+      newPasswordHash = await bcrypt.hash(newPassword, 12);
+    }
+
+    const roleChanged = targetUser.role !== role;
+    const emailChanged = targetUser.email.toLowerCase() !== email;
+    const passwordChanged = Boolean(newPasswordHash);
+
+    // Update di database
+    await prisma.user.update({
+      where: { id: cleanId },
+      data: {
+        name,
+        email,
+        role,
+        ...(newPasswordHash ? { password: newPasswordHash } : {}),
+      },
+    });
+
+    // Jika kredensial, email, atau role berubah, cabut seluruh sesi aktif akun target
+    if (roleChanged || emailChanged || passwordChanged) {
+      await revokeAllUserSessions(cleanId, "ADMIN_ACCOUNT_UPDATED");
+    }
+
+    // Catat ActivityLog
+    void logActivity({
+      userId: currentAdmin.userId,
+      action: ActivityAction.UPDATE,
+      entityType: "USER",
+      entityId: cleanId,
+      entityTitle: name,
+      description: `Administrator ${currentAdmin.name} memperbarui data akun admin: ${name} (${email}) [Peran: ${role}]`,
+      metadata: {
+        event: "ADMIN_ACCOUNT_UPDATED",
+        targetUserId: cleanId,
+        previousName: targetUser.name,
+        updatedName: name,
+        previousEmail: targetUser.email,
+        updatedEmail: email,
+        previousRole: targetUser.role,
+        updatedRole: role,
+        passwordChanged,
+        actorRole: currentAdmin.role,
+      },
+      ipAddress,
+      userAgent,
+    });
+
+    revalidatePath("/administrator/accounts");
+    revalidatePath("/administrator/sessions");
+    revalidatePath("/administrator/activity-logs");
+    revalidatePath("/administrator");
+
+    return {
+      success: true,
+      message: `Data akun ${name} (${email}) berhasil diperbarui.${
+        roleChanged || emailChanged || passwordChanged
+          ? " Sesi aktif akun tersebut telah dicabut untuk verifikasi ulang."
+          : ""
+      }`,
+    };
+  } catch (error: unknown) {
+    console.error("Failed to update admin account:", error);
+    return {
+      success: false,
+      error: toSafeErrorMessage(error, "Terjadi kesalahan saat memperbarui akun admin."),
+    };
+  }
+}
+
+/**
+ * Server Action untuk menghapus akun admin oleh ADMINISTRATOR.
+ * 
+ * Aturan Otorisasi & Keamanan:
+ * 1. Hanya role ADMINISTRATOR yang berwenang mengeksekusi.
+ * 2. Anti-Self-Deletion: Dilarang menghapus akun sendiri yang sedang aktif login.
+ * 3. Anti-Lockout: Dilarang menghapus akun Administrator jika hanya tersisa satu Administrator.
+ * 4. Seluruh sesi aktif target langsung dicabut sebelum penghapusan.
+ * 5. AdminSession di-cascade delete, log aktivitas terkait dipertahankan (userId diset null).
+ * 6. Dicatat di ActivityLog.
+ */
+export async function deleteAdminAccountAction(targetUserId: string): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+}> {
+  try {
+    const currentAdmin = await requireAdministratorAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
+    const idResult = validateId(targetUserId, "ID Pengguna Target");
+    if (!idResult.success) {
+      return { success: false, error: idResult.error };
+    }
+    const cleanId = idResult.data!;
+
+    // Anti-self-deletion
+    if (cleanId === currentAdmin.userId) {
+      return {
+        success: false,
+        error: "Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.",
+      };
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: cleanId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!targetUser) {
+      return { success: false, error: "Pengguna target tidak ditemukan." };
+    }
+
+    // Anti-lockout: Cegah menghapus administrator terakhir
+    if (targetUser.role === "ADMINISTRATOR") {
+      const adminCount = await prisma.user.count({
+        where: { role: "ADMINISTRATOR" },
+      });
+      if (adminCount <= 1) {
+        return {
+          success: false,
+          error: "Tidak dapat menghapus satu-satunya akun Administrator dalam sistem.",
+        };
+      }
+    }
+
+    // 1. Cabut seluruh sesi aktif akun target terlebih dahulu
+    await revokeAllUserSessions(targetUser.id, "ACCOUNT_DELETED");
+
+    // 2. Hapus user dari database (AdminSession cascade delete, ActivityLog userId set null)
+    await prisma.user.delete({
+      where: { id: targetUser.id },
+    });
+
+    // 3. Catat ActivityLog
+    void logActivity({
+      userId: currentAdmin.userId,
+      action: ActivityAction.DELETE,
+      entityType: "USER",
+      entityId: targetUser.id,
+      entityTitle: targetUser.name,
+      description: `Administrator ${currentAdmin.name} menghapus akun admin: ${targetUser.name} (${targetUser.email}) [Peran: ${targetUser.role}]`,
+      metadata: {
+        event: "ADMIN_ACCOUNT_DELETED",
+        deletedUserId: targetUser.id,
+        deletedEmail: targetUser.email,
+        deletedRole: targetUser.role,
+        actorRole: currentAdmin.role,
+      },
+      ipAddress,
+      userAgent,
+    });
+
+    revalidatePath("/administrator/accounts");
+    revalidatePath("/administrator/sessions");
+    revalidatePath("/administrator/activity-logs");
+    revalidatePath("/administrator");
+
+    return {
+      success: true,
+      message: `Akun admin ${targetUser.name} (${targetUser.email}) berhasil dihapus.`,
+    };
+  } catch (error: unknown) {
+    console.error("Failed to delete admin account:", error);
+    return {
+      success: false,
+      error: toSafeErrorMessage(error, "Terjadi kesalahan saat menghapus akun admin."),
+    };
+  }
+}
+

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { 
   User, 
   ShieldCheck, 
-  KeyRound, 
   Users, 
   Database, 
   Lock, 
@@ -19,7 +18,6 @@ import {
 } from "lucide-react";
 import { 
   updateProfile, 
-  updatePassword, 
   createUser, 
   updateUser, 
   deleteUser,
@@ -75,10 +73,6 @@ export default function PengaturanView({
   // Profile Form state
   const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
-
-  // Password Form state
-  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
 
   // Sector Modal state
   const [isSectorModalOpen, setIsSectorModalOpen] = useState(false);
@@ -172,30 +166,6 @@ export default function PengaturanView({
     }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmittingPassword(true);
-    setPasswordMsg(null);
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const result = await updatePassword(formData);
-
-    setIsSubmittingPassword(false);
-    if (result.success) {
-      setPasswordMsg({ 
-        type: "success", 
-        text: "Kata sandi berhasil diperbarui. Seluruh sesi aktif telah diakhiri untuk keamanan. Mengalihkan ke halaman login..." 
-      });
-      form.reset();
-      setTimeout(() => {
-        window.location.href = "/admin/login";
-      }, 1500);
-    } else {
-      setPasswordMsg({ type: "error", text: result.error || "Gagal memperbarui kata sandi." });
-    }
-  };
-
   const handleUserModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmittingUser(true);
@@ -257,7 +227,7 @@ export default function PengaturanView({
           }`}
         >
           <User size={16} />
-          Profil & Keamanan
+          Profil Akun
         </button>
 
         {(sessionRole === "SUPER_ADMIN") && (
@@ -372,82 +342,15 @@ export default function PengaturanView({
             </form>
           </div>
 
-          {/* CARD GANTI PASSWORD */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
-                <KeyRound size={22} />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground text-lg">Keamanan Kata Sandi</h3>
-                <p className="text-xs text-foreground/60">Perbarui kata sandi untuk melindungi akses akun Anda</p>
-              </div>
+          {/* PEMBERITAHUAN KREDENSIAL TERPUSAT */}
+          <div className="flex items-center gap-3 p-4 bg-muted/30 border border-border/60 rounded-2xl text-xs text-foreground/70">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
+              <ShieldCheck size={18} />
             </div>
-
-            {passwordMsg && (
-              <div className={`p-3.5 rounded-xl text-sm flex items-center gap-2.5 ${
-                passwordMsg.type === "success" 
-                  ? "bg-[#D85A30]/10 text-[#D85A30] border border-[#D85A30]/20" 
-                  : "bg-red-500/10 text-red-400 border border-red-500/20"
-              }`}>
-                {passwordMsg.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-                {passwordMsg.text}
-              </div>
-            )}
-
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                  Kata Sandi Saat Ini <span className="text-red-400">*</span>
-                </label>
-                <input
-                  name="currentPassword"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                  Kata Sandi Baru (Min. 8 Karakter, Huruf & Angka) <span className="text-red-400">*</span>
-                </label>
-                <input
-                  name="newPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
-                  Konfirmasi Kata Sandi Baru <span className="text-red-400">*</span>
-                </label>
-                <input
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="pt-4 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={isSubmittingPassword}
-                  className="px-5 py-2.5 bg-amber-500 text-black font-semibold text-sm rounded-xl hover:bg-amber-400 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isSubmittingPassword && <Loader2 size={16} className="animate-spin" />}
-                  Ubah Kata Sandi
-                </button>
-              </div>
-            </form>
+            <div>
+              <span className="font-semibold text-foreground block mb-0.5">Keamanan Kredensial Terpusat</span>
+              <span>Pengaturan kata sandi dan hak akses akun admin dikelola secara terpusat oleh Administrator sistem.</span>
+            </div>
           </div>
         </div>
       )}
