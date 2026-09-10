@@ -114,7 +114,7 @@ export function validateEnv(): ValidatedServerEnv {
     siteUrl && siteUrl.trim() !== ""
       ? siteUrl.trim()
       : isProduction
-      ? "https://csr.antam.com"
+      ? "https://csr-ubpnmalut.com"
       : "http://localhost:3000";
 
   return {

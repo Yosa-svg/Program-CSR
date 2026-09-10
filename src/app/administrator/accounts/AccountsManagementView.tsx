@@ -19,9 +19,10 @@ import {
   EyeOff,
   Sparkles,
   User,
+  UserPlus,
 } from "lucide-react";
 import { changePasswordAction, updateProfile } from "@/actions/settingActions";
-import { adminResetPasswordAction } from "@/actions/accountActions";
+import { adminResetPasswordAction, createAdminAccountAction } from "@/actions/accountActions";
 
 type AdminAccount = {
   id: string;
@@ -78,6 +79,20 @@ export default function AccountsManagementView({
   const [modalConfirmPassword, setModalConfirmPassword] = useState("");
   const [showPasswordText, setShowPasswordText] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
+
+  // State Tambah Akun Admin Baru
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
+  const [createMsg, setCreateMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    email: "",
+    role: "ADMIN_CSR" as "ADMIN_CSR" | "ADMINISTRATOR",
+    password: "",
+    confirmPassword: "",
+  });
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [copiedCreatePassword, setCopiedCreatePassword] = useState(false);
 
   // 1. Handler Self-Service Profile Update (Nama Lengkap)
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -164,9 +179,81 @@ export default function AccountsManagementView({
 
   const handleCopyPassword = () => {
     if (!modalNewPassword) return;
-    void navigator.clipboard.writeText(modalNewPassword);
+    navigator.clipboard.writeText(modalNewPassword);
     setCopiedNotification(true);
-    setTimeout(() => setCopiedNotification(false), 2000);
+    setTimeout(() => {
+      setCopiedNotification(false);
+    }, 2500);
+  };
+
+  // Helper Generator Password Akun Baru
+  const generateCreateRandomPassword = () => {
+    const uppercase = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lowercase = "abcdefghjkmnpqrstuvwxyz";
+    const numbers = "23456789";
+    const symbols = "!@#$%^&*";
+
+    const allChars = uppercase + lowercase + numbers + symbols;
+    let generated = "";
+    generated += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    generated += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    generated += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    generated += symbols.charAt(Math.floor(Math.random() * symbols.length));
+
+    for (let i = 0; i < 8; i++) {
+      generated += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    }
+
+    const shuffled = generated
+      .split("")
+      .sort(() => 0.5 - Math.random())
+      .join("");
+
+    setCreateForm((prev) => ({ ...prev, password: shuffled, confirmPassword: shuffled }));
+    setShowCreatePassword(true);
+  };
+
+  const handleCopyCreatePassword = () => {
+    if (!createForm.password) return;
+    navigator.clipboard.writeText(createForm.password);
+    setCopiedCreatePassword(true);
+    setTimeout(() => setCopiedCreatePassword(false), 2500);
+  };
+
+  // Handler Submit Tambah Akun Admin Baru
+  const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingCreate(true);
+    setCreateMsg(null);
+
+    const res = await createAdminAccountAction({
+      name: createForm.name,
+      email: createForm.email,
+      role: createForm.role,
+      password: createForm.password,
+      confirmPassword: createForm.confirmPassword,
+    });
+
+    setIsSubmittingCreate(false);
+    if (res.success) {
+      setCreateMsg({
+        type: "success",
+        text: res.message || "Akun admin baru berhasil dibuat.",
+      });
+      setCreateForm({
+        name: "",
+        email: "",
+        role: "ADMIN_CSR",
+        password: "",
+        confirmPassword: "",
+      });
+      router.refresh();
+    } else {
+      setCreateMsg({
+        type: "error",
+        text: res.error || "Gagal membuat akun admin baru.",
+      });
+    }
   };
 
   const handleOpenResetModal = (user: AdminAccount) => {
@@ -437,6 +524,17 @@ export default function AccountsManagementView({
               </p>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setIsCreateModalOpen(true);
+              setCreateMsg(null);
+            }}
+            className="px-4 py-2.5 bg-primary text-primary-foreground font-semibold text-xs sm:text-sm rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm cursor-pointer shrink-0"
+          >
+            <UserPlus size={16} />
+            Tambah Akun Admin
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -663,6 +761,213 @@ export default function AccountsManagementView({
                 >
                   {isSubmittingReset && <Loader2 size={14} className="animate-spin" />}
                   Terapkan Reset Kata Sandi
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH AKUN ADMIN BARU */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 text-foreground">
+            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/40">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">Tambah Akun Pengelola Baru</h4>
+                  <p className="text-[11px] text-foreground/60">
+                    Buat kredensial admin baru untuk tim pengelola CSR
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setCreateMsg(null);
+                }}
+                className="p-1.5 text-foreground/50 hover:text-foreground rounded-lg hover:bg-muted transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {createMsg && (
+              <div
+                className={`m-5 mb-0 p-3.5 rounded-xl text-xs flex items-start gap-2.5 border ${
+                  createMsg.type === "success"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                }`}
+              >
+                {createMsg.type === "success" ? (
+                  <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                )}
+                <span>{createMsg.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateSubmit} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Nama Lengkap <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  placeholder="cth. Budi Santoso"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Alamat Email <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  placeholder="cth. staf.csr@csr-ubpnmalut.com"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Peran / Hak Akses <span className="text-red-400">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, role: "ADMIN_CSR" })}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      createForm.role === "ADMIN_CSR"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-bold text-xs block mb-0.5">Admin CSR</span>
+                    <span className="text-[11px] opacity-70 block">
+                      Kelola program, kegiatan, sektor, & produk
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, role: "ADMINISTRATOR" })}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      createForm.role === "ADMINISTRATOR"
+                        ? "border-red-500/50 bg-red-500/10 text-red-400"
+                        : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="font-bold text-xs block mb-0.5">Administrator</span>
+                    <span className="text-[11px] opacity-70 block">
+                      Akses penuh keamanan, sesi, log, & akun
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Section with Ephemeral Generator */}
+              <div className="pt-2 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider">
+                    Kata Sandi Akun <span className="text-red-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generateCreateRandomPassword}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg border border-primary/30 transition-colors cursor-pointer"
+                  >
+                    <Sparkles size={13} />
+                    Buat Sandi Acak
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type={showCreatePassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    value={createForm.password}
+                    onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                    placeholder="Minimal 8 karakter"
+                    className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary pr-20 font-mono"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {createForm.password && (
+                      <button
+                        type="button"
+                        onClick={handleCopyCreatePassword}
+                        title="Salin kata sandi"
+                        className="p-1.5 text-foreground/50 hover:text-primary rounded-md transition-colors cursor-pointer"
+                      >
+                        {copiedCreatePassword ? (
+                          <Check size={15} className="text-emerald-400" />
+                        ) : (
+                          <Copy size={15} />
+                        )}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePassword(!showCreatePassword)}
+                      className="p-1.5 text-foreground/50 hover:text-foreground rounded-md transition-colors cursor-pointer"
+                    >
+                      {showCreatePassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+                {copiedCreatePassword && (
+                  <span className="text-[11px] text-emerald-400 mt-1 block">
+                    Kata sandi disalin ke clipboard.
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">
+                  Konfirmasi Kata Sandi <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type={showCreatePassword ? "text" : "password"}
+                  required
+                  minLength={8}
+                  value={createForm.confirmPassword}
+                  onChange={(e) => setCreateForm({ ...createForm, confirmPassword: e.target.value })}
+                  placeholder="Ulangi kata sandi"
+                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:border-primary font-mono"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end gap-2.5 border-t border-border mt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setCreateMsg(null);
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCreate || !createForm.name || !createForm.email || !createForm.password}
+                  className="px-5 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+                >
+                  {isSubmittingCreate && <Loader2 size={14} className="animate-spin" />}
+                  Simpan Akun Baru
                 </button>
               </div>
             </form>

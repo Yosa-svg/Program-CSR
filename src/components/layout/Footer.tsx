@@ -30,11 +30,6 @@ export default function Footer() {
             <p className="text-white/65 text-sm leading-relaxed mb-6 font-normal">
               Menginspirasi dan membangun masyarakat yang mandiri melalui pengelolaan sumber daya yang berkelanjutan.
             </p>
-            <div className="flex items-center gap-4 text-white/50 text-xs">
-              <a href="#" className="hover:text-[#F6A236] transition-colors">Instagram</a>
-              <a href="#" className="hover:text-[#F6A236] transition-colors">Facebook</a>
-              <a href="#" className="hover:text-[#F6A236] transition-colors">Twitter</a>
-            </div>
           </div>
 
           {/* Links Col */}
@@ -66,7 +61,7 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-white/65">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#F6A236] shrink-0 mt-0.5" />
-                <span>Jl. Pembangunan Berkelanjutan No. 12, Jakarta</span>
+                <span>Kantor PT ANTAM Tbk UBPN Maluku Utara, Buli, Kec. Maba, Kab. Halmahera Timur, Maluku Utara</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="text-[#F6A236] shrink-0" />
@@ -74,7 +69,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#F6A236] shrink-0" />
-                <span>halo@keb-csr.id</span>
+                <span>info@csr-ubpnmalut.com</span>
               </li>
             </ul>
           </div>

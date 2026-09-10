@@ -225,3 +225,127 @@ export async function adminResetPasswordAction(params: AdminResetPasswordParams)
     };
   }
 }
+
+export type CreateAdminAccountParams = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  role: "ADMIN_CSR" | "ADMINISTRATOR";
+};
+
+/**
+ * Server Action untuk membuat akun administrator / admin CSR baru.
+ * 
+ * Aturan Otorisasi & Keamanan:
+ * 1. Hanya dapat dieksekusi oleh role ADMINISTRATOR (guard requireAdministratorAuth()).
+ * 2. Validasi nama lengkap (2 - 100 karakter).
+ * 3. Validasi format email & pencegahan duplikasi email.
+ * 4. Validasi kekuatan kata sandi (minimal 8 karakter).
+ * 5. Password di-hash menggunakan bcryptjs.
+ * 6. Dicatat ke ActivityLog tanpa kredensial sensitif.
+ * 7. Revalidasi halaman tata kelola akun.
+ */
+export async function createAdminAccountAction(params: CreateAdminAccountParams): Promise<{
+  success: boolean;
+  message?: string;
+  account?: AdminAccountItem;
+  error?: string;
+}> {
+  try {
+    const currentAdmin = await requireAdministratorAuth();
+    const { ipAddress, userAgent } = await getRequestMeta();
+
+    const name = params.name?.trim();
+    if (!name || name.length < 2 || name.length > 100) {
+      return { success: false, error: "Nama lengkap harus antara 2 hingga 100 karakter." };
+    }
+
+    const email = params.email?.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return { success: false, error: "Format email tidak valid." };
+    }
+
+    const role = params.role;
+    if (role !== "ADMIN_CSR" && role !== "ADMINISTRATOR") {
+      return { success: false, error: "Role pengguna tidak valid. Pilih Admin CSR atau Administrator." };
+    }
+
+    const password = params.password;
+    if (!password || password.length < 8) {
+      return { success: false, error: "Kata sandi harus memiliki panjang minimal 8 karakter." };
+    }
+
+    if (params.confirmPassword !== undefined && params.confirmPassword !== password) {
+      return { success: false, error: "Konfirmasi kata sandi tidak cocok." };
+    }
+
+    // Cek duplikasi email
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      return { success: false, error: "Alamat email ini sudah terdaftar dalam sistem." };
+    }
+
+    // Hash kata sandi
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    // Catat ActivityLog
+    void logActivity({
+      userId: currentAdmin.userId,
+      action: ActivityAction.CREATE,
+      entityType: "USER",
+      entityId: newUser.id,
+      entityTitle: newUser.name,
+      description: `Administrator ${currentAdmin.name} membuat akun admin baru: ${newUser.name} (${newUser.email}) sebagai ${newUser.role}`,
+      metadata: {
+        event: "ADMIN_ACCOUNT_CREATED",
+        createdUserId: newUser.id,
+        createdEmail: newUser.email,
+        createdRole: newUser.role,
+        actorRole: currentAdmin.role,
+      },
+      ipAddress,
+      userAgent,
+    });
+
+    revalidatePath("/administrator/accounts");
+    revalidatePath("/administrator");
+
+    return {
+      success: true,
+      message: `Akun ${newUser.name} (${newUser.email}) berhasil dibuat dengan role ${newUser.role === "ADMINISTRATOR" ? "Administrator" : "Admin CSR"}.`,
+      account: {
+        ...newUser,
+        activeSessionCount: 0,
+      },
+    };
+  } catch (error: unknown) {
+    console.error("Failed to create admin account:", error);
+    return {
+      success: false,
+      error: toSafeErrorMessage(error, "Terjadi kesalahan saat memproses pembuatan akun."),
+    };
+  }
+}
