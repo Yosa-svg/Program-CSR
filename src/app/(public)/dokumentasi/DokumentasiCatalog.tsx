@@ -72,8 +72,38 @@ export default function DokumentasiCatalog({
             Galeri Dokumentasi & Dampak
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed font-normal drop-shadow-sm">
-            Kumpulan dokumentasi pelaksanaan, kegiatan, dan hasil program Tanggung Jawab Sosial Lingkungan (TJSL) di berbagai sektor secara transparan dan akuntabel.
+            Kumpulan dokumentasi pelaksanaan, kegiatan, dan hasil program CSR di berbagai sektor secara transparan dan akuntabel.
           </p>
+        </div>
+      </section>
+
+      {/* FULL 3-MINUTE CSR PROFILE VIDEO SECTION */}
+      <section className="py-12 md:py-16 bg-[#F7FAF9] border-b border-[#E2E8E6] px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <span className="inline-block px-3.5 py-1 bg-[#0D726D]/10 text-[#0D726D] rounded-full text-xs font-bold tracking-wider uppercase mb-3 border border-[#0D726D]/20">
+              Video Profil CSR ANTAM
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#172121]">
+              Sorotan Profil CSR ANTAM UBPN Maluku Utara
+            </h2>
+            <p className="text-sm text-[#172121]/70 mt-2 max-w-2xl mx-auto">
+              Tayangan lengkap dokumentasi inisiatif, program pemberdayaan masyarakat, dan komitmen keberlanjutan.
+            </p>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden border border-[#E2E8E6] bg-black shadow-xl aspect-video w-full flex items-center justify-center">
+            <video
+              src="/videos/csr-profil-3min.mp4"
+              controls
+              playsInline
+              preload="metadata"
+              poster="/images/asset-logo.webp"
+              className="w-full h-full object-cover"
+            >
+              Browser Anda tidak mendukung pemutaran video HTML5.
+            </video>
+          </div>
         </div>
       </section>
 

@@ -57,8 +57,8 @@ export default function PhotoSlider({
               transition={{ duration: 0.5 }}
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#0D726D]/20 bg-[#0D726D]/10 mb-4 text-xs font-bold tracking-wider text-[#0D726D] uppercase shadow-sm"
             >
-              <Camera size={13} className="text-[#F6A236]" />
-              Dokumentasi & Aksi Lapangan
+              <Camera size={13} className="text-[#F6A236]" aria-hidden="true" />
+              Dokumentasi CSR
             </motion.div>
 
             <motion.h2
@@ -68,7 +68,7 @@ export default function PhotoSlider({
               transition={{ duration: 0.5, delay: 0.1 }}
               className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[#172121]"
             >
-              Kehadiran nyata, dampak berkelanjutan.
+              Cerita dari Lapangan
             </motion.h2>
 
             <motion.p
@@ -78,7 +78,7 @@ export default function PhotoSlider({
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base text-[#172121]/70 mt-3 max-w-2xl font-normal leading-relaxed"
             >
-              Potret aktivitas kolaboratif pendampingan masyarakat, kemitraan ekonomi, dan konservasi lingkungan di kawasan binaan.
+              Dokumentasi kegiatan CSR ANTAM bersama masyarakat di wilayah sekitar operasional.
             </motion.p>
           </div>
 

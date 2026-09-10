@@ -20,12 +20,11 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Beranda", href: "/" },
-    { name: "Tentang", href: "/tentang" },
-    { name: "Sektor CSR", href: "/bidang" },
     { name: "Program", href: "/program" },
     { name: "Produk", href: "/produk" },
     { name: "Dokumentasi", href: "/dokumentasi" },
     { name: "Kinerja", href: "/kinerja" },
+    { name: "Tentang", href: "/tentang" },
   ];
 
   return (
@@ -53,13 +52,13 @@ export default function Navbar() {
             <div className="h-7 sm:h-8 w-px bg-[#E2E8E6] hidden sm:block" />
             <div className="flex flex-col">
               <span className="font-bold text-sm sm:text-base leading-tight text-[#172121] tracking-tight">
-                CSR ANTAM
+                CSR
               </span>
               <span className="text-[11px] sm:text-xs text-[#172121]/70 font-medium hidden sm:inline">
-                Kawasan Ekonomi Keberlanjutan
+                PT ANTAM Tbk UBPN Maluku Utara
               </span>
               <span className="text-[10px] text-[#172121]/70 font-medium sm:hidden">
-                Keberlanjutan
+                UBPN Maluku Utara
               </span>
             </div>
           </Link>
@@ -87,10 +86,10 @@ export default function Navbar() {
           {/* Right Actions */}
           <div className="hidden md:flex items-center space-x-5">
             <Link
-              href="/bidang"
+              href="/program"
               className="btn btn-primary rounded-full px-5 py-2 text-sm flex items-center gap-2 font-semibold shadow-sm"
             >
-              Jelajahi <ArrowRight size={15} />
+              Jelajahi Program <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
 
@@ -136,11 +135,11 @@ export default function Navbar() {
               })}
               <div className="px-3 pt-4 border-t border-[#E2E8E6] flex flex-col gap-2.5">
                 <Link
-                  href="/bidang"
+                  href="/program"
                   onClick={() => setIsOpen(false)}
                   className="btn btn-primary rounded-full w-full flex justify-center items-center gap-2 font-semibold text-sm"
                 >
-                  Jelajahi Program <ArrowRight size={15} />
+                  Jelajahi Program <ArrowRight size={15} aria-hidden="true" />
                 </Link>
               </div>
             </div>

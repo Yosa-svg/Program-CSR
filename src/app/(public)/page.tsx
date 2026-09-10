@@ -3,33 +3,35 @@ import { createMetadata } from "@/lib/seo";
 import Hero from "@/components/home/Hero";
 import PhotoSlider from "@/components/home/PhotoSlider";
 import About from "@/components/home/About";
-import Sectors from "@/components/home/Sectors";
+import Focus from "@/components/home/Focus";
+import Planning from "@/components/home/Planning";
 import ProgramPreview from "@/components/home/ProgramPreview";
 import ProductPreview from "@/components/home/ProductPreview";
 import ImpactSummary from "@/components/home/ImpactSummary";
+import Governance from "@/components/home/Governance";
+import Framework from "@/components/home/Framework";
+import ContactSection from "@/components/home/ContactSection";
 import { prisma } from "@/lib/prisma";
 
 export const revalidate = 0;
 
 export const metadata: Metadata = createMetadata({
-  title: "Beranda",
+  title: "CSR ANTAM UBPN Maluku Utara",
   description:
-    "Portal resmi program Corporate Social Responsibility (CSR) ANTAM. Menyelaraskan kemajuan ekonomi masyarakat lokal dengan kelestarian alam secara terpadu.",
+    "Portal resmi program Corporate Social Responsibility (CSR) PT ANTAM Tbk UBPN Maluku Utara. Mendorong kemandirian berkelanjutan dan memberdayakan masyarakat lingkar tambang.",
   canonical: "/",
 });
 
 export default async function Home() {
-  // Query paralel untuk seluruh kebutuhan data Beranda secara efisien
+  // Parallel database query for real published CMS data
   const [
     featuredDocs,
     fallbackDocs,
-    sectorCount,
-    sectors,
     programs,
     products,
     metrics,
   ] = await Promise.all([
-    // 1. Dokumentasi featured & published
+    // 1. Featured published documentations for slider
     prisma.documentation.findMany({
       where: {
         isPublished: true,
@@ -43,7 +45,7 @@ export default async function Home() {
       },
       take: 12,
     }),
-    // 2. Fallback dokumentasi published
+    // 2. Fallback published documentations
     prisma.documentation.findMany({
       where: {
         isPublished: true,
@@ -56,24 +58,7 @@ export default async function Home() {
       },
       take: 8,
     }),
-    // 3. Jumlah sektor aktif untuk Hero
-    prisma.sector.count(),
-    // 4. Sektor dengan inisiatif program terbit untuk Sectors
-    prisma.sector.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        programs: {
-          where: { isPublished: true },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-          },
-          take: 1,
-        },
-      },
-    }),
-    // 5. Dua program terbit untuk ProgramPreview
+    // 3. Up to 3 published programs from CMS
     prisma.program.findMany({
       where: { isPublished: true },
       include: {
@@ -86,9 +71,9 @@ export default async function Home() {
         },
       },
       orderBy: { title: "asc" },
-      take: 2,
+      take: 3,
     }),
-    // 6. Tiga produk terbit untuk ProductPreview
+    // 4. Up to 3 published products from CMS
     prisma.product.findMany({
       where: { isPublished: true },
       include: {
@@ -102,7 +87,7 @@ export default async function Home() {
       orderBy: { name: "asc" },
       take: 3,
     }),
-    // 7. Dua metrik dampak terbit terbaru untuk ImpactSummary
+    // 5. Published metrics from CMS
     prisma.metric.findMany({
       where: { isPublished: true },
       include: {
@@ -113,7 +98,7 @@ export default async function Home() {
         },
       },
       orderBy: [{ year: "desc" }, { createdAt: "desc" }],
-      take: 2,
+      take: 4,
     }),
   ]);
 
@@ -121,13 +106,38 @@ export default async function Home() {
 
   return (
     <>
-      <Hero sectorsCount={sectorCount} />
+      {/* 1. Hero Section (2 columns desktop: Left text, Right video highlight) */}
+      <Hero />
+
+      {/* 2. Photo Slider (Cerita dari Lapangan) */}
       <PhotoSlider documentations={sliderDocumentations} />
+
+      {/* 3. About CSR (CSR ANTAM untuk Masyarakat dan Lingkungan) */}
       <About />
-      <Sectors sectors={sectors} />
+
+      {/* 4. Fokus CSR (4 pilar: Pendidikan, Lingkungan, Ekonomi & UMK, Sosial & Masyarakat) */}
+      <Focus />
+
+      {/* 5. Perencanaan CSR (Terencana, Terukur, Tepat Sasaran - 3 tahap) */}
+      <Planning />
+
+      {/* 6. Program CSR Unggulan (3 program terbit dari CMS) */}
       <ProgramPreview programs={programs} />
+
+      {/* 7. Produk & Karya Mitra Binaan (3 produk terbit dari CMS tanpa info finansial/harga) */}
       <ProductPreview products={products} />
+
+      {/* 8. Dampak & Kinerja CSR (Metrik riil CMS atau state Dalam Proses Evaluasi) */}
       <ImpactSummary metrics={metrics} />
+
+      {/* 9. Tata Kelola CSR (4 pilar governance: Perencanaan, Pelaksanaan, Monitoring, Evaluasi) */}
+      <Governance />
+
+      {/* 10. Kerangka & Acuan (ISO 26000 sebagai panduan tanggung jawab sosial, SDGs, PROPER, Regulasi) */}
+      <Framework />
+
+      {/* 11. Terhubung dengan Kami (Informasi resmi kantor Buli Halmahera Timur & CTA /tentang) */}
+      <ContactSection />
     </>
   );
 }

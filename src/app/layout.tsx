@@ -16,8 +16,8 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "CSR ANTAM - Kawasan Ekonomi Keberlanjutan",
-    template: "%s | CSR ANTAM",
+    default: "CSR ANTAM UBPN Maluku Utara",
+    template: "%s | CSR ANTAM UBPN Maluku Utara",
   },
   description: DEFAULT_DESCRIPTION,
   icons: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/about/kawasan.jpg",
+        url: "/images/asset-logo.webp",
         width: 1200,
         height: 630,
         alt: SITE_NAME,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
-    images: ["/images/about/kawasan.jpg"],
+    images: ["/images/asset-logo.webp"],
   },
   robots: {
     index: true,

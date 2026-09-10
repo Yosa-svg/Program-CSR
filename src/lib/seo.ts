@@ -9,11 +9,11 @@ import type { Metadata } from "next";
 const isProduction = process.env.NODE_ENV === "production";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (isProduction ? "https://csr-ubpnmalut.com" : "http://localhost:3000");
+  (isProduction ? "https://www.csr-ubpnmalut.com" : "http://localhost:3000");
 
-export const SITE_NAME = "CSR ANTAM - Kawasan Ekonomi Keberlanjutan";
+export const SITE_NAME = "CSR ANTAM UBPN Maluku Utara";
 export const DEFAULT_DESCRIPTION =
-  "Platform transparansi, dampak, dan publikasi program Corporate Social Responsibility (CSR) Kawasan Ekonomi Keberlanjutan ANTAM.";
+  "Portal resmi program Corporate Social Responsibility (CSR) PT ANTAM Tbk Unit Bisnis Pertambangan Nikel (UBPN) Maluku Utara. Mendorong kemandirian berkelanjutan dan memberdayakan masyarakat lingkar tambang.";
 
 export interface CreateMetadataOptions {
   title: string;
@@ -32,7 +32,7 @@ export function createMetadata({
 }: CreateMetadataOptions): Metadata {
   const images = imageUrl && !imageUrl.includes("placeholder")
     ? [{ url: imageUrl, width: 1200, height: 630, alt: title }]
-    : [{ url: "/images/about/kawasan.jpg", width: 1200, height: 630, alt: SITE_NAME }];
+    : [{ url: "/images/asset-logo.webp", width: 1200, height: 630, alt: SITE_NAME }];
 
   return {
     title,
