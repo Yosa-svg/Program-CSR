@@ -57,6 +57,10 @@ next-env.d.ts
 public/uploads/*
 !public/uploads/.gitkeep
 
+# large media / videos
+public/videos/*
+!public/videos/.gitkeep
+
 # Cypress generated artifacts
 cypress/screenshots/
 cypress/videos/

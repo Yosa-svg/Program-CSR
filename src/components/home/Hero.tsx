@@ -100,12 +100,13 @@ export default function Hero() {
             <div className="relative rounded-3xl overflow-hidden border border-white/20 bg-black/40 shadow-2xl aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] w-full flex items-center justify-center group">
               {!videoError ? (
                 <video
-                  src="/videos/csr-hero-highlight.mp4"
+                  src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "/videos/0912.mp4"}
                   autoPlay
                   muted
                   loop
                   playsInline
                   controls={false}
+                  preload="metadata"
                   onError={() => setVideoError(true)}
                   className="w-full h-full object-cover"
                 />

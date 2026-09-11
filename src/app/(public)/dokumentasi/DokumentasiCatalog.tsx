@@ -94,11 +94,10 @@ export default function DokumentasiCatalog({
 
           <div className="relative rounded-3xl overflow-hidden border border-[#E2E8E6] bg-black shadow-xl aspect-video w-full flex items-center justify-center">
             <video
-              src="/videos/csr-profil-3min.mp4"
+              src={process.env.NEXT_PUBLIC_PROFILE_VIDEO_URL || "/videos/CSR%20Program%20Draft%202.mp4"}
               controls
               playsInline
               preload="metadata"
-              poster="/images/asset-logo.webp"
               className="w-full h-full object-cover"
             >
               Browser Anda tidak mendukung pemutaran video HTML5.
