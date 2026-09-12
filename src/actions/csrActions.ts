@@ -13,6 +13,7 @@ import {
   validateId,
   toSafeErrorMessage,
 } from "@/lib/validation";
+import { uploadImage, deleteImage } from "@/lib/mediaService";
 
 // Helper: extract client IP & User-Agent dari request headers
 async function getRequestMeta() {
@@ -135,10 +136,21 @@ export async function createProgram(formData: FormData) {
 
     const isPublished = formData.get("isPublished") === "true";
 
-    const rawImageUrl = (formData.get("imageUrl") as string)?.trim() || "/images/placeholder.jpg";
-    const imageVal = validateSafeUrl(rawImageUrl, { allowRelative: true, maxLen: 1000, fieldName: "URL Gambar" });
-    if (!imageVal.valid) return { success: false, error: imageVal.error };
-    const imageUrl = imageVal.value || "/images/placeholder.jpg";
+    // Image file upload or URL fallback
+    const file = formData.get("image") as File | null;
+    let imageUrl = (formData.get("imageUrl") as string)?.trim() || "/images/placeholder.jpg";
+
+    if (file && typeof file === "object" && file.size > 0) {
+      const uploadResult = await uploadImage(file, "programs");
+      if (uploadResult.error || !uploadResult.url) {
+        return { success: false, error: uploadResult.error || "Gagal mengunggah gambar program." };
+      }
+      imageUrl = uploadResult.url;
+    } else {
+      const imageVal = validateSafeUrl(imageUrl, { allowRelative: true, maxLen: 1000, fieldName: "URL Gambar" });
+      if (!imageVal.valid) return { success: false, error: imageVal.error };
+      imageUrl = imageVal.value || "/images/placeholder.jpg";
+    }
 
     const srcVal = validateOptionalString(formData.get("source"), 255);
     if (!srcVal.valid) return { success: false, error: srcVal.error };
@@ -273,10 +285,21 @@ export async function updateProgram(id: string, formData: FormData) {
       return { success: false, error: "Sektor yang dipilih tidak valid atau tidak ditemukan." };
     }
 
-    const rawImageUrl = (formData.get("imageUrl") as string)?.trim() || program.imageUrl;
-    const imageVal = validateSafeUrl(rawImageUrl, { allowRelative: true, maxLen: 1000, fieldName: "URL Gambar" });
-    if (!imageVal.valid) return { success: false, error: imageVal.error };
-    const imageUrl = imageVal.value || program.imageUrl;
+    // Image file upload or URL fallback
+    const file = formData.get("image") as File | null;
+    let imageUrl = (formData.get("imageUrl") as string)?.trim() || program.imageUrl;
+
+    if (file && typeof file === "object" && file.size > 0) {
+      const uploadResult = await uploadImage(file, "programs");
+      if (uploadResult.error || !uploadResult.url) {
+        return { success: false, error: uploadResult.error || "Gagal mengunggah gambar program." };
+      }
+      imageUrl = uploadResult.url;
+    } else {
+      const imageVal = validateSafeUrl(imageUrl, { allowRelative: true, maxLen: 1000, fieldName: "URL Gambar" });
+      if (!imageVal.valid) return { success: false, error: imageVal.error };
+      imageUrl = imageVal.value || program.imageUrl;
+    }
 
     const srcVal = validateOptionalString(formData.get("source"), 255);
     if (!srcVal.valid) return { success: false, error: srcVal.error };

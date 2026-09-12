@@ -50,14 +50,10 @@ export default function DokumentasiCatalog({
   sectors: Sector[];
 }) {
   const [activeSector, setActiveSector] = useState<string>("ALL");
-  const [activeVideo, setActiveVideo] = useState<"draft2" | "draft1">("draft2");
-
   const filtered =
     activeSector === "ALL"
       ? documentations
       : documentations.filter((d) => d.sectorId === activeSector);
-
-  const activeYouTubeId = activeVideo === "draft2" ? "H4zONQnGKGI" : "VH3IYqbi7DQ";
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans text-[#172121]">
@@ -77,73 +73,6 @@ export default function DokumentasiCatalog({
           <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed font-normal drop-shadow-sm">
             Kumpulan dokumentasi pelaksanaan, kegiatan, dan hasil program CSR di berbagai sektor secara transparan dan akuntabel.
           </p>
-        </div>
-      </section>
-
-      {/* FULL 3-MINUTE CSR PROFILE VIDEO SECTION */}
-      <section className="py-12 md:py-16 bg-[#F7FAF9] border-b border-[#E2E8E6] px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <span className="inline-block px-3.5 py-1 bg-[#0D726D]/10 text-[#0D726D] rounded-full text-xs font-bold tracking-wider uppercase mb-3 border border-[#0D726D]/20">
-              Video Profil CSR ANTAM
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#172121]">
-              Sorotan Profil CSR ANTAM UBPN Maluku Utara
-            </h2>
-            <p className="text-sm text-[#172121]/70 mt-2 max-w-2xl mx-auto">
-              Tayangan lengkap dokumentasi inisiatif, program pemberdayaan masyarakat, dan komitmen keberlanjutan.
-            </p>
-
-            {/* Version Switcher Buttons */}
-            <div className="flex items-center justify-center gap-2 mt-5">
-              <button
-                type="button"
-                onClick={() => setActiveVideo("draft2")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                  activeVideo === "draft2"
-                    ? "bg-[#0D726D] text-white shadow-sm"
-                    : "bg-white text-[#172121]/70 border border-[#E2E8E6] hover:bg-gray-50"
-                }`}
-              >
-                Video Profil (Utama)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveVideo("draft1")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                  activeVideo === "draft1"
-                    ? "bg-[#0D726D] text-white shadow-sm"
-                    : "bg-white text-[#172121]/70 border border-[#E2E8E6] hover:bg-gray-50"
-                }`}
-              >
-                Versi Alternatif (Draft 1)
-              </button>
-            </div>
-          </div>
-
-          <div className="relative rounded-3xl overflow-hidden border border-[#E2E8E6] bg-black shadow-xl aspect-video w-full flex items-center justify-center">
-            {activeVideo === "draft2" ? (
-              <video
-                key="draft2-blob"
-                src={process.env.NEXT_PUBLIC_PROFILE_VIDEO_URL || "https://4ywwtt4wzyffcgix.public.blob.vercel-storage.com/CSR%20Program%20Color.mp4"}
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full h-full object-cover"
-              >
-                Browser Anda tidak mendukung pemutaran video HTML5.
-              </video>
-            ) : (
-              <iframe
-                key="draft1-youtube"
-                src="https://www.youtube-nocookie.com/embed/VH3IYqbi7DQ?rel=0&modestbranding=1&playsinline=1"
-                title="Video Profil CSR ANTAM UBPN Maluku Utara (Draft 1)"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            )}
-          </div>
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Building2, ArrowRight } from "lucide-react";
+import { MapPin, Building2, ArrowRight, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -76,9 +76,9 @@ export default function Footer() {
           {/* Location & Corporate Office Col */}
           <div className="lg:col-span-4">
             <h4 className="text-white font-semibold mb-5 text-sm uppercase tracking-wider">
-              Wilayah Operasional
+              Kontak & Operasional
             </h4>
-            <div className="space-y-4 text-sm text-white/70">
+            <div className="space-y-3.5 text-sm text-white/70">
               <div className="flex items-start gap-3">
                 <Building2 size={18} className="text-[#F6A236] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>PT ANTAM Tbk UBPN Maluku Utara</span>
@@ -87,7 +87,33 @@ export default function Footer() {
                 <MapPin size={18} className="text-[#F6A236] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>Buli, Halmahera Timur, Maluku Utara</span>
               </div>
-              <div className="pt-2">
+              <div className="flex items-start gap-3">
+                <Phone size={18} className="text-[#F6A236] shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/50">Telepon / WhatsApp Admin:</span>
+                  <a
+                    href="https://wa.me/6281347748187"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors text-white/90 font-medium"
+                  >
+                    +62 813-4774-8187
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Mail size={18} className="text-[#F6A236] shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-white/50">Email Kontak Admin:</span>
+                  <a
+                    href="mailto:admin.csr-ubpnmalut@antam.com"
+                    className="hover:text-white transition-colors text-white/90 font-medium break-all"
+                  >
+                    admin.csr-ubpnmalut@antam.com
+                  </a>
+                </div>
+              </div>
+              <div className="pt-1">
                 <Link
                   href="/tentang"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F6A236] hover:underline"

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Building2, ArrowRight } from "lucide-react";
+import { MapPin, Building2, ArrowRight, Phone, Mail } from "lucide-react";
 import Link from "next/link";
 
 export default function ContactSection() {
@@ -46,9 +46,12 @@ export default function ContactSection() {
               <div className="space-y-4 text-sm text-[#172121]/80">
                 <div className="flex items-start gap-3">
                   <Building2 size={19} className="text-[#0D726D] shrink-0 mt-0.5" aria-hidden="true" />
-                  <span className="font-semibold text-[#172121]">
-                    PT ANTAM Tbk UBPN Maluku Utara
-                  </span>
+                  <div>
+                    <span className="font-semibold text-[#172121] block">
+                      PT ANTAM Tbk UBPN Maluku Utara
+                    </span>
+                    <span className="text-xs text-[#172121]/60">Unit Bisnis Pertambangan Nikel Maluku Utara</span>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin size={19} className="text-[#F6A236] shrink-0 mt-0.5" aria-hidden="true" />
@@ -56,24 +59,52 @@ export default function ContactSection() {
                     Buli, Kecamatan Maba, Kabupaten Halmahera Timur, Maluku Utara
                   </span>
                 </div>
+                <div className="flex items-start gap-3">
+                  <Phone size={19} className="text-[#0D726D] shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#172121]/60 font-medium">Telepon / WhatsApp Admin:</span>
+                    <a
+                      href="https://wa.me/6281347748187"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[#172121] hover:text-[#0D726D] transition-colors inline-flex items-center gap-1.5"
+                    >
+                      +62 813-4774-8187
+                    </a>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Mail size={19} className="text-[#0D726D] shrink-0 mt-0.5" aria-hidden="true" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#172121]/60 font-medium">Email Kontak Admin:</span>
+                    <a
+                      href="mailto:admin.csr-ubpnmalut@antam.com"
+                      className="font-semibold text-[#172121] hover:text-[#0D726D] transition-colors break-all"
+                    >
+                      admin.csr-ubpnmalut@antam.com
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Right Action */}
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-center gap-4">
-              <Link
-                href="/tentang"
+              <a
+                href="https://wa.me/6281347748187"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0D726D] text-white text-sm font-bold hover:bg-[#0B5C58] transition-all shadow-md flex items-center justify-center gap-2 group text-center"
               >
-                Pelajari Profil & Kontak
+                Hubungi via WhatsApp
                 <ArrowRight size={16} className="text-[#F6A236] group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-              </Link>
-              <Link
-                href="/program"
+              </a>
+              <a
+                href="mailto:admin.csr-ubpnmalut@antam.com"
                 className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white border border-[#E2E8E6] text-[#172121] text-sm font-semibold hover:border-[#0D726D]/50 hover:bg-[#F7FAF9] transition-all flex items-center justify-center text-center"
               >
-                Katalog Program CSR
-              </Link>
+                Kirim Email Admin
+              </a>
             </div>
 
           </div>

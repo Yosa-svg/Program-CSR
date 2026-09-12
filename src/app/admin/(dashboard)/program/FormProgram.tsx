@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Loader2, AlertCircle, Upload, ImagePlus } from "lucide-react";
+import Image from "next/image";
 import { createProgram, updateProgram } from "@/actions/csrActions";
 
 type Program = {
@@ -43,12 +44,28 @@ export default function FormProgram({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isEditing = !!initialData;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.imageUrl || null);
 
   useEffect(() => {
     if (isOpen) {
       setErrorMessage(null);
+      setPreviewUrl(initialData?.imageUrl || null);
     }
   }, [isOpen, initialData]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMessage("Ukuran gambar melebihi 5MB.");
+        return;
+      }
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+      setErrorMessage(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -172,16 +189,52 @@ export default function FormProgram({
             </div>
           </div>
 
+          {/* Upload Foto Program / Cover Banner */}
           <div>
             <label className="block text-sm font-medium text-foreground/70 mb-1">
-              URL Gambar Banner / Cover
+              Foto Sampul / Banner Program
             </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border border-dashed rounded-xl hover:border-primary/50 transition-colors bg-background/30 relative">
+              <div className="space-y-3 text-center flex flex-col items-center w-full">
+                {previewUrl ? (
+                  <div className="relative w-full max-w-md h-48 rounded-lg overflow-hidden border border-border shadow-sm">
+                    <Image 
+                      src={previewUrl} 
+                      alt="Preview Cover Program" 
+                      fill 
+                      className="object-cover" 
+                      unoptimized={previewUrl.startsWith("blob:")}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-3 text-foreground/40">
+                    <ImagePlus className="h-12 w-12 mb-2 opacity-50" />
+                    <span className="text-xs">Belum ada foto yang dipilih</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-2">
+                  <label className="cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary font-medium px-4 py-2 rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+                    <Upload size={16} />
+                    <span>{previewUrl ? "Ganti File Foto" : "Unggah File Foto Program"}</span>
+                    <input 
+                      ref={fileInputRef}
+                      name="image" 
+                      type="file" 
+                      accept="image/jpeg,image/png,image/webp" 
+                      onChange={handleImageChange}
+                      className="sr-only" 
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-foreground/40">Mendukung format JPG, PNG, atau WEBP (Maksimal 5MB)</p>
+              </div>
+            </div>
+            {/* Hidden field to keep existing imageUrl if no new file is selected */}
             <input 
+              type="hidden" 
               name="imageUrl" 
-              defaultValue={initialData?.imageUrl || "/images/placeholder.jpg"}
-              type="text" 
-              placeholder="/images/placeholder.jpg atau link gambar"
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary"
+              value={initialData?.imageUrl || "/images/placeholder.jpg"} 
             />
           </div>
 

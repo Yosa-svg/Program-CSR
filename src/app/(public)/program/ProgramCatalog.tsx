@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Layers, MapPin, Users, ArrowRight, Filter } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 type Program = {
   id: string;
@@ -11,6 +12,7 @@ type Program = {
   location: string;
   beneficiaries: string;
   status: string;
+  imageUrl?: string | null;
   isPublished: boolean;
   sectorId: string;
   slug: string;
@@ -119,28 +121,45 @@ export default function ProgramCatalog({
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filtered.map((program) => {
                 const status = statusLabel[program.status] || statusLabel.ACTIVE;
+                const hasImage = Boolean(program.imageUrl && !program.imageUrl.includes("placeholder"));
+
                 return (
                   <Link
                     href={`/program/${program.slug}`}
                     key={program.id}
-                    className="group bg-white border border-[#E2E8E6] rounded-2xl hover:border-[#0D726D]/50 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer shadow-sm relative"
+                    className="group bg-white border border-[#E2E8E6] rounded-2xl overflow-hidden hover:border-[#0D726D]/50 hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer shadow-sm relative"
                   >
-                    {/* Top Accent Line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#0D726D] group-hover:bg-[#F6A236] transition-colors z-20 rounded-t-2xl"></div>
+                    {/* Top Image Container */}
+                    <div className="aspect-[16/10] bg-[#0D726D]/5 relative overflow-hidden flex items-center justify-center border-b border-[#E2E8E6]">
+                      {hasImage ? (
+                        <Image
+                          src={program.imageUrl!}
+                          alt={program.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-[#0D726D]/40 p-6 text-center">
+                          <Layers size={36} aria-hidden="true" />
+                          <span className="text-xs mt-2 font-medium text-[#172121]/50">Dokumentasi Program</span>
+                        </div>
+                      )}
 
-                    {/* Card Body */}
-                    <div className="p-6 flex flex-col flex-1 pt-7">
-                      {/* Badges Row */}
-                      <div className="flex items-center gap-2 flex-wrap mb-3">
-                        <span className="inline-block w-fit px-2.5 py-1 bg-[#F6A236]/15 text-[#E59124] border border-[#F6A236]/30 rounded-lg text-[11px] uppercase font-bold tracking-wider">
+                      {/* Top Overlay Badges */}
+                      <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/95 text-[#0D726D] shadow-sm backdrop-blur-md border border-[#E2E8E6]">
                           {program.sector.name}
                         </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${status.color}`}>
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm backdrop-blur-md bg-white/95 border ${status.color}`}>
                           {status.text}
                         </span>
                       </div>
+                    </div>
 
-                      <h3 className="text-xl font-bold text-[#172121] mb-2 group-hover:text-[#0D726D] transition-colors">
+                    {/* Card Body */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold text-[#172121] mb-2 group-hover:text-[#0D726D] transition-colors line-clamp-2">
                         {program.title}
                       </h3>
                       <p className="text-[#172121]/70 text-sm line-clamp-3 mb-6 flex-1 font-normal">
@@ -157,6 +176,14 @@ export default function ProgramCatalog({
                           <Users size={14} className="text-[#0D726D] flex-shrink-0" />
                           <span>{program.beneficiaries}</span>
                         </div>
+                      </div>
+
+                      {/* Action Link Row */}
+                      <div className="pt-4 border-t border-[#E2E8E6]/60 mt-4 flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#0D726D] group-hover:text-[#0B5C58] transition-colors inline-flex items-center gap-1.5">
+                          Pelajari Selengkapnya
+                          <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-[#F6A236]" aria-hidden="true" />
+                        </span>
                       </div>
                     </div>
                   </Link>
