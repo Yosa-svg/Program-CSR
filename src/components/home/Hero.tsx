@@ -100,19 +100,19 @@ export default function Hero() {
             <div className="relative rounded-3xl overflow-hidden border border-white/20 bg-black/40 shadow-2xl aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] w-full flex items-center justify-center group">
               {!videoError ? (
                 <video
-                  src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "/videos/0912.mp4"}
+                  src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "https://4ywwtt4wzyffcgix.public.blob.vercel-storage.com/0912.mp4"}
                   autoPlay
                   muted
                   loop
                   playsInline
                   controls={false}
-                  preload="metadata"
+                  preload="auto"
                   onError={() => setVideoError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : null}
 
-              {/* Poster / Fallback Display when video has not been loaded or fails */}
+              {/* Poster / Fallback Display when video fails to load */}
               {videoError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#0D726D]/90 via-[#0A3D3A]/95 to-[#172121]">
                   <div className="relative w-44 h-14 mb-4 bg-white/10 rounded-xl p-2 flex items-center justify-center">
@@ -135,11 +135,11 @@ export default function Hero() {
 
               {/* Elegant overlay badge */}
               <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white/90 bg-black/50 backdrop-blur-md border border-white/15">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white/90 bg-black/60 backdrop-blur-md border border-white/15">
                   <Play size={11} className="text-[#F6A236] fill-[#F6A236]" aria-hidden="true" />
                   Highlight CSR ANTAM
                 </span>
-                <span className="text-[11px] text-white/70 font-medium bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md">
+                <span className="text-[11px] text-white/80 font-medium bg-black/50 px-2.5 py-1 rounded-full backdrop-blur-md">
                   UBPN Malut
                 </span>
               </div>

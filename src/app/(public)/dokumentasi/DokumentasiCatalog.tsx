@@ -50,11 +50,14 @@ export default function DokumentasiCatalog({
   sectors: Sector[];
 }) {
   const [activeSector, setActiveSector] = useState<string>("ALL");
+  const [activeVideo, setActiveVideo] = useState<"draft2" | "draft1">("draft2");
 
   const filtered =
     activeSector === "ALL"
       ? documentations
       : documentations.filter((d) => d.sectorId === activeSector);
+
+  const activeYouTubeId = activeVideo === "draft2" ? "H4zONQnGKGI" : "VH3IYqbi7DQ";
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans text-[#172121]">
@@ -90,18 +93,56 @@ export default function DokumentasiCatalog({
             <p className="text-sm text-[#172121]/70 mt-2 max-w-2xl mx-auto">
               Tayangan lengkap dokumentasi inisiatif, program pemberdayaan masyarakat, dan komitmen keberlanjutan.
             </p>
+
+            {/* Version Switcher Buttons */}
+            <div className="flex items-center justify-center gap-2 mt-5">
+              <button
+                type="button"
+                onClick={() => setActiveVideo("draft2")}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  activeVideo === "draft2"
+                    ? "bg-[#0D726D] text-white shadow-sm"
+                    : "bg-white text-[#172121]/70 border border-[#E2E8E6] hover:bg-gray-50"
+                }`}
+              >
+                Video Profil (Utama)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveVideo("draft1")}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  activeVideo === "draft1"
+                    ? "bg-[#0D726D] text-white shadow-sm"
+                    : "bg-white text-[#172121]/70 border border-[#E2E8E6] hover:bg-gray-50"
+                }`}
+              >
+                Versi Alternatif (Draft 1)
+              </button>
+            </div>
           </div>
 
           <div className="relative rounded-3xl overflow-hidden border border-[#E2E8E6] bg-black shadow-xl aspect-video w-full flex items-center justify-center">
-            <video
-              src={process.env.NEXT_PUBLIC_PROFILE_VIDEO_URL || "/videos/CSR%20Program%20Draft%202.mp4"}
-              controls
-              playsInline
-              preload="metadata"
-              className="w-full h-full object-cover"
-            >
-              Browser Anda tidak mendukung pemutaran video HTML5.
-            </video>
+            {activeVideo === "draft2" ? (
+              <video
+                key="draft2-blob"
+                src={process.env.NEXT_PUBLIC_PROFILE_VIDEO_URL || "https://4ywwtt4wzyffcgix.public.blob.vercel-storage.com/CSR%20Program%20Color.mp4"}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full h-full object-cover"
+              >
+                Browser Anda tidak mendukung pemutaran video HTML5.
+              </video>
+            ) : (
+              <iframe
+                key="draft1-youtube"
+                src="https://www.youtube-nocookie.com/embed/VH3IYqbi7DQ?rel=0&modestbranding=1&playsinline=1"
+                title="Video Profil CSR ANTAM UBPN Maluku Utara (Draft 1)"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            )}
           </div>
         </div>
       </section>

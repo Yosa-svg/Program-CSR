@@ -10,12 +10,17 @@ const cspDirectives = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   // Tailwind and CSS-in-JS style injections (e.g. Framer Motion, Recharts) require 'unsafe-inline'
   "style-src 'self' 'unsafe-inline'",
-  // Image sources: self, inline data, blob, and Vercel Blob storage
-  "img-src 'self' blob: data: https://*.public.blob.vercel-storage.com",
+  // Image sources: self, inline data, blob, Vercel Blob storage, and YouTube thumbnails
+  "img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://i.ytimg.com https://img.youtube.com",
   // Fonts are self-hosted by Next.js font optimization
   "font-src 'self'",
   // Connections for API routes, Server Actions, and Vercel Blob
   "connect-src 'self' https://*.public.blob.vercel-storage.com",
+  // Media sources for HTML5 video / audio (Vercel Blob storage)
+  "media-src 'self' blob: data: https://*.public.blob.vercel-storage.com",
+  // Allow YouTube embeds in iframes (frame-src falls back to default-src 'self' if omitted, which blocks external embeds)
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+  "child-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
   // Prevent plugins (Flash, Java applets)
   "object-src 'none'",
   // Restrict <base> tag manipulation
