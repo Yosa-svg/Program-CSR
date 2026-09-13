@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Users, Sprout, Target, BarChart3, TrendingUp, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { createMetadata } from "@/lib/seo";
+import { getCsrSummaryStats } from "@/lib/queries/stats";
 
 export const metadata: Metadata = createMetadata({
   title: "Tentang Kawasan Ekonomi Keberlanjutan",
@@ -11,7 +12,10 @@ export const metadata: Metadata = createMetadata({
   canonical: "/tentang",
 });
 
-export default function TentangPage() {
+export const revalidate = 0;
+
+export default async function TentangPage() {
+  const stats = await getCsrSummaryStats();
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* HERO SECTION */}
@@ -153,19 +157,27 @@ export default function TentangPage() {
             
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                <div className="text-4xl font-black text-white mb-2">1.840+</div>
-                <div className="text-white/80 text-sm font-medium">Penerima Manfaat</div>
+                <div className="text-4xl font-black text-white mb-2">
+                  {stats.totalBeneficiaries > 0 ? `${stats.totalBeneficiaries.toLocaleString('id-ID')}+` : '0'}
+                </div>
+                <div className="text-white/80 text-sm font-medium">Penerima Manfaat Terdata</div>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                <div className="text-4xl font-black text-white mb-2">12</div>
-                <div className="text-white/80 text-sm font-medium">Desa Terhubung</div>
+                <div className="text-4xl font-black text-white mb-2">
+                  {stats.programCount > 0 ? stats.programCount.toLocaleString('id-ID') : '0'}
+                </div>
+                <div className="text-white/80 text-sm font-medium">Program Berkelanjutan</div>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                <div className="text-4xl font-black text-white mb-2">3.200</div>
-                <div className="text-white/80 text-sm font-medium">Pohon Ditanam</div>
+                <div className="text-4xl font-black text-white mb-2">
+                  {stats.activityCount > 0 ? stats.activityCount.toLocaleString('id-ID') : '0'}
+                </div>
+                <div className="text-white/80 text-sm font-medium">Kegiatan Terlaksana</div>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                <div className="text-4xl font-black text-white mb-2">4</div>
+                <div className="text-4xl font-black text-white mb-2">
+                  {stats.sectorCount > 0 ? stats.sectorCount.toLocaleString('id-ID') : '0'}
+                </div>
                 <div className="text-white/80 text-sm font-medium">Sektor Aktif</div>
               </div>
             </div>

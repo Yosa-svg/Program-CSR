@@ -4,6 +4,8 @@ import { useState } from "react";
 import { TrendingUp, Clock, Tag, Info, Award, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
+import type { CsrSummaryStats } from "@/lib/queries/stats";
+
 type MetricItem = {
   id: string;
   name: string;
@@ -40,9 +42,11 @@ type SectorItem = {
 export default function KinerjaCatalog({
   metrics,
   sectors,
+  stats,
 }: {
   metrics: MetricItem[];
   sectors: SectorItem[];
+  stats?: CsrSummaryStats;
 }) {
   const [selectedSector, setSelectedSector] = useState<string>("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
@@ -53,18 +57,16 @@ export default function KinerjaCatalog({
     return matchSector && matchCategory;
   });
 
-  // Calculate summary metrics for headline statistics safely
-  const totalBeneficiaries = metrics
-    .filter(m => m.name.toLowerCase().includes("penerima manfaat"))
+  // Agregasi penerima manfaat terdata dari metrik riil (atau dari stats)
+  const totalBeneficiaries = stats?.totalBeneficiaries ?? metrics
+    .filter(m => 
+      m.name.toLowerCase().includes("penerima") ||
+      (m.unit && ["orang", "kk", "jiwa"].includes(m.unit.toLowerCase()))
+    )
     .reduce((acc, m) => acc + (m.realization ?? 0), 0);
 
-  const totalGroups = metrics
-    .filter(m => m.name.toLowerCase().includes("kelompok"))
-    .reduce((acc, m) => acc + (m.realization ?? 0), 0);
-
-  const totalActivities = metrics
-    .filter(m => m.name.toLowerCase().includes("kegiatan") || m.name.toLowerCase().includes("pelatihan"))
-    .reduce((acc, m) => acc + (m.realization ?? 0), 0);
+  const programCount = stats?.programCount ?? 0;
+  const activityCount = stats?.activityCount ?? 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans pt-24 text-[#172121]">
@@ -96,19 +98,19 @@ export default function KinerjaCatalog({
                 Penerima Manfaat Tercatat
               </span>
               <span className="text-4xl font-black text-[#0D726D] tracking-tight">
-                {totalBeneficiaries > 0 ? `${totalBeneficiaries.toLocaleString('id-ID')}+` : '1.840+'}
+                {totalBeneficiaries > 0 ? `${totalBeneficiaries.toLocaleString('id-ID')}+` : '0'}
               </span>
-              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Orang / Kepala Keluarga</span>
+              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Orang / Kepala Keluarga Terverifikasi</span>
             </div>
 
             <div className="bg-white/95 text-[#172121] rounded-2xl p-6 shadow-xl flex flex-col items-center border border-white/20">
               <span className="text-[#172121]/60 text-xs font-bold uppercase tracking-wider mb-2">
-                Kelompok Binaan Aktif
+                Program Berkelanjutan
               </span>
               <span className="text-4xl font-black text-[#F6A236] tracking-tight">
-                {totalGroups > 0 ? totalGroups.toLocaleString('id-ID') : '18'}
+                {programCount > 0 ? programCount.toLocaleString('id-ID') : '0'}
               </span>
-              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Kelompok Tani & Ternak</span>
+              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Inisiatif Aktif di 4 Sektor</span>
             </div>
 
             <div className="bg-white/95 text-[#172121] rounded-2xl p-6 shadow-xl flex flex-col items-center border border-white/20">
@@ -116,9 +118,9 @@ export default function KinerjaCatalog({
                 Kegiatan Pendampingan
               </span>
               <span className="text-4xl font-black text-[#0D726D] tracking-tight">
-                {totalActivities > 0 ? totalActivities.toLocaleString('id-ID') : '24'}
+                {activityCount > 0 ? activityCount.toLocaleString('id-ID') : '0'}
               </span>
-              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Sesi Terlaksana</span>
+              <span className="text-xs text-[#172121]/50 mt-1 font-medium">Sesi Pelatihan & Monitoring Terlaksana</span>
             </div>
           </div>
         </div>

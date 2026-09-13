@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAllPublishedMetrics } from "@/lib/queries/metrics";
 import { getAllSectors } from "@/lib/queries/sectors";
+import { getCsrSummaryStats } from "@/lib/queries/stats";
 import { createMetadata } from "@/lib/seo";
 import KinerjaCatalog from "./KinerjaCatalog";
 
@@ -14,8 +15,11 @@ export const metadata: Metadata = createMetadata({
 export const revalidate = 0;
 
 export default async function KinerjaPublicPage() {
-  const metrics = await getAllPublishedMetrics();
-  const sectors = await getAllSectors();
+  const [metrics, sectors, stats] = await Promise.all([
+    getAllPublishedMetrics(),
+    getAllSectors(),
+    getCsrSummaryStats(),
+  ]);
 
-  return <KinerjaCatalog metrics={metrics} sectors={sectors} />;
+  return <KinerjaCatalog metrics={metrics} sectors={sectors} stats={stats} />;
 }
